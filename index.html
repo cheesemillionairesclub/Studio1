@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="page_title">Beatpush - Beatport promotion for DJs, producers and labels</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/FLyL2c8K/icon.png">
+    <meta name="description" data-i18n-content="page_desc" content="Boost your tracks on Beatport with BeatPush. Professional promotion for DJs, producers and labels.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="#hero" class="logo">
+                <img src="https://i.ibb.co/nMjbdTkQ/White-and-Black-Modern-Initial-B-Logo-5000-x-5000-px-1.png" alt="BeatPush" class="logo-img">
+            </a>
+            <div class="nav-actions">
+                <div class="lang-selector" id="langSelector">
+                    <button class="lang-btn" id="langBtn" aria-label="Language">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span id="currentLang">FR</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <button class="lang-option" data-lang="fr">FR</button>
+                        <button class="lang-option" data-lang="en">EN</button>
+                        <button class="lang-option" data-lang="pt">PT</button>
+                        <button class="lang-option" data-lang="es">ES</button>
+                        <button class="lang-option" data-lang="de">DE</button>
+                    </div>
+                </div>
+                <!-- Auth button -->
+                <div class="auth-nav" id="authNav">
+                    <button class="auth-login-btn" id="authLoginBtn" data-i18n="nav_login">Sign in</button>
+                    <div class="auth-user-menu" id="authUserMenu" style="display:none;">
+                        <button class="auth-avatar-btn" id="authAvatarBtn">
+                            <img src="" alt="" class="auth-avatar-img" id="authAvatarImg">
+                        </button>
+                        <div class="auth-dropdown" id="authDropdown">
+                            <div class="auth-dropdown-header">
+                                <img src="" alt="" class="auth-dropdown-avatar" id="authDropdownAvatar">
+                                <div>
+                                    <div class="auth-dropdown-name" id="authDropdownName"></div>
+                                    <div class="auth-dropdown-email" id="authDropdownEmail"></div>
+                                </div>
+                            </div>
+                            <div class="auth-dropdown-divider"></div>
+                            <button class="auth-dropdown-item" id="authDashboardBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                                <span data-i18n="nav_dashboard">MY CAMPAIGNS</span>
+                            </button>
+                            <button class="auth-dropdown-item" id="authAdminBtn" style="display:none;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                                <span>Admin Panel</span>
+                            </button>
+                            <div class="auth-dropdown-divider"></div>
+                            <button class="auth-dropdown-item auth-logout" id="authLogoutBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                <span data-i18n="nav_logout">Sign out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button class="menu-toggle" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <!-- Mobile menu (outside navbar to avoid backdrop-filter breaking position:fixed) -->
+    <ul class="nav-links" id="navLinks">
+        <li><a href="#search" class="nav-cta" data-i18n="nav_cta">BOOST MY TRACK</a></li>
+        <li><a href="#how-it-works" data-i18n="nav_how">HOW IT WORKS</a></li>
+        <li><a href="#pricing" data-i18n="nav_pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li class="nav-dashboard-item" style="display:none;"><a href="/dashboard" class="nav-dashboard-link" data-i18n="nav_dashboard">MY CAMPAIGNS</a></li>
+    </ul>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="hero-glow"></div>
+            <div class="hero-particles"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge" data-i18n="hero_badge">Industry-Level Promotion. Real Results.</div>
+            <h1 class="hero-title" data-i18n-html="hero_title">Professional Beatport promotion for <span class="text-gradient">DJs</span>, <span class="text-gradient">producers</span> and <span class="text-gradient">labels.</span></h1>
+            <p class="hero-subtitle" data-i18n-html="hero_subtitle">10+ years of pushing artists up the Beatport charts.</p>
+            <div class="hero-actions">
+                <a href="#search" class="btn-primary" data-i18n="hero_cta_btn">GET STARTED</a>
+            </div>
+            <!-- Features under Get Started -->
+            <div class="hero-features">
+                <div class="hero-feature-item">
+                    <div class="hero-feature-icon">
+                        <img src="https://i.ibb.co/FLyL2c8K/icon.png" alt="" width="20" height="20">
+                    </div>
+                    <span data-i18n="feature_no_bots">100% Organic. Real Buyers</span>
+                </div>
+                <div class="hero-feature-item">
+                    <div class="hero-feature-icon">
+                        <img src="https://i.ibb.co/FLyL2c8K/icon.png" alt="" width="20" height="20">
+                    </div>
+                    <span data-i18n="feature_scheduling">Custom Campaign Scheduling</span>
+                </div>
+                <div class="hero-feature-item">
+                    <div class="hero-feature-icon">
+                        <img src="https://i.ibb.co/FLyL2c8K/icon.png" alt="" width="20" height="20">
+                    </div>
+                    <span data-i18n="feature_guarantee">Money-back guarantee</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section" id="search">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge" data-i18n="search_badge">CHOOSE YOUR TRACK</span>
+                <h2 class="section-title" data-i18n-html="search_title"><span class="text-green">Push</span> your track into Beatport Charts!</h2>
+                <p class="section-desc-highlight" data-i18n="search_tagline">No shortcuts. No automation. Just real strategy.</p>
+                <p class="section-desc" data-i18n="search_desc">Search for your track on Beatport and select it to begin.</p>
+            </div>
+            <div class="search-box">
+                <div class="search-glow-wrapper">
+                    <div class="search-input-wrap" id="searchWrap">
+                        <svg class="search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="trackSearch" data-i18n-placeholder="search_placeholder" placeholder="Artist name, Beatport track url" autocomplete="off">
+                        <button id="searchBtn" class="search-btn">
+                            <span class="search-btn-text" data-i18n="search_btn">SEARCH</span>
+                            <div class="search-spinner" style="display:none;"></div>
+                        </button>
+                    </div>
+                </div>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge" data-i18n="pricing_badge">Pricing</span>
+                <h2 class="section-title" data-i18n-html="pricing_title">Choose Your <span class="text-green">Campaign</span></h2>
+                <p class="section-desc" data-i18n="pricing_desc">Our campaigns rely on a large, established global buyer network, trusted by artists and industry professionals worldwide.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="product-card" data-pack="50">
+                    <button class="product-card-info" aria-label="Info">
+i
+                    </button>
+                    <div class="product-card-tooltip">
+                        <p class="product-card-tooltip-title" data-i18n="card_tooltip_title">Tips & Requirements</p>
+                        <ul>
+                            <li data-i18n="campaign_tip_1">Tracks must be new, to perform well.</li>
+                            <li data-i18n="campaign_tip_2">The artist/label should have a store presence, to perform well.</li>
+                            <li data-i18n="campaign_tip_5">Beatport Hype: We suggest subscribing to Beatport Hype and completing your Beatport Artist profile with a picture and bio.</li>
+                            <li data-i18n="campaign_tip_6">Chart Climbing: Climbing charts is not just about numbers; it's also about the quality of the music.</li>
+                            <li data-i18n="campaign_tip_7">Variable Promotion Periods: Every period is different, depending on the skill of the artist/label.</li>
+                            <li data-i18n="campaign_tip_8">Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.</li>
+                        </ul>
+                    </div>
+                    <div class="product-card-image">
+                        <img src="https://i.ibb.co/5hkHzDBn/50.png" alt="Beatport - 50 Copies">
+                    </div>
+                    <div class="product-card-price">$240</div>
+                    <button class="product-card-btn pack-select-btn" data-pack="50" data-i18n="choose_btn">Choose</button>
+                </div>
+                <div class="product-card" data-pack="100">
+                    <button class="product-card-info" aria-label="Info">
+i
+                    </button>
+                    <div class="product-card-tooltip">
+                        <p class="product-card-tooltip-title" data-i18n="card_tooltip_title">Tips & Requirements</p>
+                        <ul>
+                            <li data-i18n="campaign_tip_1">Tracks must be new, to perform well.</li>
+                            <li data-i18n="campaign_tip_2">The artist/label should have a store presence, to perform well.</li>
+                            <li data-i18n="campaign_tip_5">Beatport Hype: We suggest subscribing to Beatport Hype and completing your Beatport Artist profile with a picture and bio.</li>
+                            <li data-i18n="campaign_tip_6">Chart Climbing: Climbing charts is not just about numbers; it's also about the quality of the music.</li>
+                            <li data-i18n="campaign_tip_7">Variable Promotion Periods: Every period is different, depending on the skill of the artist/label.</li>
+                            <li data-i18n="campaign_tip_8">Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.</li>
+                        </ul>
+                    </div>
+                    <div class="product-card-image">
+                        <img src="https://i.ibb.co/wh8prmpG/100.png" alt="Beatport - 100 Copies">
+                    </div>
+                    <div class="product-card-price">$480</div>
+                    <button class="product-card-btn pack-select-btn" data-pack="100" data-i18n="choose_btn">Choose</button>
+                </div>
+                <div class="product-card popular" data-pack="200">
+                    <div class="popular-badge" data-i18n="popular_badge">POPULAR</div>
+                    <button class="product-card-info" aria-label="Info">
+i
+                    </button>
+                    <div class="product-card-tooltip">
+                        <p class="product-card-tooltip-title" data-i18n="card_tooltip_title">Tips & Requirements</p>
+                        <ul>
+                            <li data-i18n="campaign_tip_1">Tracks must be new, to perform well.</li>
+                            <li data-i18n="campaign_tip_2">The artist/label should have a store presence, to perform well.</li>
+                            <li data-i18n="campaign_tip_5">Beatport Hype: We suggest subscribing to Beatport Hype and completing your Beatport Artist profile with a picture and bio.</li>
+                            <li data-i18n="campaign_tip_6">Chart Climbing: Climbing charts is not just about numbers; it's also about the quality of the music.</li>
+                            <li data-i18n="campaign_tip_7">Variable Promotion Periods: Every period is different, depending on the skill of the artist/label.</li>
+                            <li data-i18n="campaign_tip_8">Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.</li>
+                        </ul>
+                    </div>
+                    <div class="product-card-image">
+                        <img src="https://i.ibb.co/yBbwTBMp/200.png" alt="Beatport - 200 Copies">
+                    </div>
+                    <div class="product-card-price">$960</div>
+                    <button class="product-card-btn pack-select-btn" data-pack="200" data-i18n="choose_btn">Choose</button>
+                </div>
+                <div class="product-card" data-pack="500">
+                    <button class="product-card-info" aria-label="Info">
+i
+                    </button>
+                    <div class="product-card-tooltip">
+                        <p class="product-card-tooltip-title" data-i18n="card_tooltip_title">Tips & Requirements</p>
+                        <ul>
+                            <li data-i18n="campaign_tip_1">Tracks must be new, to perform well.</li>
+                            <li data-i18n="campaign_tip_2">The artist/label should have a store presence, to perform well.</li>
+                            <li data-i18n="campaign_tip_5">Beatport Hype: We suggest subscribing to Beatport Hype and completing your Beatport Artist profile with a picture and bio.</li>
+                            <li data-i18n="campaign_tip_6">Chart Climbing: Climbing charts is not just about numbers; it's also about the quality of the music.</li>
+                            <li data-i18n="campaign_tip_7">Variable Promotion Periods: Every period is different, depending on the skill of the artist/label.</li>
+                            <li data-i18n="campaign_tip_8">Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.</li>
+                        </ul>
+                    </div>
+                    <div class="product-card-image">
+                        <img src="https://i.ibb.co/5hptmm29/500.png" alt="Beatport - 500 Copies">
+                    </div>
+                    <div class="product-card-price">$1,900</div>
+                    <button class="product-card-btn pack-select-btn" data-pack="500" data-i18n="choose_btn">Choose</button>
+                </div>
+                <div class="product-card" data-pack="1000">
+                    <button class="product-card-info" aria-label="Info">
+i
+                    </button>
+                    <div class="product-card-tooltip">
+                        <p class="product-card-tooltip-title" data-i18n="card_tooltip_title">Tips & Requirements</p>
+                        <ul>
+                            <li data-i18n="campaign_tip_1">Tracks must be new, to perform well.</li>
+                            <li data-i18n="campaign_tip_2">The artist/label should have a store presence, to perform well.</li>
+                            <li data-i18n="campaign_tip_5">Beatport Hype: We suggest subscribing to Beatport Hype and completing your Beatport Artist profile with a picture and bio.</li>
+                            <li data-i18n="campaign_tip_6">Chart Climbing: Climbing charts is not just about numbers; it's also about the quality of the music.</li>
+                            <li data-i18n="campaign_tip_7">Variable Promotion Periods: Every period is different, depending on the skill of the artist/label.</li>
+                            <li data-i18n="campaign_tip_8">Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.</li>
+                        </ul>
+                    </div>
+                    <div class="product-card-image">
+                        <img src="https://i.ibb.co/tTT3cwSV/1000.png" alt="Beatport - 1,000 Copies">
+                    </div>
+                    <div class="product-card-price">$3,850</div>
+                    <button class="product-card-btn pack-select-btn" data-pack="1000" data-i18n="choose_btn">Choose</button>
+                </div>
+                <div class="product-card" data-pack="exclusive-800">
+                    <button class="product-card-info" aria-label="Info">
+i
+                    </button>
+                    <div class="product-card-tooltip">
+                        <p class="product-card-tooltip-title" data-i18n="top10_tooltip_title">To qualify for this promotion, tracks must meet the following criteria:</p>
+                        <ul>
+                            <li data-i18n="top10_tip_1">Released within the last six days.</li>
+                            <li data-i18n="top10_tip_2">Not currently in a downward trend.</li>
+                            <li data-i18n="top10_tip_3">Current minimum position number 20.</li>
+                            <li data-i18n="top10_tip_4">Must be the track's first time appearing on the chart.</li>
+                        </ul>
+                        <p class="product-card-tooltip-footer" data-i18n="top10_tip_footer">If your track does not yet meet these requirements, you can begin with our <span style="color: #4CAF50;">Daily Push Promotion</span>, designed to help tracks gain momentum and climb the charts.<br>After reaching approximately position #20, you will be able to access and benefit from this exclusive promotion package.</p>
+                    </div>
+                    <div class="product-card-image">
+                        <img src="https://i.ibb.co/m5PgVFzH/b25abcd7-4bca-4e71-beb7-83265f02f660.png" alt="Beatport - Exclusive Pack">
+                    </div>
+                    <div class="top100-genre-tag" id="top10-genre" style="display:none;"></div>
+                    <div class="product-card-price genre-pending" id="top10-price">Depends on genre</div>
+                    <p class="product-card-criteria">Must meet the criterias.</p>
+                    <button class="product-card-btn pack-select-btn" data-pack="exclusive-800" data-i18n="choose_btn">Choose</button>
+                </div>
+                <div class="product-card" data-pack="promo-430">
+                    <button class="product-card-info" aria-label="Info">
+i
+                    </button>
+                    <div class="product-card-tooltip">
+                        <p class="product-card-tooltip-title" data-i18n="top100_tooltip_title">To ensure an effective promotion, the track(s) must meet the following criteria:</p>
+                        <ul>
+                            <li data-i18n="top100_tip_1">The track must be brand new (ideally in pre-order stage).</li>
+                            <li data-i18n="top100_tip_2">The release must be no older than 24 hours at the time the campaign begins.</li>
+                            <li data-i18n="top100_tip_3">The track must never have been charted before.</li>
+                            <li data-i18n="top100_tip_4">The artist or label should have at least 7 previous releases on Beatport.</li>
+                            <li data-i18n="top100_tip_5">The artist or label must have reached the Top 100 of the selected genre at least twice within the last 6 months.</li>
+                            <li data-i18n="top100_tip_6">The track must appear in Beatport Hype Picks for the genre.</li>
+                            <li data-i18n="top100_tip_7">Campaigns cannot start on Sundays or Mondays.</li>
+                        </ul>
+                    </div>
+                    <div class="product-card-image">
+                        <img src="https://i.ibb.co/HDHMGSvv/ae1c3948-995c-4bd6-a382-09a781f76df9.png" alt="Beatport - Promo Pack">
+                    </div>
+                    <div class="top100-genre-tag" id="top100-genre" style="display:none;"></div>
+                    <div class="product-card-price genre-pending" id="top100-price">Depends on genre</div>
+                    <p class="product-card-criteria">Must meet the criterias.</p>
+                    <button class="product-card-btn pack-select-btn" data-pack="promo-430" data-i18n="choose_btn">Choose</button>
+                </div>
+                <div class="product-card" data-pack="daily-push">
+                    <button class="product-card-info" aria-label="Info">
+i
+                    </button>
+                    <div class="product-card-tooltip">
+                        <p class="product-card-tooltip-title" data-i18n="card_tooltip_title">Tips & Requirements</p>
+                        <ul>
+                            <li data-i18n="dailypush_tip_1">Once you get in the chart, to keep the position, to continue and climb, you can purchase a discounted DAILY PUSH.</li>
+                            <li data-i18n="dailypush_tip_2">This consists in 10 daily purchases of your track, from DJ's all around the world and fitting with your genre.</li>
+                            <li data-i18n="dailypush_tip_3">Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.</li>
+                        </ul>
+                    </div>
+                    <div class="product-card-image">
+                        <img src="https://i.ibb.co/yFPgMFJ1/0f232e16-5bb4-4ffb-a1e1-7409f6a05a14.png" alt="Beatport - Daily Push">
+                    </div>
+                    <div class="product-card-price">$55</div>
+                    <button class="product-card-btn pack-select-btn" data-pack="daily-push" data-i18n="choose_btn">Choose</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Campaign Setup Section (hidden by default) -->
+    <section class="campaign-setup-section" id="campaignSetup" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge" data-i18n="campaign_badge">LET'S GET INTO DETAILS</span>
+                <h2 class="section-title" data-i18n="campaign_title">Campaign Setup</h2>
+                <p class="section-desc" data-i18n="campaign_desc">Configure your campaign before launching.</p>
+            </div>
+            <div class="campaign-setup-card">
+                <!-- Selected pack summary -->
+                <div class="campaign-summary" id="campaignSummary"></div>
+
+                <div class="campaign-form">
+                    <!-- Genre confirmation -->
+                    <div class="campaign-field">
+                        <label class="campaign-label" data-i18n="campaign_genre_label">Genre</label>
+                        <p class="campaign-field-hint" data-i18n="campaign_genre_hint">Confirm the genre detected for your track.</p>
+                        <div class="campaign-genre-display" id="campaignGenre">
+                            <span class="campaign-genre-tag" id="campaignGenreTag">--</span>
+                            <input type="text" class="campaign-input campaign-genre-input" id="campaignGenreInput" data-i18n-placeholder="campaign_genre_input_placeholder" placeholder="Type your genre (e.g. Afro House, Melodic Techno...)" autocomplete="off" style="display:none;">
+                            <button class="campaign-genre-confirm" id="genreConfirmBtn" data-i18n="campaign_confirm">Confirm</button>
+                        </div>
+                    </div>
+
+                    <!-- Similar artists -->
+                    <div class="campaign-field">
+                        <label class="campaign-label" data-i18n="campaign_artists_label">Similar Artists</label>
+                        <p class="campaign-field-hint" data-i18n="campaign_artists_hint">Enter 3 artists with a similar style to your track — this helps us target the right DJs, playlists, and audiences already engaging with this sound.</p>
+                        <div class="artist-search-wrapper">
+                            <input type="text" class="campaign-input" id="similarArtists" data-i18n-placeholder="campaign_artists_placeholder" placeholder="Example: Adam Port, Black Coffee, Keinemusik" autocomplete="off">
+                            <div class="artist-search-results" id="artistSearchResults"></div>
+                        </div>
+                        <div class="artist-tags" id="artistTags"></div>
+                    </div>
+
+                    <!-- Release status -->
+                    <div class="campaign-field">
+                        <label class="campaign-label" data-i18n="campaign_release_label">Release Status</label>
+                        <p class="campaign-field-hint" data-i18n="campaign_release_hint">Is your track already released or in pre-order?</p>
+                        <div class="campaign-release-options">
+                            <label class="campaign-radio">
+                                <input type="radio" name="releaseStatus" value="released" checked>
+                                <span class="campaign-radio-mark"></span>
+                                <span data-i18n="campaign_released">Already Released</span>
+                            </label>
+                            <label class="campaign-radio">
+                                <input type="radio" name="releaseStatus" value="preorder">
+                                <span class="campaign-radio-mark"></span>
+                                <span data-i18n="campaign_preorder">Pre-Order</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Tips / Requirements -->
+                    <div class="campaign-tips-wrapper">
+                        <div class="campaign-tips">
+                            <button class="campaign-tips-toggle" id="tipsToggle">
+                                <span data-i18n="campaign_tips_title">Tips / Requirements</span>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="campaign-tips-content" id="tipsContent">
+                                <ul>
+                                    <li data-i18n="campaign_tip_1">Tracks must be new, to perform well.</li>
+                                    <li data-i18n="campaign_tip_2">The artist/label should have a store presence, to perform well.</li>
+                                    <li data-i18n="campaign_tip_5">Beatport Hype: We suggest subscribing to Beatport Hype and completing your Beatport Artist profile with a picture and bio.</li>
+                                    <li data-i18n="campaign_tip_6">Chart Climbing: Climbing charts is not just about numbers; it's also about the quality of the music.</li>
+                                    <li data-i18n="campaign_tip_7">Variable Promotion Periods: Every period is different, depending on the skill of the artist/label.</li>
+                                    <li data-i18n="campaign_tip_8">Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="campaign-price-summary" id="campaignPriceSummary"></div>
+                    <button class="btn-primary btn-large campaign-launch-btn" id="launchCampaignBtn" data-i18n="campaign_launch_btn">Run my campaign</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-section" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge" data-i18n="how_badge">OUR PROCESS</span>
+                <h2 class="section-title" data-i18n-html="how_title">How Beatpush Promotion <span class="text-gradient">Works</span></h2>
+            </div>
+            <div class="steps-timeline">
+                <div class="step-card-v2">
+                    <div class="step-indicator">
+                        <div class="step-dot">1</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <h3 class="step-title-v2" data-i18n="how_step1_title">Submit Your Beatport Track</h3>
+                        <p class="step-desc-v2" data-i18n="how_step1_desc">Find & select your Beatport track using our search bar.</p>
+                        <p class="step-detail" data-i18n="how_step1_detail">Our algorithm analyzes the track and confirms the campaign feasibility.</p>
+                    </div>
+                </div>
+                <div class="step-card-v2">
+                    <div class="step-indicator">
+                        <div class="step-dot">2</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <h3 class="step-title-v2" data-i18n="how_step2_title">Campaign Strategy Setup</h3>
+                        <p class="step-desc-v2" data-i18n="how_step2_desc">We plan the promotion based on:</p>
+                        <ul class="step-list">
+                            <li data-i18n="how_step2_li1">Genre competition</li>
+                            <li data-i18n="how_step2_li2">Release timing</li>
+                            <li data-i18n="how_step2_li3">Beatport chart dynamics</li>
+                            <li data-i18n="how_step2_li4">Release visibility potential</li>
+                        </ul>
+                        <p class="step-detail" data-i18n="how_step2_detail">Each campaign is structured to maximize momentum during the key release window.</p>
+                    </div>
+                </div>
+                <div class="step-card-v2">
+                    <div class="step-indicator">
+                        <div class="step-dot">3</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <h3 class="step-title-v2" data-i18n="how_step3_title">Campaign Launch</h3>
+                        <p class="step-desc-v2" data-i18n="how_step3_desc">Your promotion campaign begins.</p>
+                        <ul class="step-list">
+                            <li data-i18n="how_step3_bullet1">Beatpush connects your music with a private network of DJs, producers, and passionate electronic music collectors built over 10+ years in the industry.</li>
+                            <li data-i18n="how_step3_bullet2">Our team monitors the campaign daily and tracks the chart activity and visibility of the release.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="step-card-v2">
+                    <div class="step-indicator">
+                        <div class="step-dot">4</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <h3 class="step-title-v2" data-i18n="how_step4_title">Chart Monitoring</h3>
+                        <p class="step-desc-v2" data-i18n="how_step4_desc">During the promotion, we monitor:</p>
+                        <ul class="step-list">
+                            <li data-i18n="how_step4_li1">Chart movements</li>
+                            <li data-i18n="how_step4_li2">Visibility growth</li>
+                            <li data-i18n="how_step4_li3">Campaign performance</li>
+                        </ul>
+                        <p class="step-detail" data-i18n="how_step4_detail">Clients receive updates on the campaign progress.</p>
+                    </div>
+                </div>
+                <div class="step-card-v2">
+                    <div class="step-indicator">
+                        <div class="step-dot">5</div>
+                    </div>
+                    <div class="step-content">
+                        <h3 class="step-title-v2" data-i18n="how_step5_title">Receipts Provided</h3>
+                        <p class="step-desc-v2" data-i18n="how_step5_desc">You will receive receipts for all your downloaded tracks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="why-choose-section" id="why-choose">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge" data-i18n="why_badge">WHY BEATPUSH</span>
+                <h2 class="section-title" data-i18n="why_title">Why Choose BeatPush to Promote Your Music</h2>
+                <p class="section-desc" data-i18n="why_subtitle">Build consistent growth</p>
+            </div>
+            <div class="why-choose-grid">
+                <div class="why-choose-card">
+                    <div class="why-choose-icon">
+                        <img src="https://i.ibb.co/FLyL2c8K/icon.png" alt="Icon">
+                    </div>
+                    <h3 class="why-choose-card-title" data-i18n="why_card1_title">Real Beatport Promotion</h3>
+                    <p class="why-choose-card-text" data-i18n="why_card1_text">All purchases comply with Beatport's platform mechanics and are made through legitimate customer accounts.</p>
+                </div>
+                <div class="why-choose-card">
+                    <div class="why-choose-icon">
+                        <img src="https://i.ibb.co/FLyL2c8K/icon.png" alt="Icon">
+                    </div>
+                    <h3 class="why-choose-card-title" data-i18n="why_card2_title">True & Measurable Impact</h3>
+                    <p class="why-choose-card-text" data-i18n="why_card2_text">Every promotion is structured to create tangible chart movement. Our team understands how Beatport charts behave and deploys campaigns in a precise and strategic way to maximize impact.</p>
+                </div>
+                <div class="why-choose-card">
+                    <div class="why-choose-icon">
+                        <img src="https://i.ibb.co/FLyL2c8K/icon.png" alt="Icon">
+                    </div>
+                    <h3 class="why-choose-card-title" data-i18n="why_card3_title">100% Organic. Real Buyers</h3>
+                    <p class="why-choose-card-text" data-i18n="why_card3_text">Every purchase is 100% organic, made through real Beatport accounts, with full traceability and verified receipts.<br><br>All purchases comply with Beatport's platform mechanics and are made through legitimate customer accounts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">FAQ</span>
+                <h2 class="section-title" data-i18n="faq_title">Frequently asked questions</h2>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq0a_q">What happens after I order?</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n-html="faq0a_a">Once your order is placed, you will immediately receive an order confirmation email with the final steps to validate your campaign.<br>The process is fast, simple and fully handled by our team.<br><br><strong>Here's what happens next:</strong><br><br>1. <strong>Track verification</strong> — Our team reviews your track and confirms the Beatport release link to ensure everything is ready for the campaign.<br>2. <strong>Campaign scheduling</strong> — We schedule your promotion according to the selected package to maximize chart impact.<br>3. <strong>Real Beatport purchases</strong> — Our network begins purchasing your track on Beatport following our strategic campaign process.<br>4. <strong>Chart positioning</strong> — As purchases accumulate, your track can start climbing the Beatport charts depending on the package and category.<br>5. <strong>Completion notification</strong> — Once the campaign is completed, you will receive a confirmation email.<br><br>That's it. Sit back and watch your track gain visibility and chart momentum on Beatport.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq0b_q">What's the refund policy?</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n-html="faq0b_a">We work hard to ensure every campaign runs smoothly and delivers the expected promotion.<br><br>If your campaign cannot be executed or the purchases cannot be delivered within the announced timeframe, you may request:<br>• A full refund, or<br>• A replacement campaign<br><br>Simply contact our support team at any time if you have questions or concerns.<br><br>Our goal is always to provide a transparent, reliable and professional promotion service.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq1_q">How long does a campaign take?</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq1_a">Most promotions are delivered within 2–10 days, depending on genre competition and chart activity.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq2_q">Do you use bots?</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq2_a">No. Beatpush campaigns rely on real promotion strategies and industry experience.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq3_q">Can new artists use the service?</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq3_a">Yes. We work with independent artists, labels and distributors.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq4_q">Do exclusive releases perform better?</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq4_a">In most cases yes, because all activity is concentrated on a single platform, increasing chart visibility.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq5_q">Any tips/requirement?</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <ul class="faq-tips-list">
+                            <li data-i18n="campaign_tip_1">Tracks must be new, to perform well.</li>
+                            <li data-i18n="campaign_tip_2">The artist/label should have a store presence, to perform well.</li>
+                            <li data-i18n="campaign_tip_5">Beatport Hype: We suggest subscribing to Beatport Hype and completing your Beatport Artist profile with a picture and bio.</li>
+                            <li data-i18n="campaign_tip_6">Chart Climbing: Climbing charts is not just about numbers; it's also about the quality of the music.</li>
+                            <li data-i18n="campaign_tip_7">Variable Promotion Periods: Every period is different, depending on the skill of the artist/label.</li>
+                            <li data-i18n="campaign_tip_8">Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-box">
+                <h2 class="cta-title" data-i18n="cta_title">Ready to dominate the charts?</h2>
+                <p class="cta-desc" data-i18n="cta_desc">Join hundreds of artists using BeatPush to boost their career.</p>
+                <a href="#search" class="btn-primary btn-large" data-i18n="cta_btn">GET STARTED NOW</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-col">
+                    <h4>Beatpush, Inc.</h4>
+                    <span class="footer-address-line">888 Prospect Street, Suite 200</span>
+                    <span class="footer-address-line">La Jolla, CA 92037</span>
+                </div>
+                <div class="footer-col">
+                    <h4 data-i18n="footer_nav">Navigation</h4>
+                    <a href="#search" data-i18n="footer_boost">Boost my track</a>
+                    <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
+                    <a href="#how-it-works" data-i18n="footer_how">How it works</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <a href="#faq">FAQ</a>
+                    <a href="mailto:contact@beatpush.app">contact@beatpush.app</a>
+                    <a href="https://api.whatsapp.com/send/?phone=13046603890&text=Hello!&type=phone_number&app_absent=0" target="_blank" rel="noopener">Customer Care (WhatsApp): +1 (304) 660‑3890</a>
+                    <a href="termsofuse" data-i18n="footer_terms">Terms of Use</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p data-i18n-html="footer_copy">&copy; 2026 BeatPush. All rights reserved.</p>
+                <p class="footer-disclaimer" data-i18n="footer_disclaimer">Beatpush is an independent promotional service. Beatpush is not affiliated with Beatport.</p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://api.whatsapp.com/send/?phone=13046603890&text=Hello!&type=phone_number&app_absent=0" target="_blank" rel="noopener" class="sticky-support">
+        <img src="https://i.ibb.co/BK7Stw8F/Digital-Glyph-Green.png" alt="Support" class="sticky-support-logo">
+        <span>Chat with us !</span>
+    </a>
+
+    <script src="supabase.js"></script>
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+    <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
