@@ -217,6 +217,13 @@
             font-weight: 600; background: rgba(76,175,80,0.12); color: #4CAF50;
             margin-top: 4px;
         }
+        .badge-sub {
+            display: inline-block; padding: 2px 8px; border-radius: 12px;
+            font-size: 0.65rem; font-weight: 700; margin-top: 3px;
+        }
+        .badge-trial { background: rgba(33,150,243,0.15); color: #2196F3; }
+        .badge-paid { background: rgba(76,175,80,0.15); color: #4CAF50; }
+        .badge-none { background: rgba(255,82,82,0.12); color: #ff5252; }
         .badge-reupload {
             display: inline-flex; align-items: center; gap: 4px;
             padding: 3px 10px; border-radius: 20px; font-size: 0.7rem;
@@ -391,6 +398,13 @@
                 const statusText = order.order_status === 'completed' ? 'Completed' : 'In Progress';
                 const hasReceipt = !!order.receipt_url;
 
+                const subStatus = order.subscription_status || 'none';
+                const isTrial = subStatus === 'trialing';
+                const isPaid = subStatus === 'active';
+                const subBadge = isTrial ? '<span class="badge-sub badge-trial">Trial</span>'
+                    : isPaid ? '<span class="badge-sub badge-paid">Paid</span>'
+                    : `<span class="badge-sub badge-none">${esc(subStatus)}</span>`;
+
                 return `<tr data-order-id="${order.id}">
                     <td>${new Date(order.created_at).toLocaleDateString()}</td>
                     <td>
@@ -399,6 +413,7 @@
                             <div>
                                 <div class="order-track-title">${esc(order.track_title || '-')}</div>
                                 <div class="order-track-artist">${esc(order.track_artist || '-')}</div>
+                                ${subBadge}
                                 ${order.reupload_count ? `<div class="badge-reupload">Re-upload ${order.reupload_count}/3</div>` : ''}
                             </div>
                         </div>
@@ -427,10 +442,10 @@
                     <td>
                         <div class="admin-actions">
                             ${order.order_status === 'in_progress' ? `<button class="admin-btn btn-green" onclick="toggleStatus('${order.id}', 'completed')">Mark Complete</button>` : `<button class="admin-btn" onclick="toggleStatus('${order.id}', 'in_progress')">Mark In Progress</button>`}
-                            <label class="admin-btn">
+                            ${isPaid ? `<label class="admin-btn">
                                 Upload Audio
                                 <input type="file" accept="audio/*,.wav,.mp3,.flac,.aiff,.aif" onchange="uploadMasteredFile('${order.id}', this)">
-                            </label>
+                            </label>` : `<span class="admin-btn" style="opacity:0.4;cursor:not-allowed;" title="Mastering only for paid subscribers">Upload Audio</span>`}
                         </div>
                     </td>
                 </tr>`;

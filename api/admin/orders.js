@@ -36,6 +36,7 @@ export default async function handler(req, res) {
 
     // GET: list all orders
     if (req.method === 'GET') {
+        // Fetch orders with user subscription status from profiles
         const ordersRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?order=created_at.desc&select=*`, {
             headers: {
                 'apikey': SUPABASE_SERVICE_KEY,
@@ -43,7 +44,31 @@ export default async function handler(req, res) {
             },
         });
         const orders = await ordersRes.json();
-        return res.status(200).json(orders);
+
+        // Fetch all profiles to get subscription_status per user
+        const userIds = [...new Set(orders.map(o => o.user_id).filter(Boolean))];
+        let profilesMap = {};
+        if (userIds.length) {
+            const pRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=in.(${userIds.join(',')})&select=id,subscription_status,trial_end`, {
+                headers: {
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                },
+            });
+            if (pRes.ok) {
+                const pData = await pRes.json();
+                pData.forEach(p => { profilesMap[p.id] = p; });
+            }
+        }
+
+        // Attach subscription info to each order
+        const enriched = orders.map(o => ({
+            ...o,
+            subscription_status: profilesMap[o.user_id]?.subscription_status || 'none',
+            trial_end: profilesMap[o.user_id]?.trial_end || null,
+        }));
+
+        return res.status(200).json(enriched);
     }
 
     // PATCH: update order status or receipt

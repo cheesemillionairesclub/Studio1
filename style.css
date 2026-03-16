@@ -3627,6 +3627,21 @@ body {
     transform: translateY(-1px);
 }
 
+.dash-original-file {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--white-05, rgba(255,255,255,0.05));
+}
+.dash-original-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--white-50);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.dash-original-link:hover { color: var(--green-primary); }
 .dash-pending-msg {
     display: flex;
     align-items: center;

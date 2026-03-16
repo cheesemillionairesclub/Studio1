@@ -1945,6 +1945,62 @@ if (tipsToggleEl) {
 
 // Launch campaign button
 document.getElementById('launchCampaignBtn').addEventListener('click', async function() {
+    // Upload audio + artwork BEFORE auth check so URLs are preserved across OAuth redirect
+    if (uploadedAudioFile && !window._preUploadedAudioUrl) {
+        const launchBtn = document.getElementById('launchCampaignBtn');
+        if (launchBtn) { launchBtn.disabled = true; launchBtn.style.opacity = '0.6'; }
+        showToast('Uploading audio file...');
+        try {
+            const signRes = await fetch('/api/upload-audio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: uploadedAudioFile.name }),
+            });
+            const signData = await signRes.json();
+            if (signRes.ok && signData.uploadUrl) {
+                const uploadRes = await fetch(signData.uploadUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': uploadedAudioFile.type || 'audio/wav' },
+                    body: uploadedAudioFile,
+                });
+                if (uploadRes.ok) {
+                    window._preUploadedAudioUrl = signData.publicUrl;
+                    if (selectedTrack) selectedTrack.id = signData.publicUrl;
+                    localStorage.setItem('alphastudios_pending_audio_url', signData.publicUrl);
+                    console.log('[AlphaStudios] Pre-uploaded audio:', signData.publicUrl);
+                }
+            }
+        } catch (e) {
+            console.warn('[AlphaStudios] Pre-upload audio error:', e.message);
+        }
+        if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
+    }
+    if (generatedArtworkDataUrl && !window._preUploadedArtworkUrl) {
+        try {
+            const signRes = await fetch('/api/upload-audio?type=artwork', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: `artwork_${Date.now()}.jpg` }),
+            });
+            const signData = await signRes.json();
+            if (signRes.ok && signData.uploadUrl) {
+                const artBlob = await (await fetch(generatedArtworkDataUrl)).blob();
+                const upRes = await fetch(signData.uploadUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'image/jpeg' },
+                    body: artBlob,
+                });
+                if (upRes.ok) {
+                    window._preUploadedArtworkUrl = signData.publicUrl;
+                    localStorage.setItem('alphastudios_pending_artwork_url', signData.publicUrl);
+                    console.log('[AlphaStudios] Pre-uploaded artwork:', signData.publicUrl);
+                }
+            }
+        } catch (e) {
+            console.warn('[AlphaStudios] Pre-upload artwork error:', e.message);
+        }
+    }
+
     // Require login before any payment action
     if (typeof requireAuth === 'function' && !requireAuth('payment')) return;
 
@@ -1987,70 +2043,11 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
     const artists = selectedArtists.map(a => a.name).join(', ');
     const releaseStatus = document.querySelector('input[name="releaseStatus"]:checked')?.value || '';
 
-    // Upload generated artwork to Supabase Storage
-    let artworkUrl = '';
-    if (generatedArtworkDataUrl) {
-        try {
-            const signRes = await fetch('/api/upload-audio?type=artwork', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filename: `artwork_${Date.now()}.jpg` }),
-            });
-            const signData = await signRes.json();
-            if (signRes.ok && signData.uploadUrl) {
-                // Convert data URL to blob
-                const artBlob = await (await fetch(generatedArtworkDataUrl)).blob();
-                const upRes = await fetch(signData.uploadUrl, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'image/jpeg' },
-                    body: artBlob,
-                });
-                if (upRes.ok) {
-                    artworkUrl = signData.publicUrl;
-                    console.log('[AlphaStudios] Artwork uploaded:', artworkUrl);
-                }
-            }
-        } catch (e) {
-            console.warn('[AlphaStudios] Artwork upload error:', e.message);
-        }
-    }
+    // Use pre-uploaded artwork URL if available, otherwise skip (already uploaded above)
+    let artworkUrl = window._preUploadedArtworkUrl || localStorage.getItem('alphastudios_pending_artwork_url') || '';
 
-    // Upload audio file to Supabase Storage if available
-    let audioUrl = track.id || '';
-    if (uploadedAudioFile) {
-        const launchBtn = document.getElementById('launchCampaignBtn');
-        if (launchBtn) { launchBtn.disabled = true; launchBtn.style.opacity = '0.6'; }
-        showToast('Uploading audio file...');
-        try {
-            // Step 1: Get signed upload URL from our API
-            const signRes = await fetch('/api/upload-audio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filename: uploadedAudioFile.name }),
-            });
-            const signData = await signRes.json();
-
-            if (signRes.ok && signData.uploadUrl) {
-                // Step 2: Upload directly to Supabase Storage (bypasses Vercel 4.5MB limit)
-                const uploadRes = await fetch(signData.uploadUrl, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': uploadedAudioFile.type || 'audio/wav' },
-                    body: uploadedAudioFile,
-                });
-
-                if (uploadRes.ok) {
-                    audioUrl = signData.publicUrl;
-                    console.log('[AlphaStudios] Audio uploaded:', audioUrl);
-                } else {
-                    console.warn('[AlphaStudios] Direct upload failed:', await uploadRes.text());
-                }
-            } else {
-                console.warn('[AlphaStudios] Failed to get upload URL:', signData);
-            }
-        } catch (e) {
-            console.warn('[AlphaStudios] Audio upload error:', e.message);
-        }
-    }
+    // Use pre-uploaded audio URL if available
+    let audioUrl = window._preUploadedAudioUrl || localStorage.getItem('alphastudios_pending_audio_url') || track.id || '';
 
     const campaignData = {
         pack: packToSend,
