@@ -404,7 +404,7 @@
                         </div>
                     </td>
                     <td>${(() => {
-                        const versions = Array.isArray(order.track_versions) && order.track_versions.length ? order.track_versions : (order.track_url ? [{ url: order.track_url, label: 'Upload 1' }] : []);
+                        const versions = Array.isArray(order.track_versions) && order.track_versions.length ? order.track_versions : (order.track_url ? [{ url: order.track_url, label: 'Original' }] : []);
                         if (!versions.length) return '<span style="color:var(--white-30)">No file</span>';
                         return '<div class="admin-versions">' + versions.map((v, i) =>
                             `<a href="${esc(v.url)}" target="_blank" class="admin-version-link${i === versions.length - 1 ? ' latest' : ''}" title="${v.date ? new Date(v.date).toLocaleString() : ''}">${esc(v.label || ('Upload ' + (i+1)))}</a>`

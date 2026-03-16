@@ -45,7 +45,7 @@ export default async function handler(req, res) {
                 track_artist: track_artist || '',
                 track_artwork: track_artwork || '',
                 track_url: track_url || '',
-                track_versions: track_url ? [{ url: track_url, artwork: track_artwork || '', label: 'Upload 1', date: new Date().toISOString() }] : [],
+                track_versions: track_url ? [{ url: track_url, artwork: track_artwork || '', label: 'Original', date: new Date().toISOString() }] : [],
                 genre: genre || '',
                 similar_artists: similar_artists || [],
                 release_status: release_status || '',

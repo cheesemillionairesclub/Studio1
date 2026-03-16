@@ -51,7 +51,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Maximum re-uploads reached (3/3)' });
         }
         const existingVersions = Array.isArray(orders[0].track_versions) ? orders[0].track_versions : [];
-        const newVersion = { url: track_url || '', artwork: track_artwork || '', label: `Upload ${existingVersions.length + 1}`, date: new Date().toISOString() };
+        const newVersion = { url: track_url || '', artwork: track_artwork || '', label: `Re-upload ${currentCount + 1}`, date: new Date().toISOString() };
         updates = {
             track_url: track_url || '',
             track_artwork: track_artwork || '',
