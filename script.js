@@ -1360,7 +1360,7 @@ async function handleAudioUpload(file) {
         if (urls.audioUrl) selectedTrack.id = urls.audioUrl;
         if (urls.artworkUrl) selectedTrack.artwork = urls.artworkUrl;
 
-        // Everything done — cancel countdown immediately
+        // Everything done — cancel countdown and show preview immediately
         countdown.cancel();
 
         // Hide dropzone and show track preview
@@ -1379,9 +1379,6 @@ async function handleAudioUpload(file) {
 
         // Render metadata tags
         renderMetaTags(metadata);
-
-        // Draw waveform
-        drawWaveform(audioBuffer);
 
         // Set duration display
         if (waveformDurationEl) {
@@ -1402,6 +1399,9 @@ async function handleAudioUpload(file) {
             const preview = document.getElementById('trackPreview');
             if (preview) preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 200);
+
+        // Draw waveform AFTER UI is visible (deferred so it doesn't block)
+        requestAnimationFrame(() => drawWaveform(audioBuffer));
 
         // Analyze with Essentia (non-blocking, runs in browser)
         analyzeWithEssentia(audioBuffer);
