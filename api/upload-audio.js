@@ -1,4 +1,5 @@
 // Generate a signed upload URL for Supabase Storage (client uploads directly)
+// Supports both audio and artwork uploads via ?type=artwork query param
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -18,12 +19,15 @@ export default async function handler(req, res) {
         try { body = JSON.parse(body); } catch (e) { body = {}; }
     }
 
-    const filename = body.filename || `track_${Date.now()}.wav`;
+    const isArtwork = req.query.type === 'artwork';
+    const defaultName = isArtwork ? `artwork_${Date.now()}.jpg` : `track_${Date.now()}.wav`;
+    const folder = isArtwork ? 'artworks' : 'uploads';
+
+    const filename = body.filename || defaultName;
     const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const storagePath = `uploads/${Date.now()}_${safeName}`;
+    const storagePath = `${folder}/${Date.now()}_${safeName}`;
 
     try {
-        // Create signed upload URL (valid 10 min)
         const signRes = await fetch(
             `${SUPABASE_URL}/storage/v1/object/upload/sign/tracks/${storagePath}`,
             {

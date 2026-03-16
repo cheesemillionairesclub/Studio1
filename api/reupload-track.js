@@ -1,5 +1,5 @@
-// API endpoint: Re-upload track after feedback
-// Resets feedback, updates track_url and track_artwork, increments reupload_count
+// API endpoint: Re-upload track after feedback OR approve mastering
+// ?action=approve → approve mastering (default: reupload)
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -29,7 +29,9 @@ export default async function handler(req, res) {
     const { order_id, track_url, track_artwork } = body || {};
     if (!order_id) return res.status(400).json({ error: 'Missing order_id' });
 
-    // Fetch current order to check ownership and reupload count
+    const action = req.query.action || 'reupload';
+
+    // Verify ownership
     const orderRes = await fetch(
         `${SUPABASE_URL}/rest/v1/orders?id=eq.${order_id}&user_id=eq.${user.id}&select=id,reupload_count,user_id`,
         { headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` } }
@@ -37,24 +39,28 @@ export default async function handler(req, res) {
     const orders = await orderRes.json();
     if (!orders.length) return res.status(404).json({ error: 'Order not found' });
 
-    const order = orders[0];
-    const currentCount = order.reupload_count || 0;
+    let updates;
 
-    if (currentCount >= 3) {
-        return res.status(400).json({ error: 'Maximum re-uploads reached (3/3)' });
+    if (action === 'approve') {
+        // Approve mastering
+        updates = { mastering_approved: true, updated_at: new Date().toISOString() };
+    } else {
+        // Re-upload track
+        const currentCount = orders[0].reupload_count || 0;
+        if (currentCount >= 3) {
+            return res.status(400).json({ error: 'Maximum re-uploads reached (3/3)' });
+        }
+        updates = {
+            track_url: track_url || '',
+            track_artwork: track_artwork || '',
+            feedback: null,
+            receipt_url: null,
+            reupload_count: currentCount + 1,
+            mastering_approved: false,
+            order_status: 'in_progress',
+            updated_at: new Date().toISOString(),
+        };
     }
-
-    // Update order: reset feedback, update track, increment reupload_count, reset status
-    const updates = {
-        track_url: track_url || '',
-        track_artwork: track_artwork || '',
-        feedback: null,
-        receipt_url: null,
-        reupload_count: currentCount + 1,
-        mastering_approved: false,
-        order_status: 'in_progress',
-        updated_at: new Date().toISOString(),
-    };
 
     const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${order_id}`, {
         method: 'PATCH',

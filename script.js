@@ -1928,7 +1928,7 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
     let artworkUrl = '';
     if (generatedArtworkDataUrl) {
         try {
-            const signRes = await fetch('/api/upload-artwork', {
+            const signRes = await fetch('/api/upload-audio?type=artwork', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ filename: `artwork_${Date.now()}.jpg` }),

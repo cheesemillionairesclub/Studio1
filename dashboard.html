@@ -462,7 +462,7 @@
 
                 // 2. Generate & upload artwork
                 const artworkDataUrl = generateTrackArtwork(400);
-                const artSignRes = await fetch('/api/upload-artwork', {
+                const artSignRes = await fetch('/api/upload-audio?type=artwork', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ filename: `artwork_${Date.now()}.jpg` }),
@@ -508,7 +508,7 @@
         async function approveMastering(orderId) {
             const token = BeatpushAuth.getToken();
             try {
-                const res = await fetch('/api/approve-mastering', {
+                const res = await fetch('/api/reupload-track?action=approve', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
