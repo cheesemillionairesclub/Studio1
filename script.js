@@ -1351,13 +1351,32 @@ async function handleAudioUpload(file) {
         audioElement = new Audio();
         audioElement.src = URL.createObjectURL(file);
 
-        // Show pricing section
-        const pricingSection = document.getElementById('pricing');
-        if (pricingSection) {
-            pricingSection.style.display = '';
-            setTimeout(() => {
-                pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 200);
+        // Check if user already has a subscription — skip pricing if so
+        let skipPricing = false;
+        try {
+            const user = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
+            if (user) {
+                const profile = await BeatpushAuth.getProfile();
+                const subStatus = profile?.subscription_status;
+                if (subStatus === 'active' || subStatus === 'trialing') {
+                    skipPricing = true;
+                }
+            }
+        } catch (e) {}
+
+        if (skipPricing) {
+            // Auto-select mastering pack and go straight to campaign setup
+            selectedPack = 'mastering';
+            showCampaignSetup('mastering');
+        } else {
+            // Show pricing section for new users
+            const pricingSection = document.getElementById('pricing');
+            if (pricingSection) {
+                pricingSection.style.display = '';
+                setTimeout(() => {
+                    pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 200);
+            }
         }
 
         // Analyze with Essentia (non-blocking, runs in browser)
