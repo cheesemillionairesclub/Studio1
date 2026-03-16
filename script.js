@@ -1945,9 +1945,6 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; launchBtn.textContent = originalBtnText; }
     }
 
-    // Require login before any payment action
-    if (typeof requireAuth === 'function' && !requireAuth('payment')) return;
-
     const lang = detectLanguage();
     const t = translations[lang] || translations.en;
 
