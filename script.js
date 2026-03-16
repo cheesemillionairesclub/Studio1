@@ -1257,8 +1257,11 @@ function showUploadCountdown() {
     let count = TOTAL;
     let cancelled = false;
     let tickId;
+    let resolvePromise;
 
     const promise = new Promise(resolve => {
+        resolvePromise = resolve;
+
         tickId = setInterval(() => {
             if (cancelled) return;
             count--;
@@ -1292,9 +1295,6 @@ function showUploadCountdown() {
                 setTimeout(() => { textEl.textContent = msg.text; textEl.style.opacity = '1'; }, 200);
             }
         }, 1000);
-
-        // Store resolve so cancel() can call it
-        promise._resolve = resolve;
     });
 
     const cancel = () => {
@@ -1302,7 +1302,7 @@ function showUploadCountdown() {
         cancelled = true;
         clearInterval(tickId);
         dropzone.innerHTML = originalContent;
-        if (promise._resolve) promise._resolve();
+        resolvePromise();
     };
 
     return { promise, cancel };
