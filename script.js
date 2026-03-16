@@ -1197,7 +1197,7 @@ function showUploadCountdown() {
             <div class="cd-wrap">
                 <div class="cd-ring-wrap">
                     <svg class="cd-ring" viewBox="0 0 80 80">
-                        <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                        <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" opacity="0.1" stroke-width="3"/>
                         <circle class="cd-ring-fill" cx="40" cy="40" r="36" fill="none" stroke="#4CAF50" stroke-width="3" stroke-linecap="round"
                             stroke-dasharray="226.195" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
                     </svg>
@@ -1215,12 +1215,12 @@ function showUploadCountdown() {
             s.textContent = `
                 .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 0;animation:cd-in .35s ease}
                 .cd-ring-wrap{position:relative;width:72px;height:72px}
-                .cd-ring{width:100%;height:100%}
+                .cd-ring{width:100%;height:100%;color:var(--text-primary,#333)}
                 .cd-ring-fill{transition:stroke-dashoffset 1s linear}
                 .cd-logo{position:absolute;top:50%;left:50%;width:34px;height:34px;border-radius:8px;transform:translate(-50%,-50%);animation:cd-pulse 2.5s ease-in-out infinite}
-                .cd-num{font-size:1.5rem;font-weight:700;color:var(--white,#fff);font-variant-numeric:tabular-nums;line-height:1;transition:transform .25s ease,opacity .25s ease}
+                .cd-num{font-size:1.5rem;font-weight:700;color:var(--text-primary,#333);font-variant-numeric:tabular-nums;line-height:1;transition:transform .25s ease,opacity .25s ease}
                 .cd-num.tick{transform:scale(1.25);opacity:.5}
-                .cd-text{font-size:.75rem;color:rgba(255,255,255,.4);letter-spacing:.3px}
+                .cd-text{font-size:.75rem;color:var(--text-secondary,#888);letter-spacing:.3px}
                 @keyframes cd-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
                 @keyframes cd-pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
             `;
