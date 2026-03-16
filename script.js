@@ -1705,7 +1705,7 @@ function renderGenreSelection() {
         placeholder.textContent = selectedGenres.length >= 1 ? '' : 'Choose a genre...';
     }
     if (trigger) {
-        trigger.classList.toggle('disabled', selectedGenres.length >= 1);
+        trigger.style.display = selectedGenres.length >= 1 ? 'none' : '';
     }
 
     // Auto-confirm when at least 1 genre is selected
