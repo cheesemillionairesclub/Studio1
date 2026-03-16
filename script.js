@@ -1797,7 +1797,7 @@ if (tipsToggleEl) {
 }
 
 // Launch campaign button
-document.getElementById('launchCampaignBtn').addEventListener('click', function() {
+document.getElementById('launchCampaignBtn').addEventListener('click', async function() {
     // Require login before any payment action
     if (typeof requireAuth === 'function' && !requireAuth('payment')) return;
 
@@ -1840,11 +1840,35 @@ document.getElementById('launchCampaignBtn').addEventListener('click', function(
     const artists = selectedArtists.map(a => a.name).join(', ');
     const releaseStatus = document.querySelector('input[name="releaseStatus"]:checked')?.value || '';
 
+    // Upload audio file to Supabase Storage if available
+    let audioUrl = track.id || '';
+    if (uploadedAudioFile) {
+        const launchBtn = document.getElementById('launchCampaignBtn');
+        if (launchBtn) { launchBtn.disabled = true; launchBtn.style.opacity = '0.6'; }
+        showToast('Uploading audio file...');
+        try {
+            const uploadRes = await fetch(`/api/upload-audio?filename=${encodeURIComponent(uploadedAudioFile.name)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': uploadedAudioFile.type || 'audio/wav' },
+                body: uploadedAudioFile,
+            });
+            const uploadData = await uploadRes.json();
+            if (uploadRes.ok && uploadData.url) {
+                audioUrl = uploadData.url;
+                console.log('[AlphaStudios] Audio uploaded:', audioUrl);
+            } else {
+                console.warn('[AlphaStudios] Audio upload failed:', uploadData);
+            }
+        } catch (e) {
+            console.warn('[AlphaStudios] Audio upload error:', e.message);
+        }
+    }
+
     const requestBody = {
         pack: packToSend,
         track_title: track.title || '',
         track_artist: track.artist || '',
-        track_url: track.id || '',
+        track_url: audioUrl,
         genre: genre,
         similar_artists: artists,
         release_status: releaseStatus,
