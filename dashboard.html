@@ -30,6 +30,32 @@
             padding: 6px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
             background: #4CAF50; color: #fff; text-decoration: none;
         }
+        /* Success Popup */
+        .dash-success-overlay {
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .dash-success-overlay.visible { opacity: 1; }
+        .dash-success-box {
+            background: var(--card-bg, #1a1a2e); border: 1px solid var(--white-10, rgba(255,255,255,0.1));
+            border-radius: 16px; padding: 32px; max-width: 380px; width: 90%;
+            text-align: center; transform: scale(0.95); transition: transform 0.3s ease;
+        }
+        .dash-success-overlay.visible .dash-success-box { transform: scale(1); }
+        .dash-success-logo { width: 48px; height: 48px; border-radius: 10px; margin-bottom: 16px; }
+        .dash-success-title { font-size: 1.2rem; font-weight: 700; color: var(--white, #fff); margin: 0 0 8px; }
+        .dash-success-text { font-size: 0.85rem; color: var(--white-50, rgba(255,255,255,0.5)); line-height: 1.6; margin: 0 0 16px; }
+        .dash-success-text strong { color: var(--white, #fff); }
+        .dash-success-art { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; margin-bottom: 16px; }
+        .dash-success-btn {
+            background: #4CAF50; color: #fff; border: none; border-radius: 8px;
+            padding: 10px 32px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .dash-success-btn:hover { background: #43A047; }
+
         .sub-active { background: rgba(76,175,80,0.04); border-color: rgba(76,175,80,0.15); }
         .sub-trial { background: rgba(33,150,243,0.04); border-color: rgba(33,150,243,0.15); }
         .sub-inactive, .sub-none { background: rgba(255,82,82,0.04); border-color: rgba(255,82,82,0.15); }
@@ -445,10 +471,16 @@
                                 body: JSON.stringify({ tracks_used_this_month: (profile?.tracks_used_this_month || 0) + 1 }),
                             });
                             console.log('[Dashboard] Track count updated:', patchRes.ok);
+
+                            // Show success popup
+                            showSubscriptionSuccess(campaign);
                         }
                     } catch (e) {
                         console.error('[Dashboard] Post-checkout save error:', e);
                     }
+                } else {
+                    // No pending campaign — just show welcome popup for new subscriber
+                    showSubscriptionSuccess(null);
                 }
 
                 // Refresh UI
@@ -458,6 +490,37 @@
 
             // Re-render cards when language changes
             window.addEventListener('alphastudios-langchange', () => loadDashboard());
+        }
+
+        // ===== Success Popup =====
+        function showSubscriptionSuccess(campaign) {
+            const existing = document.querySelector('.dash-success-overlay');
+            if (existing) existing.remove();
+
+            const hasTrack = campaign && campaign.track_title;
+            const overlay = document.createElement('div');
+            overlay.className = 'dash-success-overlay';
+            overlay.innerHTML = `
+                <div class="dash-success-box">
+                    <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="" class="dash-success-logo">
+                    <h3 class="dash-success-title">${hasTrack ? 'Track Submitted!' : 'Welcome to Pro!'}</h3>
+                    <p class="dash-success-text">${hasTrack
+                        ? `<strong>${campaign.track_title}</strong> has been submitted. Our team will begin processing your campaign shortly. Average delivery: 24–48h.`
+                        : 'Your free trial is now active. Upload a track to get started!'
+                    }</p>
+                    ${hasTrack && campaign.track_artwork ? `<img src="${campaign.track_artwork}" alt="" class="dash-success-art">` : ''}
+                    <button class="dash-success-btn">Got it</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+
+            const close = () => {
+                overlay.classList.remove('visible');
+                setTimeout(() => overlay.remove(), 300);
+            };
+            overlay.querySelector('.dash-success-btn').addEventListener('click', close);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
         }
 
         // ===== Subscription Banner =====
