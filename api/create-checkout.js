@@ -15,6 +15,7 @@ export default async function handler(req, res) {
 
     const user_id = body.user_id || '';
     const user_email = body.user_email || '';
+    const skip_trial = body.skip_trial || false;
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const origin = req.headers.origin || 'https://alphastudios.app';
@@ -48,14 +49,16 @@ export default async function handler(req, res) {
             }
         }
 
+        const subscriptionData = { metadata: { user_id } };
+        if (!skip_trial) {
+            subscriptionData.trial_period_days = 7;
+        }
+
         const sessionParams = {
             payment_method_types: ['card'],
             line_items: [{ price: priceId, quantity: 1 }],
             mode: 'subscription',
-            subscription_data: {
-                trial_period_days: 7,
-                metadata: { user_id },
-            },
+            subscription_data: subscriptionData,
             metadata: { user_id },
             success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/`,

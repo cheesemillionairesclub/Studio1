@@ -2101,13 +2101,39 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         const tracksUsed = profile.tracks_used_this_month || 0;
         const tracksLimit = subStatus === 'trialing' ? 1 : 5;
 
-        if (tracksUsed >= tracksLimit) {
-            showToast(`You've reached your limit of ${tracksLimit} track${tracksLimit > 1 ? 's' : ''} this month.`);
+        // Trial user at limit → redirect to paid checkout (no trial)
+        if (subStatus === 'trialing' && tracksUsed >= tracksLimit) {
+            localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
+            setBtnLoading('Redirecting...');
+            try {
+                const checkoutRes = await fetch('/api/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, user_email: user.email, skip_trial: true }),
+                });
+                const checkoutData = await checkoutRes.json();
+                if (checkoutData.url) {
+                    window.location.href = checkoutData.url;
+                } else {
+                    showToast('Failed to start subscription. Please try again.');
+                    resetBtn();
+                }
+            } catch (err) {
+                console.error('[AlphaStudios] Checkout error:', err);
+                showToast('Failed to start subscription. Please try again.');
+                resetBtn();
+            }
+            return;
+        }
+
+        // Active (paying) user at limit → block
+        if (subStatus === 'active' && tracksUsed >= tracksLimit) {
+            showToast(`You've reached your limit of ${tracksLimit} tracks this month.`);
             resetBtn();
             return;
         }
 
-        // Save order (files already uploaded during countdown)
+        // User has capacity — save order directly and redirect to dashboard
         try {
             setBtnLoading('Submitting...');
             const result = await saveOrderToSupabase(campaignData, {
