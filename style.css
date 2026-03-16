@@ -432,8 +432,8 @@ body {
     width: max-content;
 }
 .hero-logo-item {
-    width: 36px;
-    height: 36px;
+    width: 180px;
+    height: 180px;
     object-fit: contain;
     opacity: 0.4;
     flex-shrink: 0;
