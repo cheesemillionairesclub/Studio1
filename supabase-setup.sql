@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
     feedback TEXT,
     reupload_count INTEGER DEFAULT 0,
     mastering_approved BOOLEAN DEFAULT FALSE,
+    track_versions JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

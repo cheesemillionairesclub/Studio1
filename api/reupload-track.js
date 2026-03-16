@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
     // Verify ownership
     const orderRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/orders?id=eq.${order_id}&user_id=eq.${user.id}&select=id,reupload_count,user_id`,
+        `${SUPABASE_URL}/rest/v1/orders?id=eq.${order_id}&user_id=eq.${user.id}&select=id,reupload_count,user_id,track_versions`,
         { headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` } }
     );
     const orders = await orderRes.json();
@@ -50,9 +50,12 @@ export default async function handler(req, res) {
         if (currentCount >= 3) {
             return res.status(400).json({ error: 'Maximum re-uploads reached (3/3)' });
         }
+        const existingVersions = Array.isArray(orders[0].track_versions) ? orders[0].track_versions : [];
+        const newVersion = { url: track_url || '', artwork: track_artwork || '', label: `Upload ${existingVersions.length + 1}`, date: new Date().toISOString() };
         updates = {
             track_url: track_url || '',
             track_artwork: track_artwork || '',
+            track_versions: [...existingVersions, newVersion],
             feedback: null,
             receipt_url: null,
             reupload_count: currentCount + 1,
