@@ -256,6 +256,7 @@
                         <tr>
                             <th>Date</th>
                             <th>Track</th>
+                            <th>Original File</th>
                             <th>Customer</th>
                             <th>Pack</th>
                             <th>Genre</th>
@@ -266,7 +267,7 @@
                         </tr>
                     </thead>
                     <tbody id="adminOrdersBody">
-                        <tr><td colspan="9" class="admin-loading">Loading orders...</td></tr>
+                        <tr><td colspan="10" class="admin-loading">Loading orders...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -364,7 +365,7 @@
         function renderOrders(orders) {
             const tbody = document.getElementById('adminOrdersBody');
             if (!orders.length) {
-                tbody.innerHTML = '<tr><td colspan="9" class="admin-loading">No orders yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="admin-loading">No orders yet.</td></tr>';
                 return;
             }
 
@@ -386,6 +387,7 @@
                             </div>
                         </div>
                     </td>
+                    <td>${order.track_url ? `<a href="${esc(order.track_url)}" target="_blank" class="admin-btn" style="text-decoration:none;font-size:0.7rem;">Download Original</a>` : '<span style="color:var(--white-30)">No file</span>'}</td>
                     <td>${esc(order.customer_email || '-')}</td>
                     <td>${esc(packLabel)}</td>
                     <td>${esc(order.genre || '-')}</td>
