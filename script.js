@@ -1186,6 +1186,103 @@ function removeUploadedTrack() {
     if (banner) banner.remove();
 }
 
+function showUploadCountdown() {
+    return new Promise(resolve => {
+        const existing = document.querySelector('.countdown-overlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'countdown-overlay';
+        overlay.innerHTML = `
+            <div class="countdown-inner">
+                <div class="countdown-logo-wrap">
+                    <svg class="countdown-ring" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+                        <circle class="countdown-ring-progress" cx="60" cy="60" r="54" fill="none" stroke="url(#countdownGrad)" stroke-width="4" stroke-linecap="round"
+                            stroke-dasharray="339.292" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+                        <defs><linearGradient id="countdownGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#4CAF50"/>
+                            <stop offset="100%" stop-color="#81C784"/>
+                        </linearGradient></defs>
+                    </svg>
+                    <img class="countdown-logo" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="AlphaStudios">
+                </div>
+                <div class="countdown-number">10</div>
+                <div class="countdown-label">Analyzing your track...</div>
+            </div>
+        `;
+
+        // Inject scoped styles
+        const style = document.createElement('style');
+        style.id = 'countdown-styles';
+        if (!document.getElementById('countdown-styles')) {
+            style.textContent = `
+                .countdown-overlay {
+                    position: fixed; inset: 0; z-index: 99999;
+                    background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+                    display: flex; align-items: center; justify-content: center;
+                    opacity: 0; transition: opacity 0.4s ease;
+                }
+                .countdown-overlay.visible { opacity: 1; }
+                .countdown-overlay.fade-out { opacity: 0; transition: opacity 0.5s ease; }
+                .countdown-inner { text-align: center; }
+                .countdown-logo-wrap {
+                    position: relative; width: 120px; height: 120px; margin: 0 auto 24px;
+                }
+                .countdown-ring { position: absolute; inset: 0; width: 100%; height: 100%; }
+                .countdown-ring-progress { transition: stroke-dashoffset 1s linear; }
+                .countdown-logo {
+                    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    width: 60px; height: 60px; border-radius: 14px;
+                    animation: countdown-pulse 2s ease-in-out infinite;
+                }
+                .countdown-number {
+                    font-size: 3rem; font-weight: 800; color: #fff;
+                    font-variant-numeric: tabular-nums;
+                    transition: transform 0.3s ease, opacity 0.3s ease;
+                }
+                .countdown-number.tick { transform: scale(1.2); opacity: 0.6; }
+                .countdown-label {
+                    font-size: 0.85rem; color: rgba(255,255,255,0.5);
+                    margin-top: 8px; letter-spacing: 0.5px;
+                }
+                @keyframes countdown-pulse {
+                    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                    50% { transform: translate(-50%, -50%) scale(1.06); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('visible'));
+
+        const numberEl = overlay.querySelector('.countdown-number');
+        const ringProgress = overlay.querySelector('.countdown-ring-progress');
+        const totalDash = 339.292; // 2 * PI * 54
+        let count = 10;
+
+        const interval = setInterval(() => {
+            count--;
+            if (count < 0) {
+                clearInterval(interval);
+                overlay.classList.add('fade-out');
+                setTimeout(() => { overlay.remove(); resolve(); }, 500);
+                return;
+            }
+            // Animate number
+            numberEl.classList.add('tick');
+            setTimeout(() => {
+                numberEl.textContent = count;
+                numberEl.classList.remove('tick');
+            }, 150);
+            // Animate ring
+            const offset = totalDash * ((10 - count) / 10);
+            ringProgress.style.strokeDashoffset = offset;
+        }, 1000);
+    });
+}
+
 async function handleAudioUpload(file) {
     // Validate file
     const maxSize = 100 * 1024 * 1024; // 100MB
@@ -1243,49 +1340,51 @@ async function handleAudioUpload(file) {
             metadata: metadata
         };
 
-        // Show track preview
-        setTimeout(() => {
-            if (progressEl) progressEl.style.display = 'none';
-            if (uploadDropzone) uploadDropzone.style.display = 'none';
-            if (trackPreview) trackPreview.style.display = '';
+        // Show countdown overlay then reveal track preview
+        if (progressEl) progressEl.style.display = 'none';
+        if (uploadDropzone) uploadDropzone.style.display = 'none';
 
-            // Set title
-            const titleEl = document.getElementById('trackPreviewTitle');
-            if (titleEl) titleEl.textContent = trackTitle;
+        await showUploadCountdown();
 
-            // Set generated artwork
-            const artworkEl = document.getElementById('trackPreviewArtwork');
-            if (artworkEl && generatedArtworkDataUrl) {
-                artworkEl.innerHTML = `<img src="${generatedArtworkDataUrl}" alt="Track artwork">`;
-            }
+        // Reveal track preview
+        if (trackPreview) trackPreview.style.display = '';
 
-            // Render metadata tags
-            renderMetaTags(metadata);
+        // Set title
+        const titleEl = document.getElementById('trackPreviewTitle');
+        if (titleEl) titleEl.textContent = trackTitle;
 
-            // Draw waveform
-            drawWaveform(audioBuffer);
+        // Set generated artwork
+        const artworkEl = document.getElementById('trackPreviewArtwork');
+        if (artworkEl && generatedArtworkDataUrl) {
+            artworkEl.innerHTML = `<img src="${generatedArtworkDataUrl}" alt="Track artwork">`;
+        }
 
-            // Set duration display
-            if (waveformDurationEl) {
-                waveformDurationEl.textContent = formatTime(audioBuffer.duration);
-            }
+        // Render metadata tags
+        renderMetaTags(metadata);
 
-            // Create audio element for playback
-            audioElement = new Audio();
-            audioElement.src = URL.createObjectURL(file);
+        // Draw waveform
+        drawWaveform(audioBuffer);
 
-            // Show pricing section
-            const pricingSection = document.getElementById('pricing');
-            if (pricingSection) {
-                pricingSection.style.display = '';
-                setTimeout(() => {
-                    pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 200);
-            }
+        // Set duration display
+        if (waveformDurationEl) {
+            waveformDurationEl.textContent = formatTime(audioBuffer.duration);
+        }
 
-            // Analyze with Essentia (non-blocking, runs in browser)
-            analyzeWithEssentia(audioBuffer);
-        }, 400);
+        // Create audio element for playback
+        audioElement = new Audio();
+        audioElement.src = URL.createObjectURL(file);
+
+        // Show pricing section
+        const pricingSection = document.getElementById('pricing');
+        if (pricingSection) {
+            pricingSection.style.display = '';
+            setTimeout(() => {
+                pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 200);
+        }
+
+        // Analyze with Essentia (non-blocking, runs in browser)
+        analyzeWithEssentia(audioBuffer);
 
     } catch (err) {
         clearInterval(progressInterval);
