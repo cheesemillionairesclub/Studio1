@@ -29,6 +29,20 @@ async function updateProfile(serviceKey, filters, updates) {
     return res;
 }
 
+async function upsertProfile(serviceKey, profileData) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': serviceKey,
+            'Authorization': `Bearer ${serviceKey}`,
+            'Prefer': 'resolution=merge-duplicates,return=representation',
+        },
+        body: JSON.stringify(profileData),
+    });
+    return res;
+}
+
 async function findProfileByStripeCustomer(serviceKey, customerId) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?stripe_customer_id=eq.${customerId}&select=id`, {
         headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}` },
@@ -68,24 +82,35 @@ export default async function handler(req, res) {
 
         if (userId && customerId) {
             // Link Stripe customer + subscription to profile
-            const updates = {
+            // Use upsert to create profile if it doesn't exist yet (race condition with auth trigger)
+            const profileData = {
+                id: userId,
                 stripe_customer_id: customerId,
                 stripe_subscription_id: subscriptionId || null,
             };
+
+            // Add email from checkout session if available
+            const customerEmail = session.customer_details?.email || session.customer_email;
+            if (customerEmail) profileData.email = customerEmail;
 
             // Fetch subscription to get status and trial info
             if (subscriptionId) {
                 try {
                     const sub = await stripe.subscriptions.retrieve(subscriptionId);
-                    updates.subscription_status = sub.status; // 'trialing' or 'active'
-                    updates.trial_end = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
-                    updates.current_period_end = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+                    profileData.subscription_status = sub.status; // 'trialing' or 'active'
+                    profileData.trial_end = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
+                    profileData.current_period_end = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
                 } catch (e) {
                     console.error('[Webhook] Failed to retrieve subscription:', e.message);
                 }
             }
 
-            await updateProfile(serviceKey, { id: userId }, updates);
+            const upsertRes = await upsertProfile(serviceKey, profileData);
+            if (!upsertRes.ok) {
+                console.error('[Webhook] Profile upsert failed:', await upsertRes.text());
+                // Fallback to PATCH in case upsert fails due to permissions
+                await updateProfile(serviceKey, { id: userId }, profileData);
+            }
             console.log(`[Webhook] Profile ${userId} linked to customer ${customerId}`);
         }
     }

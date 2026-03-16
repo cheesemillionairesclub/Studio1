@@ -425,20 +425,24 @@
                         console.log('[Dashboard] Checkout data:', JSON.stringify(checkoutData));
 
                         // Update local profile with subscription status from Stripe
+                        // Use upsert (POST with merge-duplicates) to create profile if it doesn't exist
                         if (checkoutData.subscription_status) {
                             const token = BeatpushAuth.getToken();
-                            const profileUpdate = {
+                            const profileData = {
+                                id: user.id,
+                                email: user.email,
                                 subscription_status: checkoutData.subscription_status,
                             };
-                            if (checkoutData.trial_end) profileUpdate.trial_end = checkoutData.trial_end;
-                            await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
-                                method: 'PATCH',
+                            if (checkoutData.trial_end) profileData.trial_end = checkoutData.trial_end;
+                            await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles`, {
+                                method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'Authorization': `Bearer ${token}`,
                                     'apikey': BeatpushAuth.supabaseKey,
+                                    'Prefer': 'resolution=merge-duplicates',
                                 },
-                                body: JSON.stringify(profileUpdate),
+                                body: JSON.stringify(profileData),
                             });
                             console.log('[Dashboard] Profile subscription_status set to:', checkoutData.subscription_status);
                         }
