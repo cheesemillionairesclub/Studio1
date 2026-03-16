@@ -2103,7 +2103,7 @@ function showToast(message, scrollToSearch) {
     overlay.innerHTML = `
         <div class="toast-box">
             <div class="toast-icon">
-                <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="AlphaStudios" class="toast-logo">
+                <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" class="toast-logo">
             </div>
             <p class="toast-msg">${message}</p>
             <button class="toast-close">OK</button>

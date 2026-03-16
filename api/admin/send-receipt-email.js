@@ -122,7 +122,7 @@ function buildEmailHtml({ greeting, packLabel, order }) {
     <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:40px 20px;">
         <!-- Header -->
         <div style="text-align:center;padding-bottom:30px;border-bottom:1px solid rgba(0,0,0,0.08);">
-            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="AlphaStudios" style="height:50px;" />
+            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" style="height:50px;" />
         </div>
 
         <!-- Content -->
@@ -188,7 +188,7 @@ function buildFeedbackEmailHtml({ greeting, packLabel, order }) {
     <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:40px 20px;">
         <!-- Header -->
         <div style="text-align:center;padding-bottom:30px;border-bottom:1px solid rgba(0,0,0,0.08);">
-            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="AlphaStudios" style="height:50px;" />
+            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" style="height:50px;" />
         </div>
 
         <!-- Content -->

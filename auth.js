@@ -149,7 +149,7 @@
         overlay.innerHTML = `
             <div class="toast-box auth-prompt-box">
                 <div class="toast-icon">
-                    <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="AlphaStudios" class="toast-logo">
+                    <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" class="toast-logo">
                 </div>
                 <h3 class="auth-prompt-title">${t.auth_prompt_title || 'Sign in to continue'}</h3>
                 <p class="auth-prompt-text">${t.auth_prompt_text || 'Please sign in with your Google account to proceed with your campaign.'}</p>
