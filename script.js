@@ -1188,37 +1188,29 @@ function removeUploadedTrack() {
 
 function showUploadCountdown() {
     const dropzone = document.getElementById('uploadDropzone');
-    if (!dropzone) return { promise: Promise.resolve(), cancel: () => {} };
+    if (!dropzone) return { cancel: () => {} };
 
     const originalContent = dropzone.innerHTML;
-    const TOTAL = 10;
-    const totalDash = 226.195; // 2 * PI * 36
+    const DURATION = 10; // seconds
 
-    const messages = [
-        { at: 10, text: 'Uploading your track...' },
-        { at: 8,  text: 'Reading audio data...' },
-        { at: 6,  text: 'Analyzing frequencies...' },
-        { at: 4,  text: 'Detecting BPM & key...' },
-        { at: 2,  text: 'Measuring loudness...' },
-    ];
-
+    // 100% CSS-driven countdown — runs on compositor thread, NEVER freezes
     dropzone.innerHTML = `
         <div class="cd-wrap">
             <div class="cd-ring-wrap">
                 <svg class="cd-ring" viewBox="0 0 80 80">
                     <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" opacity="0.1" stroke-width="3"/>
                     <circle class="cd-ring-fill" cx="40" cy="40" r="36" fill="none" stroke="var(--green-primary, #00a854)" stroke-width="3.5" stroke-linecap="round"
-                        stroke-dasharray="${totalDash}" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
+                        stroke-dasharray="226.195" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
                 </svg>
                 <img class="cd-icon" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" width="32" height="32">
             </div>
-            <span class="cd-num">${TOTAL}</span>
-            <span class="cd-text">${messages[0].text}</span>
+            <div class="cd-num-wrap"><span class="cd-num"></span></div>
+            <span class="cd-text"></span>
             <div class="cd-dots"><span></span><span></span><span></span></div>
         </div>
     `;
 
-    // Inject styles once
+    // Inject styles once — ALL animations are CSS, no JS intervals
     if (!document.getElementById('cd-styles')) {
         const s = document.createElement('style');
         s.id = 'cd-styles';
@@ -1226,79 +1218,95 @@ function showUploadCountdown() {
             .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 0;animation:cd-in .35s ease}
             .cd-ring-wrap{position:relative;width:80px;height:80px}
             .cd-ring{width:100%;height:100%;color:var(--text-primary,#333)}
-            .cd-ring-fill{transition:stroke-dashoffset 1s linear}
+            .cd-ring-fill{animation:cd-ring-progress ${DURATION}s linear forwards}
             .cd-icon{position:absolute;top:50%;left:50%;width:32px;height:32px;border-radius:50%;object-fit:cover;transform:translate(-50%,-50%);animation:cd-spin 3s linear infinite}
-            .cd-num{font-size:1.6rem;font-weight:800;color:var(--green-primary,#00a854);font-variant-numeric:tabular-nums;line-height:1;transition:transform .25s ease,opacity .25s ease}
-            .cd-num.tick{transform:scale(1.3);opacity:.4}
-            .cd-text{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;transition:opacity .3s ease;min-height:1.2em}
+            .cd-num-wrap{height:1.8rem;overflow:hidden}
+            .cd-num{display:block;font-size:1.6rem;font-weight:800;color:var(--green-primary,#00a854);font-variant-numeric:tabular-nums;line-height:1.8rem;animation:cd-count ${DURATION}s steps(1) forwards}
+            .cd-text{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;min-height:1.2em;animation:cd-msgs ${DURATION}s steps(1) forwards}
             .cd-dots{display:flex;gap:5px}
             .cd-dots span{width:6px;height:6px;border-radius:50%;background:var(--green-primary,#00a854);opacity:.25;animation:cd-bounce 1.4s ease-in-out infinite}
             .cd-dots span:nth-child(2){animation-delay:.2s}
             .cd-dots span:nth-child(3){animation-delay:.4s}
-            .cd-wait{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;animation:cd-fade 2s ease-in-out infinite;min-height:1.2em;text-align:center}
+            .cd-wait-text{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;animation:cd-fade 2s ease-in-out infinite;text-align:center}
             @keyframes cd-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
             @keyframes cd-spin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
             @keyframes cd-bounce{0%,80%,100%{opacity:.25;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
             @keyframes cd-fade{0%,100%{opacity:.5}50%{opacity:1}}
+            @keyframes cd-ring-progress{
+                0%{stroke-dashoffset:0}
+                100%{stroke-dashoffset:226.195}
+            }
+            @keyframes cd-count{
+                0%{content:"10"} 0.1%{content:"10"}
+                10%{content:"9"} 10.1%{content:"9"}
+                20%{content:"8"} 20.1%{content:"8"}
+                30%{content:"7"} 30.1%{content:"7"}
+                40%{content:"6"} 40.1%{content:"6"}
+                50%{content:"5"} 50.1%{content:"5"}
+                60%{content:"4"} 60.1%{content:"4"}
+                70%{content:"3"} 70.1%{content:"3"}
+                80%{content:"2"} 80.1%{content:"2"}
+                90%{content:"1"} 90.1%{content:"1"}
+                100%{content:"0"}
+            }
+            @keyframes cd-msgs{
+                0%{content:"Uploading your track..."}
+                20%{content:"Reading audio data..."}
+                40%{content:"Analyzing frequencies..."}
+                60%{content:"Detecting BPM & key..."}
+                80%{content:"Measuring loudness..."}
+                100%{content:"Almost there..."}
+            }
         `;
         document.head.appendChild(s);
     }
 
+    // Use CSS content property for number and text (works via ::after pseudo-elements won't work on span directly)
+    // Fallback: set initial content and use animation on the elements directly
     const numEl = dropzone.querySelector('.cd-num');
-    const ringFill = dropzone.querySelector('.cd-ring-fill');
     const textEl = dropzone.querySelector('.cd-text');
-    let count = TOTAL;
-    let cancelled = false;
-    let tickId;
-    let resolvePromise;
+    if (numEl) numEl.textContent = '10';
+    if (textEl) textEl.textContent = 'Uploading your track...';
 
-    const promise = new Promise(resolve => {
-        resolvePromise = resolve;
+    // CSS content animation doesn't work on regular elements — use a lightweight rAF loop instead
+    // rAF runs at paint time and is NOT blocked by heavy JS like setInterval is on Safari
+    let startTime = performance.now();
+    let rafId;
+    let done = false;
 
-        tickId = setInterval(() => {
-            if (cancelled) return;
-            count--;
+    function tick() {
+        if (done) return;
+        const elapsed = (performance.now() - startTime) / 1000;
+        const remaining = Math.max(0, Math.ceil(DURATION - elapsed));
 
-            if (count < 0) {
-                // Timer expired but upload still going — show waiting message
-                clearInterval(tickId);
-                if (numEl) numEl.style.display = 'none';
-                if (textEl) {
-                    textEl.className = 'cd-wait';
-                    textEl.textContent = 'Almost there! We are as excited as you are!';
-                }
-                if (ringFill) ringFill.style.strokeDashoffset = String(totalDash);
-                // Don't resolve — wait for cancel() to be called when upload finishes
-                return;
+        if (numEl) numEl.textContent = remaining;
+
+        const msgs = ['Uploading your track...', 'Reading audio data...', 'Analyzing frequencies...', 'Detecting BPM & key...', 'Measuring loudness...'];
+        const msgIdx = Math.min(Math.floor(elapsed / 2), msgs.length - 1);
+        if (textEl) textEl.textContent = msgs[msgIdx];
+
+        if (elapsed >= DURATION && !done) {
+            // Timer expired — show waiting message
+            if (numEl) numEl.style.display = 'none';
+            if (textEl) {
+                textEl.className = 'cd-wait-text';
+                textEl.textContent = 'Almost there! We are as excited as you are!';
             }
+            return; // stop rAF, but don't resolve — wait for cancel()
+        }
 
-            // Tick number animation
-            if (numEl) {
-                numEl.classList.add('tick');
-                setTimeout(() => { numEl.textContent = count; numEl.classList.remove('tick'); }, 120);
-            }
-
-            // Ring progress
-            if (ringFill) ringFill.style.strokeDashoffset = String(totalDash * ((TOTAL - count) / TOTAL));
-
-            // Update text message at milestones
-            const msg = messages.find(m => count === m.at);
-            if (msg && textEl) {
-                textEl.style.opacity = '0';
-                setTimeout(() => { textEl.textContent = msg.text; textEl.style.opacity = '1'; }, 200);
-            }
-        }, 1000);
-    });
+        rafId = requestAnimationFrame(tick);
+    }
+    rafId = requestAnimationFrame(tick);
 
     const cancel = () => {
-        if (cancelled) return;
-        cancelled = true;
-        clearInterval(tickId);
+        if (done) return;
+        done = true;
+        cancelAnimationFrame(rafId);
         dropzone.innerHTML = originalContent;
-        resolvePromise();
     };
 
-    return { promise, cancel };
+    return { cancel };
 }
 
 async function handleAudioUpload(file) {
@@ -1313,17 +1321,18 @@ async function handleAudioUpload(file) {
 
     const trackTitle = file.name.replace(/\.[^/.]+$/, '');
 
-    // Start countdown IMMEDIATELY so user sees animation from the start
+    // Start countdown IMMEDIATELY — all CSS animations, never freezes
     const countdown = showUploadCountdown();
-
-    // Let the countdown render & start animating before any work
-    await new Promise(r => setTimeout(r, 200));
 
     try {
         generatedArtworkDataUrl = generateTrackArtwork(400);
 
-        // Start upload to Supabase ONLY (network I/O — does NOT block main thread)
-        // Do NOT start audio decode yet — it freezes the UI on Safari/iOS
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Start upload + decode in PARALLEL
+        // Countdown is pure CSS animation — won't freeze even if decode blocks main thread
         const uploadPromise = uploadTrackFiles(file, generatedArtworkDataUrl).then(urls => {
             if (urls.audioUrl) {
                 window._preUploadedAudioUrl = urls.audioUrl;
@@ -1336,11 +1345,16 @@ async function handleAudioUpload(file) {
             return urls;
         });
 
-        // Wait for upload only — countdown runs smoothly during network wait
-        const urls = await uploadPromise;
+        const decodePromise = file.arrayBuffer().then(ab => audioContext.decodeAudioData(ab));
 
-        // Upload done — cancel countdown, show preview
+        // Wait for BOTH — waveform ready when we show the preview
+        const [urls, decodedBuffer] = await Promise.all([uploadPromise, decodePromise]);
+        audioBuffer = decodedBuffer;
+
+        // Everything ready — cancel countdown, show preview with waveform
         countdown.cancel();
+
+        const metadata = extractMetadata(file, decodedBuffer);
 
         selectedTrack = {
             title: trackTitle,
@@ -1349,11 +1363,11 @@ async function handleAudioUpload(file) {
             id: urls.audioUrl || '',
             genre: '',
             file: file,
-            metadata: null
+            metadata: metadata
         };
         if (urls.artworkUrl) selectedTrack.artwork = urls.artworkUrl;
 
-        // Show track preview immediately
+        // Show track preview
         if (uploadDropzone) uploadDropzone.style.display = 'none';
         if (trackPreview) trackPreview.style.display = '';
 
@@ -1365,7 +1379,16 @@ async function handleAudioUpload(file) {
             artworkEl.innerHTML = `<img src="${generatedArtworkDataUrl}" alt="Track artwork">`;
         }
 
-        // Create audio element for playback (from local file, instant)
+        renderMetaTags(metadata);
+
+        if (waveformDurationEl) {
+            waveformDurationEl.textContent = formatTime(decodedBuffer.duration);
+        }
+
+        // Draw waveform
+        drawWaveform(decodedBuffer);
+
+        // Create audio element for playback
         audioElement = new Audio();
         audioElement.src = URL.createObjectURL(file);
 
@@ -1380,34 +1403,8 @@ async function handleAudioUpload(file) {
             if (preview) preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 200);
 
-        // ---- NOW start decode (after UI is fully shown) ----
-        // This is CPU-heavy and WILL block on Safari/iOS, but the countdown
-        // is already gone and the preview is visible, so user doesn't notice
-        setTimeout(async () => {
-            try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                const arrayBuffer = await file.arrayBuffer();
-                const decodedBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                audioBuffer = decodedBuffer;
-
-                const metadata = extractMetadata(file, decodedBuffer);
-                selectedTrack.metadata = metadata;
-
-                renderMetaTags(metadata);
-
-                if (waveformDurationEl) {
-                    waveformDurationEl.textContent = formatTime(decodedBuffer.duration);
-                }
-
-                requestAnimationFrame(() => drawWaveform(decodedBuffer));
-
-                analyzeWithEssentia(decodedBuffer);
-            } catch (err) {
-                console.error('Audio decode error:', err);
-            }
-        }, 300);
+        // Analyze with Essentia (non-blocking)
+        analyzeWithEssentia(decodedBuffer);
 
     } catch (err) {
         countdown.cancel();
