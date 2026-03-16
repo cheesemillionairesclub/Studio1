@@ -1212,7 +1212,7 @@ function showUploadCountdown() {
                 <svg class="cd-ring" viewBox="0 0 80 80">
                     <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" opacity="0.1" stroke-width="3"/>
                     <circle class="cd-ring-fill" cx="40" cy="40" r="36" fill="none" stroke="var(--green-primary, #00a854)" stroke-width="3.5" stroke-linecap="round"
-                        stroke-dasharray="226.195" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
+                        stroke-dasharray="226.195" stroke-dashoffset="226.195" transform="rotate(-90 40 40)"/>
                 </svg>
                 <img class="cd-icon" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" width="32" height="32">
             </div>
@@ -1250,7 +1250,7 @@ function showUploadCountdown() {
             @keyframes cd-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
             @keyframes cd-spin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
             @keyframes cd-bounce{0%,80%,100%{opacity:.25;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
-            @keyframes cd-ring-anim{0%{stroke-dashoffset:0}100%{stroke-dashoffset:226.195}}
+            @keyframes cd-ring-anim{0%{stroke-dashoffset:226.195}100%{stroke-dashoffset:0}}
             @keyframes cd-show{0%{opacity:0}0.1%{opacity:1}99.9%{opacity:1}100%{opacity:0}}
             @keyframes cd-show-last{0%{opacity:0}0.1%{opacity:1}100%{opacity:1}}
         `;
