@@ -2807,8 +2807,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     background: transparent;
     border: none;
@@ -2816,10 +2816,9 @@ body {
 }
 
 .toast-logo {
-    width: 56px;
-    height: 56px;
+    width: 120px;
+    height: 120px;
     object-fit: contain;
-    border-radius: 50%;
 }
 
 .toast-msg {
