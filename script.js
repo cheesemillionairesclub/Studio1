@@ -122,13 +122,13 @@ const translations = {
         feature_scheduling: 'Detailed Feedback Reports',
         feature_strategy: 'Label Submission Support',
         feature_guarantee: 'Money-back guarantee',
-        search_badge: 'CHOOSE YOUR TRACK',
-        search_title: '<span class="text-green">Find</span> your track to get started!',
-        search_desc: 'Search for your track and select it to begin.',
-        search_tagline: 'Professional quality. Fast delivery. Affordable pricing.',
-        search_placeholder: 'Artist name, track title or URL',
-        search_btn: 'SEARCH',
-        search_empty: 'No tracks found. Try another search term.',
+        upload_badge: 'UPLOAD YOUR TRACK',
+        upload_title: 'Upload your track for <span class="text-green">mastering</span>',
+        upload_desc: 'Drag & drop or click to upload your audio file.',
+        upload_tagline: 'Professional quality. Fast delivery. Affordable pricing.',
+        upload_drop_text: 'Drag & drop your audio file here',
+        upload_drop_hint: 'or click to browse — WAV, AIFF, MP3, FLAC (max 100MB)',
+        choose_validate_track: 'Please upload a track first before choosing a package.',
         pricing_badge: 'PRICING',
         pricing_title: 'Choose Your <span class="text-green">Package</span>',
         pricing_desc: 'Professional music services including mastering, feedback and label submission support — all for just $1.',
@@ -261,13 +261,13 @@ const translations = {
         feature_scheduling: 'Rapports de feedback détaillés',
         feature_strategy: 'Support de soumission aux labels',
         feature_guarantee: 'Garantie satisfait ou remboursé',
-        search_badge: 'CHOISISSEZ VOTRE TRACK',
-        search_title: '<span class="text-green">Trouvez</span> votre track pour commencer !',
-        search_desc: 'Recherchez votre morceau et sélectionnez-le pour commencer.',
-        search_tagline: 'Qualité professionnelle. Livraison rapide. Prix abordables.',
-        search_placeholder: 'Nom d\'artiste, titre du morceau ou URL',
-        search_btn: 'RECHERCHER',
-        search_empty: 'Aucun titre trouvé. Essayez un autre terme.',
+        upload_badge: 'UPLOADEZ VOTRE TRACK',
+        upload_title: 'Uploadez votre track pour le <span class="text-green">mastering</span>',
+        upload_desc: 'Glissez-déposez ou cliquez pour uploader votre fichier audio.',
+        upload_tagline: 'Qualité professionnelle. Livraison rapide. Prix abordables.',
+        upload_drop_text: 'Glissez-déposez votre fichier audio ici',
+        upload_drop_hint: 'ou cliquez pour parcourir — WAV, AIFF, MP3, FLAC (max 100MB)',
+        choose_validate_track: 'Veuillez d\'abord uploader une track avant de choisir un forfait.',
         pricing_badge: 'TARIFS',
         pricing_title: 'Choisissez Votre <span class="text-green">Forfait</span>',
         pricing_desc: 'Services musicaux professionnels incluant mastering, feedback et support de soumission aux labels — le tout pour seulement 1$.',
@@ -400,13 +400,13 @@ const translations = {
         feature_scheduling: 'Relatórios de feedback detalhados',
         feature_strategy: 'Suporte de submissão a gravadoras',
         feature_guarantee: 'Garantia de devolução',
-        search_badge: 'ESCOLHA SUA TRACK',
-        search_title: '<span class="text-green">Encontre</span> sua track para começar!',
-        search_desc: 'Pesquise sua música e selecione para começar.',
-        search_tagline: 'Qualidade profissional. Entrega rápida. Preços acessíveis.',
-        search_placeholder: 'Nome do artista, título da track ou URL',
-        search_btn: 'PESQUISAR',
-        search_empty: 'Nenhuma track encontrada. Tente outro termo.',
+        upload_badge: 'ENVIE SUA TRACK',
+        upload_title: 'Envie sua track para <span class="text-green">mastering</span>',
+        upload_desc: 'Arraste e solte ou clique para enviar seu arquivo de áudio.',
+        upload_tagline: 'Qualidade profissional. Entrega rápida. Preços acessíveis.',
+        upload_drop_text: 'Arraste e solte seu arquivo de áudio aqui',
+        upload_drop_hint: 'ou clique para navegar — WAV, AIFF, MP3, FLAC (máx 100MB)',
+        choose_validate_track: 'Por favor, envie uma track antes de escolher um pacote.',
         pricing_badge: 'PREÇOS',
         pricing_title: 'Escolha Seu <span class="text-green">Pacote</span>',
         pricing_desc: 'Serviços musicais profissionais incluindo mastering, feedback e suporte de submissão a gravadoras — tudo por apenas $1.',
@@ -539,13 +539,13 @@ const translations = {
         feature_scheduling: 'Informes de feedback detallados',
         feature_strategy: 'Soporte de envío a sellos',
         feature_guarantee: 'Garantía de devolución',
-        search_badge: 'ELIGE TU TRACK',
-        search_title: '¡<span class="text-green">Encuentra</span> tu track para comenzar!',
-        search_desc: 'Busca tu track y selecciónala para comenzar.',
-        search_tagline: 'Calidad profesional. Entrega rápida. Precios accesibles.',
-        search_placeholder: 'Nombre del artista, título del track o URL',
-        search_btn: 'BUSCAR',
-        search_empty: 'No se encontraron tracks. Prueba con otro término.',
+        upload_badge: 'SUBE TU TRACK',
+        upload_title: 'Sube tu track para <span class="text-green">mastering</span>',
+        upload_desc: 'Arrastra y suelta o haz clic para subir tu archivo de audio.',
+        upload_tagline: 'Calidad profesional. Entrega rápida. Precios accesibles.',
+        upload_drop_text: 'Arrastra y suelta tu archivo de audio aquí',
+        upload_drop_hint: 'o haz clic para explorar — WAV, AIFF, MP3, FLAC (máx 100MB)',
+        choose_validate_track: 'Por favor, sube una track antes de elegir un paquete.',
         pricing_badge: 'PRECIOS',
         pricing_title: 'Elige Tu <span class="text-green">Paquete</span>',
         pricing_desc: 'Servicios musicales profesionales que incluyen mastering, feedback y soporte de envío a sellos — todo por solo $1.',
@@ -678,13 +678,13 @@ const translations = {
         feature_scheduling: 'Detaillierte Feedback-Berichte',
         feature_strategy: 'Label-Einreichungsunterstützung',
         feature_guarantee: 'Geld-zurück-Garantie',
-        search_badge: 'WÄHLE DEINEN TRACK',
-        search_title: '<span class="text-green">Finde</span> deinen Track, um zu starten!',
-        search_desc: 'Suche nach deinem Track und wähle ihn aus, um zu beginnen.',
-        search_tagline: 'Professionelle Qualität. Schnelle Lieferung. Erschwingliche Preise.',
-        search_placeholder: 'Künstlername, Tracktitel oder URL',
-        search_btn: 'SUCHEN',
-        search_empty: 'Keine Tracks gefunden. Versuche einen anderen Suchbegriff.',
+        upload_badge: 'LADE DEINEN TRACK HOCH',
+        upload_title: 'Lade deinen Track für <span class="text-green">Mastering</span> hoch',
+        upload_desc: 'Ziehe deine Audiodatei hierher oder klicke zum Hochladen.',
+        upload_tagline: 'Professionelle Qualität. Schnelle Lieferung. Erschwingliche Preise.',
+        upload_drop_text: 'Ziehe deine Audiodatei hierher',
+        upload_drop_hint: 'oder klicke zum Durchsuchen — WAV, AIFF, MP3, FLAC (max 100MB)',
+        choose_validate_track: 'Bitte lade zuerst einen Track hoch, bevor du ein Paket wählst.',
         pricing_badge: 'PREISE',
         pricing_title: 'Wähle Dein <span class="text-green">Paket</span>',
         pricing_desc: 'Professionelle Musikdienste einschließlich Mastering, Feedback und Label-Einreichungsunterstützung — alles für nur $1.',
@@ -883,16 +883,17 @@ document.addEventListener('click', (e) => {
 // ===== DOM Elements =====
 const menuToggle = document.querySelector('.menu-toggle');
 const navLinks = document.querySelector('.nav-links');
-const searchInput = document.getElementById('trackSearch');
-const searchBtn = document.getElementById('searchBtn');
-const searchResults = document.getElementById('searchResults');
 
 // ===== State =====
 let selectedTrack = null;
 let selectedPack = null;
-let searchTimeout = null;
-let currentSearchQuery = '';
 let genreConfirmed = false;
+let uploadedAudioFile = null;
+let audioContext = null;
+let audioBuffer = null;
+let audioElement = null;
+let isPlaying = false;
+let animFrameId = null;
 
 // ===== Mobile Menu =====
 menuToggle.addEventListener('click', () => {
@@ -1035,16 +1036,323 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// ===== Search Bar Glow Animation =====
-const searchWrap = document.getElementById('searchWrap');
-if (searchWrap) {
-    searchWrap.addEventListener('click', function(e) {
-        this.style.animation = 'none';
-        void this.offsetWidth;
-        this.style.animation = '';
-        this.classList.add('search-pulse');
-        setTimeout(() => this.classList.remove('search-pulse'), 600);
+// ===== Audio Upload & Waveform =====
+const uploadDropzone = document.getElementById('uploadDropzone');
+const audioFileInput = document.getElementById('audioFileInput');
+const trackPreview = document.getElementById('trackPreview');
+const waveformCanvas = document.getElementById('waveformCanvas');
+const waveformPlayBtn = document.getElementById('waveformPlayBtn');
+const waveformProgress = document.getElementById('waveformProgress');
+const waveformTimeEl = document.getElementById('waveformTime');
+const waveformDurationEl = document.getElementById('waveformDuration');
+const trackRemoveBtn = document.getElementById('trackRemoveBtn');
+const waveformWrap = document.querySelector('.waveform-wrap');
+
+// Dropzone click
+if (uploadDropzone) {
+    uploadDropzone.addEventListener('click', () => audioFileInput.click());
+    uploadDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadDropzone.classList.add('drag-over');
     });
+    uploadDropzone.addEventListener('dragleave', () => {
+        uploadDropzone.classList.remove('drag-over');
+    });
+    uploadDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadDropzone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('audio/')) handleAudioUpload(file);
+    });
+}
+
+if (audioFileInput) {
+    audioFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleAudioUpload(file);
+    });
+}
+
+// Remove track
+if (trackRemoveBtn) {
+    trackRemoveBtn.addEventListener('click', () => {
+        removeUploadedTrack();
+    });
+}
+
+function removeUploadedTrack() {
+    if (audioElement) { audioElement.pause(); audioElement = null; }
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    isPlaying = false;
+    uploadedAudioFile = null;
+    audioBuffer = null;
+    selectedTrack = null;
+    selectedPack = null;
+
+    if (trackPreview) trackPreview.style.display = 'none';
+    if (uploadDropzone) uploadDropzone.style.display = '';
+    if (audioFileInput) audioFileInput.value = '';
+
+    // Reset play button
+    if (waveformPlayBtn) waveformPlayBtn.classList.remove('playing');
+    if (waveformProgress) waveformProgress.style.width = '0%';
+    if (waveformTimeEl) waveformTimeEl.textContent = '0:00';
+
+    // Hide pricing & campaign
+    const pricingSection = document.getElementById('pricing');
+    if (pricingSection) pricingSection.style.display = 'none';
+    const campaignSetup = document.getElementById('campaignSetup');
+    if (campaignSetup) campaignSetup.style.display = 'none';
+    const banner = document.getElementById('selectedTrackBanner');
+    if (banner) banner.remove();
+}
+
+async function handleAudioUpload(file) {
+    // Validate file
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+        showToast('File too large. Maximum size is 100MB.');
+        return;
+    }
+
+    uploadedAudioFile = file;
+
+    // Show progress
+    const progressEl = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('uploadProgressBar');
+    const progressText = document.getElementById('uploadProgressText');
+    if (progressEl) progressEl.style.display = '';
+    if (progressBar) progressBar.style.width = '0%';
+
+    // Simulate loading progress while decoding
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress = Math.min(progress + Math.random() * 15, 90);
+        if (progressBar) progressBar.style.width = progress + '%';
+        if (progressText) progressText.textContent = Math.round(progress) + '%';
+    }, 200);
+
+    try {
+        // Create AudioContext and decode
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        const arrayBuffer = await file.arrayBuffer();
+        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        // Complete progress
+        clearInterval(progressInterval);
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressText) progressText.textContent = '100%';
+
+        // Extract metadata
+        const metadata = extractMetadata(file, audioBuffer);
+
+        // Set selectedTrack (for compatibility with rest of flow)
+        const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+        selectedTrack = {
+            title: trackTitle,
+            artist: '',
+            artwork: '',
+            id: '',
+            genre: '',
+            file: file,
+            metadata: metadata
+        };
+
+        // Show track preview
+        setTimeout(() => {
+            if (progressEl) progressEl.style.display = 'none';
+            if (uploadDropzone) uploadDropzone.style.display = 'none';
+            if (trackPreview) trackPreview.style.display = '';
+
+            // Set title
+            const titleEl = document.getElementById('trackPreviewTitle');
+            if (titleEl) titleEl.textContent = trackTitle;
+
+            // Render metadata tags
+            renderMetaTags(metadata);
+
+            // Draw waveform
+            drawWaveform(audioBuffer);
+
+            // Set duration display
+            if (waveformDurationEl) {
+                waveformDurationEl.textContent = formatTime(audioBuffer.duration);
+            }
+
+            // Create audio element for playback
+            audioElement = new Audio();
+            audioElement.src = URL.createObjectURL(file);
+
+            // Show pricing section
+            const pricingSection = document.getElementById('pricing');
+            if (pricingSection) {
+                pricingSection.style.display = '';
+                setTimeout(() => {
+                    pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 200);
+            }
+        }, 400);
+
+    } catch (err) {
+        clearInterval(progressInterval);
+        if (progressEl) progressEl.style.display = 'none';
+        console.error('Audio decode error:', err);
+        showToast('Could not process this audio file. Please try a different format.');
+    }
+}
+
+function extractMetadata(file, buffer) {
+    const duration = buffer.duration;
+    const sampleRate = buffer.sampleRate;
+    const channels = buffer.numberOfChannels;
+    const fileSize = file.size;
+    const fileName = file.name;
+    const ext = fileName.split('.').pop().toUpperCase();
+
+    // Detect format from extension
+    const formatMap = { 'MP3': 'Mp3', 'WAV': 'Wav', 'AIFF': 'Aiff', 'AIF': 'Aiff', 'FLAC': 'Flac', 'OGG': 'Ogg', 'M4A': 'M4a' };
+    const format = formatMap[ext] || ext;
+
+    // Calculate bitrate approximation
+    const bitrate = Math.round((fileSize * 8) / duration / 1000);
+
+    return {
+        duration: duration,
+        durationFormatted: formatTime(duration),
+        fileSize: fileSize,
+        fileSizeFormatted: formatFileSize(fileSize),
+        format: format,
+        sampleRate: sampleRate,
+        channels: channels,
+        bitrate: bitrate,
+        fileName: fileName
+    };
+}
+
+function renderMetaTags(metadata) {
+    const container = document.getElementById('trackMetaTags');
+    if (!container) return;
+
+    const tags = [];
+    tags.push(`<span class="meta-tag">${metadata.durationFormatted}</span>`);
+    tags.push(`<span class="meta-tag">${metadata.fileSizeFormatted}</span>`);
+    tags.push(`<span class="meta-tag">${metadata.format}</span>`);
+    if (metadata.sampleRate) {
+        tags.push(`<span class="meta-tag">${(metadata.sampleRate / 1000).toFixed(1)} kHz</span>`);
+    }
+    tags.push(`<span class="meta-tag">${metadata.channels === 1 ? 'Mono' : 'Stereo'}</span>`);
+    if (metadata.bitrate) {
+        tags.push(`<span class="meta-tag">${metadata.bitrate} kbps</span>`);
+    }
+
+    container.innerHTML = tags.join('');
+}
+
+function drawWaveform(buffer) {
+    const canvas = waveformCanvas;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+
+    // Set canvas size
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = 80 * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = '80px';
+    ctx.scale(dpr, dpr);
+
+    const width = rect.width;
+    const height = 80;
+    const channelData = buffer.getChannelData(0);
+    const step = Math.ceil(channelData.length / width);
+    const halfHeight = height / 2;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw bars
+    const barWidth = 2;
+    const barGap = 1;
+    const totalBarWidth = barWidth + barGap;
+    const numBars = Math.floor(width / totalBarWidth);
+    const samplesPerBar = Math.floor(channelData.length / numBars);
+
+    for (let i = 0; i < numBars; i++) {
+        let sum = 0;
+        const start = i * samplesPerBar;
+        for (let j = start; j < start + samplesPerBar && j < channelData.length; j++) {
+            sum += Math.abs(channelData[j]);
+        }
+        const avg = sum / samplesPerBar;
+        const barHeight = Math.max(2, avg * halfHeight * 1.8);
+
+        const x = i * totalBarWidth;
+        ctx.fillStyle = 'rgba(26, 26, 46, 0.25)';
+        ctx.fillRect(x, halfHeight - barHeight, barWidth, barHeight * 2);
+    }
+}
+
+// Playback controls
+if (waveformPlayBtn) {
+    waveformPlayBtn.addEventListener('click', () => {
+        if (!audioElement) return;
+        if (isPlaying) {
+            audioElement.pause();
+            isPlaying = false;
+            waveformPlayBtn.classList.remove('playing');
+            cancelAnimationFrame(animFrameId);
+        } else {
+            audioElement.play();
+            isPlaying = true;
+            waveformPlayBtn.classList.add('playing');
+            updatePlaybackProgress();
+        }
+    });
+}
+
+function updatePlaybackProgress() {
+    if (!audioElement || !isPlaying) return;
+    const progress = (audioElement.currentTime / audioElement.duration) * 100;
+    if (waveformProgress) waveformProgress.style.width = progress + '%';
+    if (waveformTimeEl) waveformTimeEl.textContent = formatTime(audioElement.currentTime);
+
+    if (audioElement.ended) {
+        isPlaying = false;
+        waveformPlayBtn.classList.remove('playing');
+        if (waveformProgress) waveformProgress.style.width = '0%';
+        if (waveformTimeEl) waveformTimeEl.textContent = '0:00';
+        return;
+    }
+    animFrameId = requestAnimationFrame(updatePlaybackProgress);
+}
+
+// Click on waveform to seek
+if (waveformWrap) {
+    waveformWrap.addEventListener('click', (e) => {
+        if (!audioElement || !audioElement.duration) return;
+        const rect = waveformWrap.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const ratio = x / rect.width;
+        audioElement.currentTime = ratio * audioElement.duration;
+        if (waveformProgress) waveformProgress.style.width = (ratio * 100) + '%';
+        if (waveformTimeEl) waveformTimeEl.textContent = formatTime(audioElement.currentTime);
+    });
+}
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
 // ===== Scroll Animations =====
@@ -1061,7 +1369,7 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-document.querySelectorAll('.step-card, .product-card, .section-header, .search-box, .cta-box, .faq-item, .why-choose-card, .campaign-setup-card').forEach(el => {
+document.querySelectorAll('.step-card, .product-card, .section-header, .search-box, .upload-box, .cta-box, .faq-item, .why-choose-card, .campaign-setup-card').forEach(el => {
     el.classList.add('fade-in');
     observer.observe(el);
 });
@@ -1083,191 +1391,7 @@ stepCards.forEach(card => {
     stepObserver.observe(card);
 });
 
-// ===== Beatport URL Detection =====
-function parseBeatportUrl(input) {
-    const urlPattern = /(?:https?:\/\/)?(?:www\.)?beatport\.com\/track\/([^/]+)\/(\d+)/i;
-    const match = input.match(urlPattern);
-    if (match) {
-        return {
-            slug: match[1],
-            id: match[2],
-            name: match[1].replace(/-/g, ' ')
-        };
-    }
-    return null;
-}
-
-// ===== Track Search =====
-searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    const query = searchInput.value.trim();
-
-    if (query.length < 2) {
-        searchResults.innerHTML = '';
-        hideSearchLoading();
-        return;
-    }
-
-    showSearchLoading();
-    searchTimeout = setTimeout(() => performSearch(), 400);
-});
-
-searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        clearTimeout(searchTimeout);
-        performSearch();
-    }
-});
-
-searchBtn.addEventListener('click', () => {
-    clearTimeout(searchTimeout);
-    performSearch();
-});
-
-function showSearchLoading() {
-    const btnText = searchBtn.querySelector('.search-btn-text');
-    const spinner = searchBtn.querySelector('.search-spinner');
-    btnText.style.display = 'none';
-    spinner.style.display = 'block';
-    searchBtn.disabled = true;
-}
-
-function hideSearchLoading() {
-    const btnText = searchBtn.querySelector('.search-btn-text');
-    const spinner = searchBtn.querySelector('.search-spinner');
-    btnText.style.display = 'inline';
-    spinner.style.display = 'none';
-    searchBtn.disabled = false;
-}
-
-async function performSearch() {
-    const query = searchInput.value.trim();
-    if (!query) return;
-
-    if (query === currentSearchQuery) {
-        hideSearchLoading();
-        return;
-    }
-    currentSearchQuery = query;
-
-    showSearchLoading();
-
-    try {
-        const beatportUrl = parseBeatportUrl(query);
-        let searchQuery = beatportUrl ? beatportUrl.name : query;
-
-        let response;
-        try {
-            response = await fetch(`${SEARCH_API_PROXY}?q=${encodeURIComponent(searchQuery)}&type=track`);
-        } catch (e) {
-            response = null;
-        }
-        if (!response || !response.ok) {
-            response = await fetch(`${SEARCH_API_BASE}?q=${encodeURIComponent(searchQuery)}&type=track`);
-        }
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Track search response:', data);
-        displayResults(data, beatportUrl ? beatportUrl.id : null);
-    } catch (error) {
-        console.error('Search error:', error);
-        currentSearchQuery = '';
-        displayDemoResults(query);
-    } finally {
-        hideSearchLoading();
-    }
-}
-
-function displayResults(data, targetTrackId) {
-    searchResults.innerHTML = '';
-
-    let tracks = Array.isArray(data) ? data : (data.results || data.tracks || data.data || []);
-    tracks = tracks.filter(item => item.title || item.name);
-
-    if (!tracks.length) {
-        const lang = detectLanguage();
-        const t = translations[lang] || translations.en;
-        const emptyMsg = t.search_empty || 'No tracks found.';
-        searchResults.innerHTML = `<div class="search-empty">${emptyMsg}</div>`;
-        return;
-    }
-
-    if (targetTrackId) {
-        tracks.sort((a, b) => {
-            const aMatch = a.link && a.link.includes(targetTrackId);
-            const bMatch = b.link && b.link.includes(targetTrackId);
-            return bMatch - aMatch;
-        });
-    }
-
-    tracks.slice(0, 10).forEach(track => {
-        const title = track.title || track.name;
-        const artist = Array.isArray(track.artists) ? track.artists.join(', ') : (track.artist || 'Unknown artist');
-        const artwork = track.image_url || track.image || track.artwork || '';
-        const genre = Array.isArray(track.genre) ? track.genre.join(', ') : '';
-        const link = track.link || '';
-
-        const el = createTrackElement(title, artist, artwork, link, genre);
-        searchResults.appendChild(el);
-    });
-}
-
-function displayDemoResults(query) {
-    searchResults.innerHTML = '';
-
-    const beatportUrl = parseBeatportUrl(query);
-    const displayName = beatportUrl ? beatportUrl.name : query;
-
-    const demoTracks = [
-        { title: `${displayName} (Original Mix)`, artist: 'Various Artists', artwork: '' },
-        { title: `${displayName} - Extended Mix`, artist: 'DJ Producer', artwork: '' },
-        { title: `${displayName} (Remix)`, artist: 'Top Artist', artwork: '' },
-    ];
-
-    demoTracks.forEach((track) => {
-        const el = createTrackElement(track.title, track.artist, track.artwork, '', '');
-        searchResults.appendChild(el);
-    });
-}
-
-function createTrackElement(title, artist, artwork, link, genre) {
-    const el = document.createElement('div');
-    el.className = 'track-result';
-
-    const safeTitle = escapeHtml(title);
-    const safeArtist = escapeHtml(artist);
-    const safeGenre = genre ? escapeHtml(genre) : '';
-    const largeArtwork = artwork ? artwork.replace('200x200', '500x500') : '';
-
-    el.innerHTML = `
-        <div class="track-art">
-            ${artwork
-                ? `<img src="${escapeHtml(artwork)}" alt="${safeTitle}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                   <div class="track-art-placeholder" style="display:none;">
-                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                   </div>`
-                : `<div class="track-art-placeholder">
-                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                   </div>`
-            }
-        </div>
-        <div class="track-info">
-            <div class="track-title">${safeTitle}</div>
-            <div class="track-artist">${safeArtist}</div>
-            ${safeGenre ? `<div class="track-genre">${safeGenre}</div>` : ''}
-        </div>
-    `;
-
-    el.addEventListener('click', () => {
-        selectTrack(title, artist, largeArtwork, link, genre);
-    });
-
-    return el;
-}
+// ===== (Search removed — replaced by upload) =====
 
 function escapeHtml(text) {
     const div = document.createElement('div');
@@ -1275,77 +1399,13 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function selectTrack(title, artist, artwork, id, genre) {
-    selectedTrack = { title, artist, artwork, id, genre: genre || '' };
-
-    // Update Top 10 / Top 100 card price based on genre
-    updateTop10Price(genre);
-    updateTop100Price(genre);
-
-    // Show pricing section
-    const pricingSection = document.getElementById('pricing');
-    if (pricingSection) {
-        pricingSection.style.display = '';
-
-        // Show selected track banner
-        let banner = document.getElementById('selectedTrackBanner');
-        if (!banner) {
-            banner = document.createElement('div');
-            banner.id = 'selectedTrackBanner';
-            banner.className = 'selected-track-banner';
-            const sectionHeader = pricingSection.querySelector('.section-header');
-            sectionHeader.parentNode.insertBefore(banner, sectionHeader.nextSibling);
-        }
-
-        const safeTitle = escapeHtml(title);
-        const safeArtist = escapeHtml(artist);
-        const largeArtwork = artwork ? artwork.replace('200x200', '500x500') : '';
-        const lang = detectLanguage();
-        const t = translations[lang] || translations.en;
-
-        banner.innerHTML = `
-            <div class="selected-track">
-                ${largeArtwork ? `<img src="${escapeHtml(largeArtwork)}" alt="${safeTitle}" class="selected-track-art">` : ''}
-                <div class="selected-track-info">
-                    <div class="selected-track-title">${safeTitle}</div>
-                    <div class="selected-track-artist">${safeArtist}</div>
-                </div>
-                <button class="selected-track-change" onclick="changeTrack()">${t.change_track || 'Change'}</button>
-            </div>
-        `;
-
-        setTimeout(() => {
-            pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-    }
-
-    // Clear search results
-    searchResults.innerHTML = '';
-}
-
 function changeTrack() {
-    selectedTrack = null;
-    selectedPack = null;
-    // Reset Top 10 / Top 100 price
-    updateTop10Price(null);
-    updateTop100Price(null);
-    const pricingSection = document.getElementById('pricing');
-    if (pricingSection) {
-        pricingSection.style.display = 'none';
-    }
-    const banner = document.getElementById('selectedTrackBanner');
-    if (banner) banner.remove();
-
-    // Hide campaign setup
-    const campaignSetup = document.getElementById('campaignSetup');
-    if (campaignSetup) campaignSetup.style.display = 'none';
-
-    // Scroll back to search
+    removeUploadedTrack();
+    // Scroll back to upload
     const searchSection = document.getElementById('search');
     if (searchSection) {
         searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    searchInput.focus();
 }
 
 // ===== Package Selection =====
@@ -1357,7 +1417,7 @@ document.querySelectorAll('.pack-select-btn').forEach(btn => {
         if (!selectedTrack) {
             const lang = detectLanguage();
             const t = translations[lang] || translations.en;
-            showToast(t.choose_validate_track || 'Please select a track first before choosing a campaign.', true);
+            showToast(t.choose_validate_track || 'Please upload a track first before choosing a package.', true);
             return;
         }
 

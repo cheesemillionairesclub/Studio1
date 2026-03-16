@@ -772,6 +772,298 @@ body {
     border: 1px solid rgba(255, 82, 82, 0.15);
 }
 
+/* ===== Upload Zone ===== */
+.upload-box {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.upload-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    border: 2px dashed var(--white-15);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+}
+
+.upload-dropzone:hover {
+    border-color: var(--green-primary);
+    background: var(--green-10);
+}
+
+.upload-dropzone.drag-over {
+    border-color: var(--green-primary);
+    background: var(--green-10);
+    box-shadow: 0 0 30px rgba(0, 168, 84, 0.15);
+}
+
+.upload-dropzone-icon {
+    color: var(--white-30);
+    margin-bottom: 16px;
+    transition: color var(--transition);
+}
+
+.upload-dropzone:hover .upload-dropzone-icon,
+.upload-dropzone.drag-over .upload-dropzone-icon {
+    color: var(--green-primary);
+}
+
+.upload-dropzone-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--white-70);
+    margin-bottom: 6px;
+}
+
+.upload-dropzone-hint {
+    font-size: 0.8rem;
+    color: var(--white-40);
+}
+
+.upload-progress {
+    width: 100%;
+    max-width: 300px;
+    margin-top: 20px;
+    position: relative;
+    height: 6px;
+    background: var(--white-10);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.upload-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--green-primary);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.upload-progress-text {
+    position: absolute;
+    top: -22px;
+    right: 0;
+    font-size: 0.7rem;
+    color: var(--white-50);
+    font-weight: 600;
+}
+
+/* ===== Track Preview (after upload) ===== */
+.track-preview {
+    background: var(--bg-card);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.track-preview-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 20px 0;
+}
+
+.track-preview-artwork {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-sm);
+    background: var(--white-06);
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.track-preview-artwork img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.track-preview-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.track-preview-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-preview-meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--white-70);
+    background: var(--white-06);
+    border: 1px solid var(--white-10);
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.meta-tag.meta-tag-accent {
+    color: var(--green-primary);
+    background: var(--green-10);
+    border-color: rgba(0, 168, 84, 0.2);
+}
+
+.meta-tag-energy {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.meta-tag-energy-bar {
+    width: 4px;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--white-15);
+}
+
+.meta-tag-energy-bar.active {
+    background: var(--green-primary);
+}
+
+.meta-tag-energy-bar.active.high {
+    background: #6c5ce7;
+}
+
+.track-preview-remove {
+    background: none;
+    border: none;
+    color: var(--white-30);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.track-preview-remove:hover {
+    color: #ff5252;
+    background: rgba(255, 82, 82, 0.1);
+}
+
+/* ===== Waveform ===== */
+.track-waveform-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px 20px;
+    position: relative;
+}
+
+.waveform-play-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--white);
+    color: var(--bg-primary);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.waveform-play-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.waveform-play-btn.playing svg {
+    display: none;
+}
+
+.waveform-play-btn.playing::after {
+    content: '';
+    width: 12px;
+    height: 14px;
+    border-left: 4px solid var(--bg-primary);
+    border-right: 4px solid var(--bg-primary);
+}
+
+.waveform-wrap {
+    flex: 1;
+    position: relative;
+    height: 80px;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+#waveformCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.waveform-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background: rgba(108, 92, 231, 0.15);
+    pointer-events: none;
+    transition: width 0.1s linear;
+}
+
+.waveform-cursor {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--green-primary);
+    pointer-events: none;
+}
+
+.waveform-time,
+.waveform-duration {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--white-40);
+    min-width: 32px;
+    flex-shrink: 0;
+}
+
+.waveform-duration {
+    text-align: right;
+}
+
+/* ===== Analysis Tags (Cyanite) ===== */
+.track-analysis-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 20px 20px;
+}
+
 /* ===== Selected Track Banner ===== */
 .selected-track-banner {
     max-width: 600px;
@@ -2735,18 +3027,39 @@ body {
         padding: 48px 24px;
     }
 
-    .search-btn .search-btn-text {
-        display: none;
+    .upload-dropzone {
+        padding: 32px 16px;
     }
 
-    .search-btn {
-        padding: 14px;
+    .upload-dropzone-icon svg {
+        width: 36px;
+        height: 36px;
     }
 
-    .search-btn::after {
-        content: 'GO';
-        font-size: 0.8rem;
-        font-weight: 700;
+    .track-preview-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .track-preview-artwork {
+        width: 56px;
+        height: 56px;
+    }
+
+    .track-waveform-container {
+        padding: 12px 12px 16px;
+        gap: 8px;
+    }
+
+    .waveform-play-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .meta-tag {
+        font-size: 0.65rem;
+        padding: 3px 8px;
     }
 
     .campaign-setup-card {
