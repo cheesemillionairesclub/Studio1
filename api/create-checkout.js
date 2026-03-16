@@ -59,7 +59,7 @@ export default async function handler(req, res) {
             line_items: [{ price: priceId, quantity: 1 }],
             mode: 'subscription',
             subscription_data: subscriptionData,
-            metadata: { user_id },
+            metadata: { user_id, upgrade_from_trial: skip_trial ? 'true' : 'false' },
             success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/`,
             allow_promotion_codes: true,

@@ -2065,8 +2065,8 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
                 body: JSON.stringify({ tracks_used_this_month: tracksUsed + 1 }),
             });
 
-            // Redirect to dashboard
-            window.location.href = '/dashboard';
+            // Redirect to dashboard with submitted flag for success popup
+            window.location.href = '/dashboard?submitted=' + encodeURIComponent(campaignData.track_title || 'Your track');
         } catch (err) {
             console.error('[AlphaStudios] Submit error:', err);
             showToast('Failed to submit track. Please try again.');

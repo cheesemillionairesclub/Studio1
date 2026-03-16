@@ -34,6 +34,7 @@ export default async function handler(req, res) {
             mode: session.mode,
             subscription_status,
             trial_end,
+            upgrade_from_trial: session.metadata?.upgrade_from_trial === 'true',
         });
     } catch (error) {
         console.error('Checkout success error:', error.message);

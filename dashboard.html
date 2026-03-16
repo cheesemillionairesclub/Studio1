@@ -605,6 +605,8 @@
                 window.history.replaceState({}, '', '/dashboard');
                 console.log('[Dashboard] Post-checkout return, session:', sessionId);
 
+                let isUpgradeFromTrial = false;
+
                 // Verify subscription was activated and update profile immediately
                 // (don't wait for webhook — it may arrive later)
                 try {
@@ -617,9 +619,8 @@
                         // Use upsert (POST with merge-duplicates) to create profile if it doesn't exist
                         if (checkoutData.subscription_status) {
                             const token = BeatpushAuth.getToken();
-                            // Check if upgrading from trial to active — reset track count
-                            const prevProfile = await BeatpushAuth.getProfile();
-                            const isUpgradeFromTrial = prevProfile?.subscription_status === 'trialing' && checkoutData.subscription_status === 'active';
+                            // Check if upgrading from trial to active — use metadata flag (avoids webhook race condition)
+                            isUpgradeFromTrial = checkoutData.upgrade_from_trial === true;
 
                             const profileData = {
                                 id: user.id,
@@ -666,10 +667,10 @@
                         });
 
                         if (result) {
-                            // Increment track count
-                            const profile = await BeatpushAuth.getProfile();
+                            // Increment track count — if upgrading from trial, base is 0 (just reset above)
                             const token = BeatpushAuth.getToken();
-                            const newCount = (profile?.tracks_used_this_month || 0) + 1;
+                            const baseCount = isUpgradeFromTrial ? 0 : ((await BeatpushAuth.getProfile())?.tracks_used_this_month || 0);
+                            const newCount = baseCount + 1;
                             postCheckoutTracksUsed = newCount;
                             const patchRes = await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
                                 method: 'PATCH',
@@ -696,6 +697,15 @@
                 // Refresh UI with known track count to avoid stale data
                 await renderSubscriptionBanner(postCheckoutTracksUsed);
                 loadDashboard();
+            }
+
+            // Handle ?submitted for direct track submission success popup
+            const submittedTrack = new URLSearchParams(window.location.search).get('submitted');
+            if (submittedTrack) {
+                window.history.replaceState({}, '', '/dashboard');
+                showSubscriptionSuccess({ track_title: decodeURIComponent(submittedTrack) });
+                // Refresh banner to show updated track count
+                await renderSubscriptionBanner();
             }
 
             // Re-render cards when language changes
@@ -742,21 +752,12 @@
 
             const status = profile.subscription_status || 'none';
 
-            // Use override if provided, otherwise count actual orders this month, fallback to profile field
+            // Use override if provided, otherwise use profile field as source of truth
             let tracksUsed;
             if (typeof overrideTracksUsed === 'number') {
                 tracksUsed = overrideTracksUsed;
             } else {
-                // Count orders created this billing cycle as source of truth
-                try {
-                    const orders = await BeatpushAuth.getMyOrders();
-                    const periodStart = profile.current_period_end
-                        ? new Date(new Date(profile.current_period_end).getTime() - 30 * 86400000)
-                        : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-                    tracksUsed = orders.filter(o => new Date(o.created_at) >= periodStart).length;
-                } catch (e) {
-                    tracksUsed = profile.tracks_used_this_month || 0;
-                }
+                tracksUsed = profile.tracks_used_this_month || 0;
             }
 
             if (status === 'active') {
