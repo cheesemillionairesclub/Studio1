@@ -1210,13 +1210,7 @@ function showUploadCountdown() {
                     <circle class="cd-ring-fill" cx="40" cy="40" r="36" fill="none" stroke="var(--green-primary, #00a854)" stroke-width="3.5" stroke-linecap="round"
                         stroke-dasharray="${totalDash}" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
                 </svg>
-                <div class="cd-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--green-primary, #00a854)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 18V5l12-2v13"/>
-                        <circle cx="6" cy="18" r="3"/>
-                        <circle cx="18" cy="16" r="3"/>
-                    </svg>
-                </div>
+                <img class="cd-icon" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" width="32" height="32">
             </div>
             <span class="cd-num">${TOTAL}</span>
             <span class="cd-text">${messages[0].text}</span>
@@ -1233,7 +1227,7 @@ function showUploadCountdown() {
             .cd-ring-wrap{position:relative;width:80px;height:80px}
             .cd-ring{width:100%;height:100%;color:var(--text-primary,#333)}
             .cd-ring-fill{transition:stroke-dashoffset 1s linear}
-            .cd-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);animation:cd-spin 3s linear infinite}
+            .cd-icon{position:absolute;top:50%;left:50%;width:32px;height:32px;border-radius:50%;object-fit:cover;transform:translate(-50%,-50%);animation:cd-spin 3s linear infinite}
             .cd-num{font-size:1.6rem;font-weight:800;color:var(--green-primary,#00a854);font-variant-numeric:tabular-nums;line-height:1;transition:transform .25s ease,opacity .25s ease}
             .cd-num.tick{transform:scale(1.3);opacity:.4}
             .cd-text{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;transition:opacity .3s ease;min-height:1.2em}
