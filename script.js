@@ -1187,64 +1187,125 @@ function removeUploadedTrack() {
 }
 
 function showUploadCountdown() {
-    return new Promise(resolve => {
-        const dropzone = document.getElementById('uploadDropzone');
-        if (!dropzone) { resolve(); return; }
+    const dropzone = document.getElementById('uploadDropzone');
+    if (!dropzone) return { promise: Promise.resolve(), cancel: () => {} };
 
-        // Save original content and replace with countdown
-        const originalContent = dropzone.innerHTML;
-        dropzone.innerHTML = `
-            <div class="cd-wrap">
-                <div class="cd-ring-wrap">
-                    <svg class="cd-ring" viewBox="0 0 80 80">
-                        <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" opacity="0.1" stroke-width="3"/>
-                        <circle class="cd-ring-fill" cx="40" cy="40" r="36" fill="none" stroke="#4CAF50" stroke-width="3" stroke-linecap="round"
-                            stroke-dasharray="226.195" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
+    const originalContent = dropzone.innerHTML;
+    const TOTAL = 20;
+    const totalDash = 226.195; // 2 * PI * 36
+
+    const messages = [
+        { at: 20, text: 'Uploading your track...' },
+        { at: 17, text: 'Reading audio data...' },
+        { at: 14, text: 'Analyzing frequencies...' },
+        { at: 10, text: 'Detecting BPM & key...' },
+        { at: 7,  text: 'Measuring loudness...' },
+        { at: 4,  text: 'Almost there...' },
+    ];
+
+    dropzone.innerHTML = `
+        <div class="cd-wrap">
+            <div class="cd-ring-wrap">
+                <svg class="cd-ring" viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" opacity="0.1" stroke-width="3"/>
+                    <circle class="cd-ring-fill" cx="40" cy="40" r="36" fill="none" stroke="var(--green-primary, #00a854)" stroke-width="3.5" stroke-linecap="round"
+                        stroke-dasharray="${totalDash}" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
+                </svg>
+                <div class="cd-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--green-primary, #00a854)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18V5l12-2v13"/>
+                        <circle cx="6" cy="18" r="3"/>
+                        <circle cx="18" cy="16" r="3"/>
                     </svg>
-                    <img class="cd-logo" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="">
                 </div>
-                <span class="cd-num">15</span>
-                <span class="cd-text">Uploading & Analyzing...</span>
             </div>
+            <span class="cd-num">${TOTAL}</span>
+            <span class="cd-text">${messages[0].text}</span>
+            <div class="cd-dots"><span></span><span></span><span></span></div>
+        </div>
+    `;
+
+    // Inject styles once
+    if (!document.getElementById('cd-styles')) {
+        const s = document.createElement('style');
+        s.id = 'cd-styles';
+        s.textContent = `
+            .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 0;animation:cd-in .35s ease}
+            .cd-ring-wrap{position:relative;width:80px;height:80px}
+            .cd-ring{width:100%;height:100%;color:var(--text-primary,#333)}
+            .cd-ring-fill{transition:stroke-dashoffset 1s linear}
+            .cd-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);animation:cd-spin 3s linear infinite}
+            .cd-num{font-size:1.6rem;font-weight:800;color:var(--green-primary,#00a854);font-variant-numeric:tabular-nums;line-height:1;transition:transform .25s ease,opacity .25s ease}
+            .cd-num.tick{transform:scale(1.3);opacity:.4}
+            .cd-text{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;transition:opacity .3s ease;min-height:1.2em}
+            .cd-dots{display:flex;gap:5px}
+            .cd-dots span{width:6px;height:6px;border-radius:50%;background:var(--green-primary,#00a854);opacity:.25;animation:cd-bounce 1.4s ease-in-out infinite}
+            .cd-dots span:nth-child(2){animation-delay:.2s}
+            .cd-dots span:nth-child(3){animation-delay:.4s}
+            .cd-wait{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;animation:cd-fade 2s ease-in-out infinite;min-height:1.2em;text-align:center}
+            @keyframes cd-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+            @keyframes cd-spin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+            @keyframes cd-bounce{0%,80%,100%{opacity:.25;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
+            @keyframes cd-fade{0%,100%{opacity:.5}50%{opacity:1}}
         `;
+        document.head.appendChild(s);
+    }
 
-        // Inject styles once
-        if (!document.getElementById('cd-styles')) {
-            const s = document.createElement('style');
-            s.id = 'cd-styles';
-            s.textContent = `
-                .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 0;animation:cd-in .35s ease}
-                .cd-ring-wrap{position:relative;width:72px;height:72px}
-                .cd-ring{width:100%;height:100%;color:var(--text-primary,#333)}
-                .cd-ring-fill{transition:stroke-dashoffset 1s linear}
-                .cd-logo{position:absolute;top:50%;left:50%;width:34px;height:34px;border-radius:8px;transform:translate(-50%,-50%);animation:cd-pulse 2.5s ease-in-out infinite}
-                .cd-num{font-size:1.5rem;font-weight:700;color:var(--text-primary,#333);font-variant-numeric:tabular-nums;line-height:1;transition:transform .25s ease,opacity .25s ease}
-                .cd-num.tick{transform:scale(1.25);opacity:.5}
-                .cd-text{font-size:.75rem;color:var(--text-secondary,#888);letter-spacing:.3px}
-                @keyframes cd-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-                @keyframes cd-pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
-            `;
-            document.head.appendChild(s);
-        }
+    const numEl = dropzone.querySelector('.cd-num');
+    const ringFill = dropzone.querySelector('.cd-ring-fill');
+    const textEl = dropzone.querySelector('.cd-text');
+    let count = TOTAL;
+    let cancelled = false;
+    let tickId;
 
-        const numEl = dropzone.querySelector('.cd-num');
-        const ringFill = dropzone.querySelector('.cd-ring-fill');
-        const totalDash = 226.195; // 2 * PI * 36
-        let count = 15;
-
-        const tick = setInterval(() => {
+    const promise = new Promise(resolve => {
+        tickId = setInterval(() => {
+            if (cancelled) return;
             count--;
+
             if (count < 0) {
-                clearInterval(tick);
-                dropzone.innerHTML = originalContent;
-                resolve();
+                // Timer expired but upload still going — show waiting message
+                clearInterval(tickId);
+                if (numEl) numEl.style.display = 'none';
+                if (textEl) {
+                    textEl.className = 'cd-wait';
+                    textEl.textContent = 'Hang tight, your track is almost ready...';
+                }
+                if (ringFill) ringFill.style.strokeDashoffset = String(totalDash);
+                // Don't resolve — wait for cancel() to be called when upload finishes
                 return;
             }
-            numEl.classList.add('tick');
-            setTimeout(() => { numEl.textContent = count; numEl.classList.remove('tick'); }, 120);
-            ringFill.style.strokeDashoffset = totalDash * ((15 - count) / 15);
+
+            // Tick number animation
+            if (numEl) {
+                numEl.classList.add('tick');
+                setTimeout(() => { numEl.textContent = count; numEl.classList.remove('tick'); }, 120);
+            }
+
+            // Ring progress
+            if (ringFill) ringFill.style.strokeDashoffset = String(totalDash * ((TOTAL - count) / TOTAL));
+
+            // Update text message at milestones
+            const msg = messages.find(m => count === m.at);
+            if (msg && textEl) {
+                textEl.style.opacity = '0';
+                setTimeout(() => { textEl.textContent = msg.text; textEl.style.opacity = '1'; }, 200);
+            }
         }, 1000);
+
+        // Store resolve so cancel() can call it
+        promise._resolve = resolve;
     });
+
+    const cancel = () => {
+        if (cancelled) return;
+        cancelled = true;
+        clearInterval(tickId);
+        dropzone.innerHTML = originalContent;
+        if (promise._resolve) promise._resolve();
+    };
+
+    return { promise, cancel };
 }
 
 async function handleAudioUpload(file) {
@@ -1307,6 +1368,8 @@ async function handleAudioUpload(file) {
         // Upload to Supabase Storage + show countdown in parallel
         if (progressEl) progressEl.style.display = 'none';
 
+        const countdown = showUploadCountdown();
+
         const uploadPromise = uploadTrackFiles(file, generatedArtworkDataUrl).then(urls => {
             if (urls.audioUrl) {
                 selectedTrack.id = urls.audioUrl;
@@ -1318,9 +1381,11 @@ async function handleAudioUpload(file) {
                 window._preUploadedArtworkUrl = urls.artworkUrl;
                 console.log('[AlphaStudios] Artwork ready:', urls.artworkUrl);
             }
+            // Upload done — skip remaining countdown immediately
+            countdown.cancel();
         });
 
-        await Promise.all([showUploadCountdown(), uploadPromise]);
+        await Promise.all([countdown.promise, uploadPromise]);
 
         // Hide dropzone and show track preview
         if (uploadDropzone) uploadDropzone.style.display = 'none';
