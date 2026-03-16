@@ -1245,15 +1245,7 @@ function renderMetaTags(metadata) {
 
     const tags = [];
     tags.push(`<span class="meta-tag">${metadata.durationFormatted}</span>`);
-    tags.push(`<span class="meta-tag">${metadata.fileSizeFormatted}</span>`);
     tags.push(`<span class="meta-tag">${metadata.format}</span>`);
-    if (metadata.sampleRate) {
-        tags.push(`<span class="meta-tag">${(metadata.sampleRate / 1000).toFixed(1)} kHz</span>`);
-    }
-    tags.push(`<span class="meta-tag">${metadata.channels === 1 ? 'Mono' : 'Stereo'}</span>`);
-    if (metadata.bitrate) {
-        tags.push(`<span class="meta-tag">${metadata.bitrate} kbps</span>`);
-    }
 
     container.innerHTML = tags.join('');
 }
@@ -1379,9 +1371,13 @@ if (typeof EssentiaWASM !== 'undefined') {
 
 async function analyzeWithEssentia(buffer) {
     const analysisTags = document.getElementById('trackAnalysisTags');
+    const metaTagsContainer = document.getElementById('trackMetaTags');
     if (analysisTags) {
-        analysisTags.style.display = '';
-        analysisTags.innerHTML = '<span class="meta-tag meta-tag-accent"><span class="cyanite-spinner"></span> Analyzing...</span>';
+        analysisTags.style.display = 'none';
+    }
+    // Show analyzing spinner in meta tags line
+    if (metaTagsContainer) {
+        metaTagsContainer.innerHTML += '<span class="meta-tag meta-tag-accent" id="analyzingSpinner"><span class="cyanite-spinner"></span> Analyzing...</span>';
     }
 
     try {
@@ -1461,15 +1457,19 @@ async function analyzeWithEssentia(buffer) {
 
     } catch (err) {
         console.error('[Essentia] Error:', err);
-        if (analysisTags) {
-            analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">Analysis unavailable</span>';
-        }
+        // Remove analyzing spinner
+        const spinner = document.getElementById('analyzingSpinner');
+        if (spinner) spinner.remove();
     }
 }
 
 function renderAnalysisTags(data) {
-    const container = document.getElementById('trackAnalysisTags');
-    if (!container) return;
+    const metaContainer = document.getElementById('trackMetaTags');
+    const analysisContainer = document.getElementById('trackAnalysisTags');
+
+    // Remove analyzing spinner
+    const spinner = document.getElementById('analyzingSpinner');
+    if (spinner) spinner.remove();
 
     const tags = [];
 
@@ -1481,7 +1481,6 @@ function renderAnalysisTags(data) {
         tags.push(`<span class="meta-tag meta-tag-accent">${escapeHtml(keyLabel)}</span>`);
     }
     if (data.energy != null) {
-        // Normalize energy to low/medium/high based on RMS-like thresholds
         const energyNorm = Math.sqrt(data.energy);
         const level = energyNorm > 0.15 ? 'high' : energyNorm > 0.05 ? 'medium' : 'low';
         const bars = level === 'high' ? 3 : level === 'medium' ? 2 : 1;
@@ -1494,15 +1493,15 @@ function renderAnalysisTags(data) {
     if (data.loudness != null) {
         tags.push(`<span class="meta-tag">${data.loudness.toFixed(1)} dB loudness</span>`);
     }
-    if (data.dynamicComplexity != null) {
-        const dynLabel = data.dynamicComplexity > 5 ? 'Very dynamic'
-            : data.dynamicComplexity > 2 ? 'Moderate dynamics'
-            : 'Low dynamics';
-        tags.push(`<span class="meta-tag">${dynLabel}</span>`);
-    }
 
-    container.innerHTML = tags.join('');
-    container.style.display = '';
+    // Append analysis tags to meta tags line (same row above track)
+    if (metaContainer) {
+        metaContainer.innerHTML += tags.join('');
+    }
+    // Hide separate analysis container
+    if (analysisContainer) {
+        analysisContainer.style.display = 'none';
+    }
 }
 
 // ===== Scroll Animations =====
