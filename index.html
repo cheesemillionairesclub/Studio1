@@ -183,37 +183,37 @@
                     </div>
 
                     <!-- Inline campaign form (shown after upload) -->
-                    <div class="campaign-form" id="inlineCampaignForm" style="display:none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px;">
-                        <!-- Genre selection -->
-                        <div class="campaign-field">
-                            <label class="campaign-label">Genre</label>
-                            <div class="genre-select-wrapper" id="genreSelectWrapper">
-                                <div class="genre-selected-tags" id="genreSelectedTags"></div>
-                                <div class="genre-dropdown-trigger" id="genreDropdownTrigger">
-                                    <span class="genre-dropdown-placeholder" id="genreDropdownPlaceholder">Choose a genre...</span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    <div class="campaign-form" id="inlineCampaignForm" style="display:none; margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px;">
+                        <div class="inline-campaign-row">
+                            <!-- Genre selection -->
+                            <div class="campaign-field-compact">
+                                <label class="campaign-label-compact">Genre</label>
+                                <div class="genre-select-wrapper" id="genreSelectWrapper">
+                                    <div class="genre-selected-tags" id="genreSelectedTags"></div>
+                                    <div class="genre-dropdown-trigger" id="genreDropdownTrigger">
+                                        <span class="genre-dropdown-placeholder" id="genreDropdownPlaceholder">Choose a genre...</span>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </div>
+                                    <div class="genre-dropdown" id="genreDropdown" style="display:none;">
+                                        <input type="text" class="genre-search-input" id="genreSearchInput" placeholder="Search..." autocomplete="off">
+                                        <div class="genre-dropdown-list" id="genreDropdownList"></div>
+                                    </div>
                                 </div>
-                                <div class="genre-dropdown" id="genreDropdown" style="display:none;">
-                                    <input type="text" class="genre-search-input" id="genreSearchInput" placeholder="Search..." autocomplete="off">
-                                    <div class="genre-dropdown-list" id="genreDropdownList"></div>
+                            </div>
+
+                            <!-- Similar artists -->
+                            <div class="campaign-field-compact">
+                                <label class="campaign-label-compact" data-i18n="campaign_artists_label">Similar Artists</label>
+                                <div class="artist-search-wrapper">
+                                    <input type="text" class="campaign-input campaign-input-compact" id="similarArtists" data-i18n-placeholder="campaign_artists_placeholder" placeholder="Search artists..." autocomplete="off">
+                                    <div class="artist-search-results" id="artistSearchResults"></div>
                                 </div>
+                                <div class="artist-tags" id="artistTags"></div>
                             </div>
                         </div>
 
-                        <!-- Similar artists -->
-                        <div class="campaign-field">
-                            <label class="campaign-label" data-i18n="campaign_artists_label">Similar Artists</label>
-                            <div class="artist-search-wrapper">
-                                <input type="text" class="campaign-input" id="similarArtists" data-i18n-placeholder="campaign_artists_placeholder" placeholder="Search for similar artists..." autocomplete="off">
-                                <div class="artist-search-results" id="artistSearchResults"></div>
-                            </div>
-                            <div class="artist-tags" id="artistTags"></div>
-                        </div>
-
-                        <!-- Hidden release status default -->
                         <input type="hidden" name="releaseStatus" value="released">
-
-                        <button class="btn-primary btn-large campaign-launch-btn" id="launchCampaignBtn" style="width: 100%; margin-top: 12px;">Run my campaign</button>
+                        <button class="btn-primary campaign-launch-btn" id="launchCampaignBtn" style="width: 100%; margin-top: 12px; padding: 10px 20px; font-size: 0.85rem;">Run my campaign</button>
                     </div>
 
                     <!-- Pricing card for unknown users (no subscription) -->

@@ -1351,29 +1351,10 @@ async function handleAudioUpload(file) {
         audioElement = new Audio();
         audioElement.src = URL.createObjectURL(file);
 
-        // Show inline campaign form or pricing card based on subscription status
+        // Show inline campaign form for ALL users after upload
         selectedPack = 'mastering';
-        let userSubStatus = null;
-        try {
-            const user = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
-            if (user) {
-                const profile = await BeatpushAuth.getProfile();
-                userSubStatus = profile?.subscription_status;
-            }
-        } catch (e) {}
-
         const inlineForm = document.getElementById('inlineCampaignForm');
-        const inlinePricing = document.getElementById('inlinePricingCard');
-
-        if (userSubStatus === 'active' || userSubStatus === 'trialing') {
-            // Subscribed user — show campaign form directly
-            if (inlineForm) inlineForm.style.display = '';
-            if (inlinePricing) inlinePricing.style.display = 'none';
-        } else {
-            // Unknown user — show pricing card with Start Free Trial
-            if (inlineForm) inlineForm.style.display = 'none';
-            if (inlinePricing) inlinePricing.style.display = '';
-        }
+        if (inlineForm) inlineForm.style.display = '';
 
         // Scroll to the track preview
         setTimeout(() => {
@@ -1739,25 +1720,42 @@ function changeTrack() {
 }
 
 // ===== Package Selection =====
-// Inline pricing "Start Free Trial" button — show campaign form, then checkout with trial
-document.addEventListener('click', (e) => {
+// Inline pricing "Start Free Trial" button — redirect to Stripe checkout with trial
+document.addEventListener('click', async (e) => {
     const btn = e.target.closest('#inlinePricingBtn');
     if (!btn) return;
     e.preventDefault();
 
-    if (!selectedTrack) {
-        showToast('Please upload a track first.');
-        return;
-    }
+    const user = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
 
-    selectedPack = 'mastering';
-    // Hide pricing card, show inline campaign form
-    const inlinePricing = document.getElementById('inlinePricingCard');
-    const inlineForm = document.getElementById('inlineCampaignForm');
-    if (inlinePricing) inlinePricing.style.display = 'none';
-    if (inlineForm) {
-        inlineForm.style.display = '';
-        inlineForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Require login first
+    if (typeof requireAuth === 'function' && !requireAuth('payment')) return;
+
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+    btn.textContent = 'Redirecting...';
+
+    try {
+        const checkoutRes = await fetch('/api/create-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: user?.id || '', user_email: user?.email || '' }),
+        });
+        const checkoutData = await checkoutRes.json();
+        if (checkoutData.url) {
+            window.location.href = checkoutData.url;
+        } else {
+            showToast('Failed to start subscription. Please try again.');
+            btn.disabled = false;
+            btn.style.opacity = '';
+            btn.textContent = 'Start Free Trial';
+        }
+    } catch (err) {
+        console.error('[AlphaStudios] Checkout error:', err);
+        showToast('Failed to start subscription. Please try again.');
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.textContent = 'Start Free Trial';
     }
 });
 
@@ -2084,30 +2082,14 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
             resetBtn();
         }
     } else {
-        // No subscription — save campaign and redirect to Stripe
-        // Files already uploaded during countdown phase
+        // No subscription — show pricing card inline, user clicks "Start Free Trial" to go to Stripe
         localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
+        resetBtn();
 
-        setBtnLoading('Redirecting...');
-        try {
-            const checkoutRes = await fetch('/api/create-checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user?.id || '', user_email: user?.email || '' }),
-            });
-            const checkoutData = await checkoutRes.json();
-            console.log('[AlphaStudios] Checkout response:', checkoutRes.status, checkoutData);
-            if (checkoutData.url) {
-                window.location.href = checkoutData.url;
-            } else {
-                console.error('[AlphaStudios] No checkout URL returned:', checkoutData);
-                showToast('Failed to start subscription. Please try again.');
-                resetBtn();
-            }
-        } catch (err) {
-            console.error('[AlphaStudios] Checkout error:', err);
-            showToast('Failed to start subscription. Please try again.');
-            resetBtn();
+        const inlinePricing = document.getElementById('inlinePricingCard');
+        if (inlinePricing) {
+            inlinePricing.style.display = '';
+            inlinePricing.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 });

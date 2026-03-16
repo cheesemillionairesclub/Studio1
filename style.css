@@ -1691,6 +1691,64 @@ body {
     box-shadow: 0 0 0 3px var(--green-10);
 }
 
+/* Inline campaign compact layout */
+.inline-campaign-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.inline-campaign-row .campaign-field-compact {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.campaign-label-compact {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--white-70);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.campaign-field-compact .genre-dropdown-trigger {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+}
+
+.campaign-field-compact .genre-selected-tags {
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.campaign-field-compact .genre-selected-tag {
+    padding: 3px 10px;
+    font-size: 0.75rem;
+}
+
+.campaign-input-compact {
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+}
+
+.campaign-field-compact .artist-tags {
+    gap: 4px;
+}
+
+.campaign-field-compact .artist-tag {
+    padding: 3px 10px;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    .inline-campaign-row {
+        flex-direction: column;
+    }
+}
+
 /* Artist search autocomplete */
 .artist-search-wrapper {
     position: relative;
