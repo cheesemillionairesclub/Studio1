@@ -1752,9 +1752,13 @@ body {
 }
 
 @media (max-width: 600px) {
+    .campaign-form {
+        align-items: center;
+    }
     .inline-campaign-row {
         flex-direction: column;
         align-items: center;
+        width: 100%;
     }
     .inline-campaign-row .campaign-field-compact {
         width: 100%;
@@ -1764,6 +1768,10 @@ body {
     .campaign-label-compact {
         text-align: center;
         width: 100%;
+    }
+    .campaign-launch-btn {
+        width: auto;
+        margin: 16px auto 0;
     }
 }
 
