@@ -152,11 +152,11 @@ function buildEmailHtml({ greeting, packLabel, order }) {
             </div>
 
             <!-- Download Button -->
-            <a href="${escapeHtml(order.receipt_url)}" style="display:inline-block;padding:14px 40px;background:#00a854;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
+            <a href="${escapeHtml(order.receipt_url)}" style="display:inline-block;padding:14px 40px;background:#e8720c;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
                 DOWNLOAD MY MASTERED TRACK
             </a>
             <p style="color:rgba(26,26,46,0.4);font-size:13px;margin-top:16px;">
-                You can also access your file from your <a href="${escapeHtml(dashboardUrl)}" style="color:#00a854;">dashboard</a>.
+                You can also access your file from your <a href="${escapeHtml(dashboardUrl)}" style="color:#e8720c;">dashboard</a>.
             </p>
         </div>
 
@@ -206,7 +206,7 @@ function buildFeedbackEmailHtml({ greeting, packLabel, order }) {
             </div>
 
             <!-- CTA Button -->
-            <a href="${escapeHtml(dashboardUrl)}" style="display:inline-block;padding:14px 40px;background:#00a854;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
+            <a href="${escapeHtml(dashboardUrl)}" style="display:inline-block;padding:14px 40px;background:#e8720c;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
                 VIEW MY DASHBOARD
             </a>
         </div>

@@ -1229,7 +1229,7 @@ function showUploadCountdown() {
             .cd-icon{width:40px;height:40px;border-radius:50%;object-fit:cover;animation:cd-spin 3s linear infinite}
 
             .cd-nums{position:relative;height:1.8rem;width:3rem;text-align:center}
-            .cd-n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:var(--green-primary,#00a854);font-variant-numeric:tabular-nums;opacity:0;animation:cd-show 1s steps(1) forwards}
+            .cd-n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:var(--green-primary,#e8720c);font-variant-numeric:tabular-nums;opacity:0;animation:cd-show 1s steps(1) forwards}
             .cd-n:first-child{opacity:1}
 
             .cd-msgs{position:relative;height:1.2em;min-width:200px;text-align:center}
@@ -1238,7 +1238,7 @@ function showUploadCountdown() {
             .cd-m:last-child{animation:cd-show-last 2s steps(1) forwards}
 
             .cd-dots{display:flex;gap:5px}
-            .cd-dots span{width:6px;height:6px;border-radius:50%;background:var(--green-primary,#00a854);opacity:.25;animation:cd-bounce 1.4s ease-in-out infinite}
+            .cd-dots span{width:6px;height:6px;border-radius:50%;background:var(--green-primary,#e8720c);opacity:.25;animation:cd-bounce 1.4s ease-in-out infinite}
             .cd-dots span:nth-child(2){animation-delay:.2s}
             .cd-dots span:nth-child(3){animation-delay:.4s}
 
