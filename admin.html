@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeatPush Admin</title>
-    <link rel="icon" type="image/png" href="https://i.ibb.co/FLyL2c8K/icon.png">
+    <title>AlphaStudios Admin</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dymdijw7n/image/upload/v1773638403/2_hy8evh.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -204,7 +204,7 @@
 <body>
     <div id="adminApp">
         <div class="admin-login" id="adminLogin">
-            <h2>BeatPush Admin Panel</h2>
+            <h2>AlphaStudios Admin Panel</h2>
             <p id="adminLoginMsg">Checking session...</p>
             <a href="/" class="admin-login-btn" id="adminGoLogin" style="display:none;text-decoration:none;">Go to main site to sign in</a>
         </div>
@@ -212,8 +212,8 @@
         <div id="adminPanel" style="display:none;">
             <div class="admin-header">
                 <h1>
-                    <img src="https://i.ibb.co/FLyL2c8K/icon.png" alt="">
-                    BeatPush Admin
+                    <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773638403/2_hy8evh.png" alt="">
+                    AlphaStudios Admin
                 </h1>
                 <div class="admin-user">
                     <span id="adminUserName"></span>
@@ -253,7 +253,7 @@
         // Init - detect existing session
         (async function() {
             const msg = document.getElementById('adminLoginMsg');
-            const token = localStorage.getItem('beatpush_access_token');
+            const token = localStorage.getItem('alphastudios_access_token');
 
             if (!token) {
                 msg.textContent = 'No session found. Sign in on the main site first.';
@@ -341,7 +341,7 @@
             }
 
             tbody.innerHTML = orders.map(order => {
-                const packLabel = order.pack === 'daily-push' ? 'Daily Push' : `${order.pack} Copies`;
+                const packLabel = order.pack === 'mastering' ? 'Mastering + Feedback + Labels' : order.pack;
                 const statusClass = `status-${order.order_status}`;
                 const statusText = order.order_status === 'completed' ? 'Completed' : 'In Progress';
                 const hasReceipt = !!order.receipt_url;

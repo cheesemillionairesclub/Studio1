@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const SUPABASE_URL = 'https://wrdbhyypbpppzrtyacvw.supabase.co';
+    const SUPABASE_URL = 'https://mbruoxxqpnxcybwureku.supabase.co';
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     // Verify admin: check the user's token and profile

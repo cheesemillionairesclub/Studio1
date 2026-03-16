@@ -1,4 +1,4 @@
-// ===== BeatPush Auth UI & Dashboard =====
+// ===== AlphaStudios Auth UI & Dashboard =====
 
 (function () {
     'use strict';
@@ -116,19 +116,19 @@
 
         // Save the action to perform after login
         if (returnAction) {
-            localStorage.setItem('beatpush_auth_redirect', returnAction);
+            localStorage.setItem('alphastudios_auth_redirect', returnAction);
         }
         // Save campaign state so it can be restored after OAuth redirect
-        localStorage.setItem('beatpush_auth_pending_action', 'payment');
+        localStorage.setItem('alphastudios_auth_pending_action', 'payment');
         try {
             if (typeof selectedTrack !== 'undefined' && selectedTrack) {
-                localStorage.setItem('beatpush_pending_track', JSON.stringify(selectedTrack));
+                localStorage.setItem('alphastudios_pending_track', JSON.stringify(selectedTrack));
             }
             if (typeof selectedPack !== 'undefined' && selectedPack) {
-                localStorage.setItem('beatpush_pending_pack', selectedPack);
+                localStorage.setItem('alphastudios_pending_pack', selectedPack);
             }
             if (typeof selectedArtists !== 'undefined' && selectedArtists.length) {
-                localStorage.setItem('beatpush_pending_artists', JSON.stringify(selectedArtists));
+                localStorage.setItem('alphastudios_pending_artists', JSON.stringify(selectedArtists));
             }
         } catch (e) {}
 
@@ -149,7 +149,7 @@
         overlay.innerHTML = `
             <div class="toast-box auth-prompt-box">
                 <div class="toast-icon">
-                    <img src="https://i.ibb.co/nMjbdTkQ/White-and-Black-Modern-Initial-B-Logo-5000-x-5000-px-1.png" alt="BeatPush" class="toast-logo">
+                    <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="AlphaStudios" class="toast-logo">
                 </div>
                 <h3 class="auth-prompt-title">${t.auth_prompt_title || 'Sign in to continue'}</h3>
                 <p class="auth-prompt-text">${t.auth_prompt_text || 'Please sign in with your Google account to proceed with your campaign.'}</p>
@@ -171,7 +171,7 @@
         const close = () => {
             overlay.classList.remove('visible');
             setTimeout(() => overlay.remove(), 300);
-            localStorage.removeItem('beatpush_auth_pending_action');
+            localStorage.removeItem('alphastudios_auth_pending_action');
         };
 
         overlay.querySelector('.auth-prompt-cancel').addEventListener('click', close);
@@ -204,7 +204,7 @@
                 }),
             });
         } catch (e) {
-            console.error('[BeatPush] Failed to save order:', e);
+            console.error('[AlphaStudios] Failed to save order:', e);
         }
     };
 
@@ -228,7 +228,7 @@
                 body: JSON.stringify({ device_type }),
             });
         } catch (e) {
-            console.error('[BeatPush] Failed to update user meta:', e);
+            console.error('[AlphaStudios] Failed to update user meta:', e);
         }
     }
 
@@ -246,19 +246,19 @@
         if (user) {
             sendUserMeta();
 
-            const pendingAction = localStorage.getItem('beatpush_auth_pending_action');
+            const pendingAction = localStorage.getItem('alphastudios_auth_pending_action');
             if (pendingAction === 'payment') {
-                localStorage.removeItem('beatpush_auth_pending_action');
+                localStorage.removeItem('alphastudios_auth_pending_action');
 
                 // Restore campaign state saved before OAuth redirect
                 try {
-                    const savedTrack = localStorage.getItem('beatpush_pending_track');
-                    const savedPack = localStorage.getItem('beatpush_pending_pack');
-                    const savedArtists = localStorage.getItem('beatpush_pending_artists');
+                    const savedTrack = localStorage.getItem('alphastudios_pending_track');
+                    const savedPack = localStorage.getItem('alphastudios_pending_pack');
+                    const savedArtists = localStorage.getItem('alphastudios_pending_artists');
 
                     if (savedTrack) {
                         const track = JSON.parse(savedTrack);
-                        localStorage.removeItem('beatpush_pending_track');
+                        localStorage.removeItem('alphastudios_pending_track');
                         // Re-select the track (rebuilds pricing section + banner)
                         if (typeof selectTrack === 'function') {
                             selectTrack(track.title, track.artist, track.artwork, track.id, track.genre);
@@ -266,7 +266,7 @@
                     }
 
                     if (savedPack) {
-                        localStorage.removeItem('beatpush_pending_pack');
+                        localStorage.removeItem('alphastudios_pending_pack');
                         if (typeof selectedPack !== 'undefined') {
                             selectedPack = savedPack;
                         }
@@ -278,7 +278,7 @@
 
                     if (savedArtists) {
                         const artists = JSON.parse(savedArtists);
-                        localStorage.removeItem('beatpush_pending_artists');
+                        localStorage.removeItem('alphastudios_pending_artists');
                         if (typeof selectedArtists !== 'undefined' && Array.isArray(artists)) {
                             selectedArtists.length = 0;
                             artists.forEach(a => selectedArtists.push(a));
@@ -299,7 +299,7 @@
                         }
                     }, 600);
                 } catch (e) {
-                    console.error('[BeatPush] Failed to restore campaign state:', e);
+                    console.error('[AlphaStudios] Failed to restore campaign state:', e);
                 }
             }
         }

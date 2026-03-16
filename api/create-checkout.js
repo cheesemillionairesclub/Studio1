@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 
-const PRODUCT_DESCRIPTION = 'All purchases comply with Beatport\'s platform mechanics and are made through legitimate customer accounts. 24/48H delivery. You will receive a detailed receipt once your order is complete.';
+const PRODUCT_DESCRIPTION = 'Mastering + Feedback + Labels. Professional audio mastering with detailed feedback and label submission support. You will receive a detailed receipt once your order is complete.';
 
 export default async function handler(req, res) {
     // Allow CORS
@@ -32,21 +32,11 @@ export default async function handler(req, res) {
     console.log('Received pack:', pack);
     console.log('Raw body:', JSON.stringify(body));
 
-    // Define all packs inline - no external config to avoid any reference issues
-    let amount, currency, name, mode, interval;
+    // Single pack: mastering
+    let amount, currency, name, mode;
 
-    if (pack === '50') {
-        amount = 24000; currency = 'usd'; name = 'Beatport Campaign - 50 Copies'; mode = 'payment';
-    } else if (pack === '100') {
-        amount = 48000; currency = 'usd'; name = 'Beatport Campaign - 100 Copies'; mode = 'payment';
-    } else if (pack === '200') {
-        amount = 96000; currency = 'usd'; name = 'Beatport Campaign - 200 Copies'; mode = 'payment';
-    } else if (pack === '500') {
-        amount = 190000; currency = 'usd'; name = 'Beatport Campaign - 500 Copies'; mode = 'payment';
-    } else if (pack === '1000') {
-        amount = 385000; currency = 'usd'; name = 'Beatport Campaign - 1,000 Copies'; mode = 'payment';
-    } else if (pack === 'daily-push') {
-        amount = 5500; currency = 'usd'; name = 'Beatport Daily Push - 10 Copies/Day'; mode = 'subscription'; interval = 'day';
+    if (pack === 'mastering') {
+        amount = 100; currency = 'usd'; name = 'AlphaStudios - Mastering + Feedback + Labels'; mode = 'payment';
     } else {
         console.log('INVALID PACK:', pack);
         return res.status(400).json({ error: `Invalid pack: "${pack}"` });
@@ -55,7 +45,7 @@ export default async function handler(req, res) {
     console.log(`Creating session: pack=${pack}, amount=${amount}, mode=${mode}`);
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const origin = req.headers.origin || 'https://beatpush.app';
+    const origin = req.headers.origin || 'https://alphastudios.app';
 
     const metadata = {
         pack,
@@ -68,45 +58,23 @@ export default async function handler(req, res) {
     };
 
     try {
-        let sessionParams;
-
-        if (mode === 'subscription') {
-            sessionParams = {
-                payment_method_types: ['card'],
-                line_items: [{
-                    price_data: {
-                        currency,
-                        product_data: { name, description: PRODUCT_DESCRIPTION },
-                        unit_amount: amount,
-                        recurring: { interval },
-                    },
-                    quantity: 1,
-                }],
-                mode: 'subscription',
-                subscription_data: { metadata },
-                metadata,
-                success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${origin}/`,
-            };
-        } else {
-            sessionParams = {
-                payment_method_types: ['card'],
-                line_items: [{
-                    price_data: {
-                        currency,
-                        product_data: { name, description: PRODUCT_DESCRIPTION },
-                        unit_amount: amount,
-                    },
-                    quantity: 1,
-                }],
-                mode: 'payment',
-                payment_intent_data: { metadata },
-                invoice_creation: { enabled: true },
-                metadata,
-                success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${origin}/`,
-            };
-        }
+        const sessionParams = {
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency,
+                    product_data: { name, description: PRODUCT_DESCRIPTION },
+                    unit_amount: amount,
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            payment_intent_data: { metadata },
+            invoice_creation: { enabled: true },
+            metadata,
+            success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${origin}/`,
+        };
 
         console.log('Session params mode:', sessionParams.mode);
         const session = await stripe.checkout.sessions.create(sessionParams);
