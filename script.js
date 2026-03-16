@@ -1203,8 +1203,8 @@ function showUploadCountdown() {
                     </svg>
                     <img class="cd-logo" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="">
                 </div>
-                <span class="cd-num">10</span>
-                <span class="cd-text">Analyzing...</span>
+                <span class="cd-num">15</span>
+                <span class="cd-text">Uploading & Analyzing...</span>
             </div>
         `;
 
@@ -1230,7 +1230,7 @@ function showUploadCountdown() {
         const numEl = dropzone.querySelector('.cd-num');
         const ringFill = dropzone.querySelector('.cd-ring-fill');
         const totalDash = 226.195; // 2 * PI * 36
-        let count = 10;
+        let count = 15;
 
         const tick = setInterval(() => {
             count--;
@@ -1242,7 +1242,7 @@ function showUploadCountdown() {
             }
             numEl.classList.add('tick');
             setTimeout(() => { numEl.textContent = count; numEl.classList.remove('tick'); }, 120);
-            ringFill.style.strokeDashoffset = totalDash * ((10 - count) / 10);
+            ringFill.style.strokeDashoffset = totalDash * ((15 - count) / 15);
         }, 1000);
     });
 }
