@@ -1377,7 +1377,7 @@ async function sendToCyanite(file, title) {
 
     try {
         // Step 1: Get upload URL from Cyanite
-        const uploadReq = await fetch('/api/cyanite-upload-request', {
+        const uploadReq = await fetch('/api/cyanite?action=upload-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -1401,7 +1401,7 @@ async function sendToCyanite(file, title) {
         console.log('[Cyanite] File uploaded successfully');
 
         // Step 3: Create and enqueue the analysis
-        const analyzeRes = await fetch('/api/cyanite-analyze', {
+        const analyzeRes = await fetch('/api/cyanite?action=analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1443,7 +1443,7 @@ function pollCyaniteResults(analysisId, attempt = 0) {
     cyanitePollTimer = setTimeout(async () => {
         try {
             // Poll our own DB (populated by Cyanite webhook)
-            const res = await fetch(`/api/track-analysis?cyanite_id=${encodeURIComponent(analysisId)}`);
+            const res = await fetch(`/api/cyanite?action=track-analysis&cyanite_id=${encodeURIComponent(analysisId)}`);
             const data = await res.json();
 
             console.log('[Cyanite] Poll result:', data.status, data);

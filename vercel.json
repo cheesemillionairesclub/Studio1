@@ -10,10 +10,7 @@
         { "source": "/api/admin/upload-receipt", "destination": "/api/admin/upload-receipt" },
         { "source": "/api/admin/send-receipt-email", "destination": "/api/admin/send-receipt-email" },
         { "source": "/api/cyanite-webhook", "destination": "/api/cyanite-webhook" },
-        { "source": "/api/cyanite-upload-request", "destination": "/api/cyanite-upload-request" },
-        { "source": "/api/cyanite-analyze", "destination": "/api/cyanite-analyze" },
-        { "source": "/api/cyanite-result", "destination": "/api/cyanite-result" },
-        { "source": "/api/track-analysis", "destination": "/api/track-analysis" },
+        { "source": "/api/cyanite", "destination": "/api/cyanite" },
         { "source": "/termsofuse", "destination": "/termsofuse.html" },
         { "source": "/admin", "destination": "/admin.html" },
         { "source": "/dashboard", "destination": "/dashboard.html" }
