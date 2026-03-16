@@ -304,17 +304,17 @@
                         console.error('[AlphaStudios] Failed to restore campaign state:', e);
                     }
                 } else {
-                    // No subscription — show pricing card so user can choose to start trial
-                    console.log('[AlphaStudios] Post-login: showing pricing card');
-                    // Build campaign data in localStorage if not already saved
-                    const existingCampaign = localStorage.getItem('alphastudios_pending_campaign');
-                    if (!existingCampaign) {
-                        try {
-                            const savedTrack = localStorage.getItem('alphastudios_pending_track');
-                            const savedPack = localStorage.getItem('alphastudios_pending_pack');
-                            const savedArtists = localStorage.getItem('alphastudios_pending_artists');
-                            const track = savedTrack ? JSON.parse(savedTrack) : {};
-                            const artists = savedArtists ? JSON.parse(savedArtists) : [];
+                    // No subscription — restore campaign state and show pricing card
+                    console.log('[AlphaStudios] Post-login: no subscription, restoring campaign state');
+                    try {
+                        const savedTrack = localStorage.getItem('alphastudios_pending_track');
+                        const savedPack = localStorage.getItem('alphastudios_pending_pack');
+                        const savedArtists = localStorage.getItem('alphastudios_pending_artists');
+                        const track = savedTrack ? JSON.parse(savedTrack) : {};
+                        const artists = savedArtists ? JSON.parse(savedArtists) : [];
+
+                        // Save campaign data to localStorage so it persists through Stripe checkout
+                        if (!localStorage.getItem('alphastudios_pending_campaign')) {
                             localStorage.setItem('alphastudios_pending_campaign', JSON.stringify({
                                 pack: savedPack || 'pro',
                                 track_title: track.title || '',
@@ -325,21 +325,38 @@
                                 similar_artists: artists,
                                 release_status: '',
                             }));
-                        } catch (e) {}
-                    }
-                    // Clean up individual saved items
-                    localStorage.removeItem('alphastudios_pending_track');
-                    localStorage.removeItem('alphastudios_pending_pack');
-                    localStorage.removeItem('alphastudios_pending_artists');
-                    localStorage.removeItem('alphastudios_pending_audio_url');
-                    localStorage.removeItem('alphastudios_pending_artwork_url');
-                    // Show the inline pricing card instead of redirecting directly
-                    const inlinePricing = document.getElementById('inlinePricingCard');
-                    if (inlinePricing) {
-                        inlinePricing.style.display = '';
+                        }
+
+                        // Restore UI state
+                        if (savedTrack) {
+                            localStorage.removeItem('alphastudios_pending_track');
+                            if (typeof selectTrack === 'function') {
+                                selectTrack(track.title, track.artist, track.artwork, track.id, track.genre);
+                            }
+                        }
+                        if (savedPack) {
+                            localStorage.removeItem('alphastudios_pending_pack');
+                            if (typeof selectedPack !== 'undefined') selectedPack = savedPack;
+                            if (typeof showCampaignSetup === 'function') showCampaignSetup(savedPack);
+                        }
+                        if (savedArtists && Array.isArray(artists)) {
+                            localStorage.removeItem('alphastudios_pending_artists');
+                            if (typeof selectedArtists !== 'undefined') {
+                                selectedArtists.length = 0;
+                                artists.forEach(a => selectedArtists.push(a));
+                                if (typeof renderArtistTags === 'function') renderArtistTags();
+                            }
+                        }
+                        // Show the pricing card directly since user already filled the form
                         setTimeout(() => {
-                            inlinePricing.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 400);
+                            const inlinePricing = document.getElementById('inlinePricingCard');
+                            if (inlinePricing) {
+                                inlinePricing.style.display = '';
+                                inlinePricing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }, 800);
+                    } catch (e) {
+                        console.error('[AlphaStudios] Failed to restore campaign state:', e);
                     }
                 }
             }
