@@ -15,7 +15,7 @@ async function getRawBody(req) {
     return Buffer.concat(chunks);
 }
 
-async function fetchCyaniteAnalysis(analysisId, token) {
+async function fetchCyaniteAnalysis(trackId, token) {
     const response = await fetch(CYANITE_API, {
         method: 'POST',
         headers: {
@@ -23,69 +23,63 @@ async function fetchCyaniteAnalysis(analysisId, token) {
             'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-            query: `query InDepthAnalysisQuery($id: ID!) {
-                inDepthAnalysis(recordId: $id) {
-                    ... on InDepthAnalysis {
+            query: `query LibraryTrackQuery($id: ID!) {
+                libraryTrack(id: $id) {
+                    __typename
+                    ... on LibraryTrackNotFoundError { message }
+                    ... on LibraryTrack {
                         id
                         title
-                        status
-                        fastMusicalAnalysis {
-                            ... on FastMusicalAnalysisResult {
-                                bpm
-                                key { value }
+                        audioAnalysisV6 {
+                            __typename
+                            ... on AudioAnalysisV6Finished {
+                                result {
+                                    bpm
+                                    key
+                                    energyLevel
+                                    energyDynamics
+                                    emotionalProfile
+                                    emotionalDynamics
+                                    voicePresenceProfile
+                                    predominantVoiceGender
+                                    moodTags
+                                    genreTags
+                                    instrumentTags
+                                }
                             }
+                            ... on AudioAnalysisV6Failed { error { message } }
                         }
-                        fullScaleMusicalAnalysis {
-                            ... on FullScaleMusicalAnalysisResult {
-                                bpm
-                                key { value }
-                                energyLevel
-                                energyDynamics
-                                emotionalProfile
-                                emotionalDynamics
-                                voicePresenceProfile
-                                predominantVoiceGender
-                                mood { tags }
-                                genre { tags }
-                                instrument { tags }
-                            }
-                        }
-                    }
-                    ... on InDepthAnalysisError {
-                        message
                     }
                 }
             }`,
-            variables: { id: analysisId },
+            variables: { id: trackId },
         }),
     });
     return response.json();
 }
 
-function normalizeAnalysis(analysis) {
-    const fast = analysis.fastMusicalAnalysis;
-    const full = analysis.fullScaleMusicalAnalysis;
+function normalizeAnalysis(track) {
+    const av6 = track.audioAnalysisV6;
+    const status = av6?.__typename?.replace('AudioAnalysisV6', '').toLowerCase() || 'unknown';
 
     const result = {
-        cyanite_id: analysis.id,
-        title: analysis.title,
-        status: analysis.status,
+        cyanite_id: track.id,
+        title: track.title,
+        status: status === 'finished' ? 'finished' : status,
     };
 
-    if (full && !full.message) {
-        result.bpm = full.bpm;
-        result.key = full.key?.value;
-        result.energy_level = full.energyLevel;
-        result.energy_dynamics = full.energyDynamics;
-        result.emotional_profile = full.emotionalProfile;
-        result.voice_presence = full.voicePresenceProfile;
-        result.predominant_voice_gender = full.predominantVoiceGender;
-        result.mood = full.mood?.tags || [];
-        result.genre = full.genre?.tags || [];
-        result.instruments = full.instrument?.tags || [];
-    } else if (fast && !fast.message) {
-        result.bpm = fast.bpm;
-        result.key = fast.key?.value;
+    if (av6?.__typename === 'AudioAnalysisV6Finished' && av6.result) {
+        const r = av6.result;
+        result.bpm = r.bpm;
+        result.key = r.key;
+        result.energy_level = r.energyLevel;
+        result.energy_dynamics = r.energyDynamics;
+        result.emotional_profile = r.emotionalProfile;
+        result.voice_presence = r.voicePresenceProfile;
+        result.predominant_voice_gender = r.predominantVoiceGender;
+        result.mood = r.moodTags || [];
+        result.genre = r.genreTags || [];
+        result.instruments = r.instrumentTags || [];
     }
 
     return result;
@@ -178,19 +172,22 @@ export default async function handler(req, res) {
             }
         }
 
-        // Extract analysis ID from webhook payload
-        const analysisId = payload.inDepthAnalysisId
+        // Extract track ID from webhook v2 payload
+        // Webhook v2 sends: { event, libraryTrackId, ... } or nested variants
+        const trackId = payload.libraryTrackId
+            || payload.inDepthAnalysisId
             || payload.analysisId
             || payload.id
+            || payload.data?.libraryTrackId
             || payload.data?.inDepthAnalysisId
             || payload.data?.id;
 
-        if (!analysisId) {
-            console.log('[Cyanite Webhook] No analysis ID found in payload, acknowledging test event');
+        if (!trackId) {
+            console.log('[Cyanite Webhook] No track ID found in payload, acknowledging test event');
             return res.status(200).json({ received: true });
         }
 
-        console.log('[Cyanite Webhook] Processing analysis:', analysisId);
+        console.log('[Cyanite Webhook] Processing track:', trackId);
 
         // Fetch full analysis results from Cyanite
         const cyaniteToken = process.env.CYANITE_ACCESS_TOKEN;
@@ -201,17 +198,17 @@ export default async function handler(req, res) {
             return res.status(200).json({ received: true });
         }
 
-        const result = await fetchCyaniteAnalysis(analysisId, cyaniteToken);
+        const result = await fetchCyaniteAnalysis(trackId, cyaniteToken);
         console.log('[Cyanite Webhook] Analysis result:', JSON.stringify(result).slice(0, 500));
 
-        const analysis = result.data?.inDepthAnalysis;
-        if (!analysis || analysis.message) {
-            console.error('[Cyanite Webhook] Analysis error:', analysis?.message || 'Not found');
+        const track = result.data?.libraryTrack;
+        if (!track || track.__typename === 'LibraryTrackNotFoundError') {
+            console.error('[Cyanite Webhook] Track error:', track?.message || 'Not found');
             return res.status(200).json({ received: true });
         }
 
         // Normalize and store in Supabase
-        const normalized = normalizeAnalysis(analysis);
+        const normalized = normalizeAnalysis(track);
         console.log('[Cyanite Webhook] Normalized:', JSON.stringify(normalized).slice(0, 500));
 
         if (supabaseKey) {

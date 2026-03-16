@@ -15,12 +15,14 @@ async function graphql(token, query, variables = {}) {
 
 // POST ?action=upload-request — Get pre-signed upload URL from Cyanite
 async function handleUploadRequest(req, res, token) {
-    const data = await graphql(token, `mutation FileUploadRequestMutation {
+    const data = await graphql(token, `mutation fileUploadRequest {
         fileUploadRequest {
-            ... on FileUploadRequest { id uploadUrl }
-            ... on FileUploadRequestError { message }
+            id
+            uploadUrl
         }
     }`);
+
+    console.log('[Cyanite] fileUploadRequest response:', JSON.stringify(data));
 
     if (data.errors) {
         return res.status(400).json({ error: data.errors[0]?.message || 'GraphQL error' });
@@ -28,103 +30,122 @@ async function handleUploadRequest(req, res, token) {
 
     const result = data.data?.fileUploadRequest;
     if (!result?.uploadUrl) {
-        return res.status(400).json({ error: result?.message || 'Failed to get upload URL' });
+        return res.status(400).json({ error: 'Failed to get upload URL' });
     }
 
     return res.status(200).json({ uploadUrl: result.uploadUrl, fileUploadId: result.id });
 }
 
-// POST ?action=analyze — Create analysis + enqueue
+// POST ?action=analyze — Create library track (auto-enqueues analysis)
 async function handleAnalyze(req, res, token) {
     const { fileUploadId, title } = req.body || {};
     if (!fileUploadId) {
         return res.status(400).json({ error: 'fileUploadId is required' });
     }
 
-    // Create InDepthAnalysis
     const createResult = await graphql(token, `
-        mutation InDepthAnalysisCreateMutation($input: InDepthAnalysisCreateInput!) {
-            inDepthAnalysisCreate(input: $input) {
-                ... on InDepthAnalysisCreateResultSuccess {
-                    inDepthAnalysis { id title status }
+        mutation LibraryTrackCreate($input: LibraryTrackCreateInput!) {
+            libraryTrackCreate(input: $input) {
+                __typename
+                ... on LibraryTrackCreateSuccess {
+                    createdLibraryTrack { id title }
+                    enqueueResult {
+                        __typename
+                        ... on LibraryTrackEnqueueSuccess { success }
+                        ... on LibraryTrackEnqueueError { message }
+                    }
                 }
-                ... on InDepthAnalysisCreateResultError { message }
+                ... on LibraryTrackCreateError { code message }
             }
         }
-    `, { input: { fileName: title || 'Uploaded Track', uploadId: fileUploadId } });
+    `, { input: { uploadId: fileUploadId, title: title || 'Uploaded Track' } });
+
+    console.log('[Cyanite] libraryTrackCreate response:', JSON.stringify(createResult));
 
     if (createResult.errors) {
         return res.status(400).json({ error: createResult.errors[0]?.message || 'GraphQL error' });
     }
 
-    const analysis = createResult.data?.inDepthAnalysisCreate?.inDepthAnalysis;
-    if (!analysis) {
-        return res.status(400).json({ error: createResult.data?.inDepthAnalysisCreate?.message || 'Failed to create analysis' });
+    const result = createResult.data?.libraryTrackCreate;
+    if (result?.__typename === 'LibraryTrackCreateError') {
+        return res.status(400).json({ error: result.message || result.code || 'Failed to create track' });
     }
 
-    // Enqueue analysis
-    await graphql(token, `
-        mutation InDepthAnalysisEnqueueMutation($input: InDepthAnalysisEnqueueAnalysisInput!) {
-            inDepthAnalysisEnqueueAnalysis(input: $input) {
-                ... on InDepthAnalysisEnqueueAnalysisResultSuccess { success }
-                ... on InDepthAnalysisEnqueueAnalysisResultError { message }
-            }
-        }
-    `, { input: { inDepthAnalysisId: analysis.id } });
+    const track = result?.createdLibraryTrack;
+    if (!track) {
+        return res.status(400).json({ error: 'Failed to create library track' });
+    }
 
-    return res.status(200).json({ analysisId: analysis.id, title: analysis.title, status: analysis.status });
+    return res.status(200).json({ analysisId: track.id, title: track.title, status: 'enqueued' });
 }
 
 // GET ?action=result&id=... — Fetch analysis result from Cyanite
 async function handleResult(req, res, token) {
-    const analysisId = req.query.id;
-    if (!analysisId) {
+    const trackId = req.query.id;
+    if (!trackId) {
         return res.status(400).json({ error: 'id query parameter is required' });
     }
 
-    const data = await graphql(token, `query InDepthAnalysisQuery($id: ID!) {
-        inDepthAnalysis(recordId: $id) {
-            ... on InDepthAnalysis {
-                id title status
-                fastMusicalAnalysis {
-                    ... on FastMusicalAnalysisResult { bpm key { value } }
-                }
-                fullScaleMusicalAnalysis {
-                    ... on FullScaleMusicalAnalysisResult {
-                        bpm key { value } energyLevel energyDynamics
-                        emotionalProfile emotionalDynamics voicePresenceProfile
-                        predominantVoiceGender mood { tags } genre { tags } instrument { tags }
+    const data = await graphql(token, `query LibraryTrackQuery($id: ID!) {
+        libraryTrack(id: $id) {
+            __typename
+            ... on LibraryTrackNotFoundError { message }
+            ... on LibraryTrack {
+                id
+                title
+                audioAnalysisV6 {
+                    __typename
+                    ... on AudioAnalysisV6NotStarted { _: __typename }
+                    ... on AudioAnalysisV6Enqueued { _: __typename }
+                    ... on AudioAnalysisV6Processing { _: __typename }
+                    ... on AudioAnalysisV6Finished {
+                        result {
+                            bpm
+                            key
+                            energyLevel
+                            energyDynamics
+                            emotionalProfile
+                            emotionalDynamics
+                            voicePresenceProfile
+                            predominantVoiceGender
+                            moodTags
+                            genreTags
+                            instrumentTags
+                            advancedGenreTags
+                            freeGenreTags
+                        }
                     }
+                    ... on AudioAnalysisV6Failed { error { message } }
                 }
             }
-            ... on InDepthAnalysisError { message }
         }
-    }`, { id: analysisId });
+    }`, { id: trackId });
+
+    console.log('[Cyanite] libraryTrack response:', JSON.stringify(data).slice(0, 1000));
 
     if (data.errors) {
         return res.status(400).json({ error: data.errors[0]?.message || 'GraphQL error' });
     }
 
-    const analysis = data.data?.inDepthAnalysis;
-    if (!analysis || analysis.message) {
-        return res.status(404).json({ error: analysis?.message || 'Analysis not found' });
+    const track = data.data?.libraryTrack;
+    if (!track || track.__typename === 'LibraryTrackNotFoundError') {
+        return res.status(404).json({ error: track?.message || 'Track not found' });
     }
 
-    const fast = analysis.fastMusicalAnalysis;
-    const full = analysis.fullScaleMusicalAnalysis;
-    const result = { id: analysis.id, status: analysis.status, title: analysis.title };
+    const av6 = track.audioAnalysisV6;
+    const status = av6?.__typename?.replace('AudioAnalysisV6', '').toLowerCase() || 'unknown';
+    const result = { id: track.id, title: track.title, status };
 
-    if (full && !full.message) {
+    if (av6?.__typename === 'AudioAnalysisV6Finished' && av6.result) {
+        const r = av6.result;
         Object.assign(result, {
-            bpm: full.bpm, key: full.key?.value, energyLevel: full.energyLevel,
-            energyDynamics: full.energyDynamics, emotionalProfile: full.emotionalProfile,
-            voicePresenceProfile: full.voicePresenceProfile,
-            predominantVoiceGender: full.predominantVoiceGender,
-            mood: full.mood?.tags, genre: full.genre?.tags, instruments: full.instrument?.tags,
+            bpm: r.bpm, key: r.key, energyLevel: r.energyLevel,
+            energyDynamics: r.energyDynamics, emotionalProfile: r.emotionalProfile,
+            voicePresenceProfile: r.voicePresenceProfile,
+            predominantVoiceGender: r.predominantVoiceGender,
+            mood: r.moodTags, genre: r.genreTags, instruments: r.instrumentTags,
+            advancedGenre: r.advancedGenreTags, freeGenre: r.freeGenreTags,
         });
-    } else if (fast && !fast.message) {
-        result.bpm = fast.bpm;
-        result.key = fast.key?.value;
     }
 
     return res.status(200).json(result);
