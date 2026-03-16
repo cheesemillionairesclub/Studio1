@@ -304,13 +304,11 @@
                         console.error('[AlphaStudios] Failed to restore campaign state:', e);
                     }
                 } else {
-                    // No subscription — redirect to Stripe Checkout
-                    // Campaign data with uploaded URLs is already in localStorage
-                    // (saved before OAuth redirect in script.js)
-                    console.log('[AlphaStudios] Post-login: redirecting to Stripe Checkout');
+                    // No subscription — show pricing card so user can choose to start trial
+                    console.log('[AlphaStudios] Post-login: showing pricing card');
+                    // Build campaign data in localStorage if not already saved
                     const existingCampaign = localStorage.getItem('alphastudios_pending_campaign');
                     if (!existingCampaign) {
-                        // Fallback: build campaign from individual saved items
                         try {
                             const savedTrack = localStorage.getItem('alphastudios_pending_track');
                             const savedPack = localStorage.getItem('alphastudios_pending_pack');
@@ -335,23 +333,13 @@
                     localStorage.removeItem('alphastudios_pending_artists');
                     localStorage.removeItem('alphastudios_pending_audio_url');
                     localStorage.removeItem('alphastudios_pending_artwork_url');
-                    try {
-                        console.log('[AlphaStudios] Post-login: calling create-checkout for user', user.id);
-                        const res = await fetch('/api/create-checkout', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ user_id: user.id, user_email: user.email }),
-                        });
-                        const data = await res.json();
-                        console.log('[AlphaStudios] Checkout response:', res.status, data);
-                        if (data.url) {
-                            window.location.href = data.url;
-                            return; // Stop further init
-                        } else {
-                            console.error('[AlphaStudios] No checkout URL:', data);
-                        }
-                    } catch (e) {
-                        console.error('[AlphaStudios] Failed to create checkout after login:', e);
+                    // Show the inline pricing card instead of redirecting directly
+                    const inlinePricing = document.getElementById('inlinePricingCard');
+                    if (inlinePricing) {
+                        inlinePricing.style.display = '';
+                        setTimeout(() => {
+                            inlinePricing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 400);
                     }
                 }
             }
