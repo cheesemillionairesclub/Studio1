@@ -1191,16 +1191,15 @@ function showUploadCountdown() {
     if (!dropzone) return { promise: Promise.resolve(), cancel: () => {} };
 
     const originalContent = dropzone.innerHTML;
-    const TOTAL = 20;
+    const TOTAL = 10;
     const totalDash = 226.195; // 2 * PI * 36
 
     const messages = [
-        { at: 20, text: 'Uploading your track...' },
-        { at: 17, text: 'Reading audio data...' },
-        { at: 14, text: 'Analyzing frequencies...' },
-        { at: 10, text: 'Detecting BPM & key...' },
-        { at: 7,  text: 'Measuring loudness...' },
-        { at: 4,  text: 'Almost there...' },
+        { at: 10, text: 'Uploading your track...' },
+        { at: 8,  text: 'Reading audio data...' },
+        { at: 6,  text: 'Analyzing frequencies...' },
+        { at: 4,  text: 'Detecting BPM & key...' },
+        { at: 2,  text: 'Measuring loudness...' },
     ];
 
     dropzone.innerHTML = `
@@ -1272,7 +1271,7 @@ function showUploadCountdown() {
                 if (numEl) numEl.style.display = 'none';
                 if (textEl) {
                     textEl.className = 'cd-wait';
-                    textEl.textContent = 'Hang tight, your track is almost ready...';
+                    textEl.textContent = 'Almost there! We are as excited as you are!';
                 }
                 if (ringFill) ringFill.style.strokeDashoffset = String(totalDash);
                 // Don't resolve — wait for cancel() to be called when upload finishes
