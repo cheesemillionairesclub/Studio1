@@ -1847,17 +1847,30 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         if (launchBtn) { launchBtn.disabled = true; launchBtn.style.opacity = '0.6'; }
         showToast('Uploading audio file...');
         try {
-            const uploadRes = await fetch(`/api/upload-audio?filename=${encodeURIComponent(uploadedAudioFile.name)}`, {
+            // Step 1: Get signed upload URL from our API
+            const signRes = await fetch('/api/upload-audio', {
                 method: 'POST',
-                headers: { 'Content-Type': uploadedAudioFile.type || 'audio/wav' },
-                body: uploadedAudioFile,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: uploadedAudioFile.name }),
             });
-            const uploadData = await uploadRes.json();
-            if (uploadRes.ok && uploadData.url) {
-                audioUrl = uploadData.url;
-                console.log('[AlphaStudios] Audio uploaded:', audioUrl);
+            const signData = await signRes.json();
+
+            if (signRes.ok && signData.uploadUrl) {
+                // Step 2: Upload directly to Supabase Storage (bypasses Vercel 4.5MB limit)
+                const uploadRes = await fetch(signData.uploadUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': uploadedAudioFile.type || 'audio/wav' },
+                    body: uploadedAudioFile,
+                });
+
+                if (uploadRes.ok) {
+                    audioUrl = signData.publicUrl;
+                    console.log('[AlphaStudios] Audio uploaded:', audioUrl);
+                } else {
+                    console.warn('[AlphaStudios] Direct upload failed:', await uploadRes.text());
+                }
             } else {
-                console.warn('[AlphaStudios] Audio upload failed:', uploadData);
+                console.warn('[AlphaStudios] Failed to get upload URL:', signData);
             }
         } catch (e) {
             console.warn('[AlphaStudios] Audio upload error:', e.message);
