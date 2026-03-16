@@ -55,7 +55,7 @@ const translations = {
         campaign_genre_input_placeholder: 'Type your genre (e.g. Afro House, Melodic Techno...)',
         campaign_confirm: 'Confirm',
         campaign_confirmed: 'Confirmed',
-        campaign_artists_label: 'Similar Artists',
+        campaign_artists_label: 'Similar Artists (For Reference)',
         campaign_artists_hint: 'Enter 3 artists with a similar style to your track — this helps our engineers understand your sound and target the right labels.',
         campaign_artists_placeholder: 'Select a similar artist',
         campaign_release_label: 'Release Status',

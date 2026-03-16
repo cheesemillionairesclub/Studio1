@@ -144,7 +144,7 @@ const translations = {
         campaign_genre_input_placeholder: 'Type your genre (e.g. Afro House, Melodic Techno...)',
         campaign_confirm: 'Confirm',
         campaign_confirmed: 'Confirmed',
-        campaign_artists_label: 'Similar Artists',
+        campaign_artists_label: 'Similar Artists (For Reference)',
         campaign_artists_hint: 'Enter 3 artists with a similar style to your track — this helps us tailor our feedback and label recommendations.',
         campaign_artists_placeholder: 'Example: Adam Port, Black Coffee, Keinemusik',
         campaign_release_label: 'Release Status',
@@ -1048,10 +1048,9 @@ function renderArtistResults(data) {
         item.addEventListener('click', () => {
             const name = item.dataset.name;
             const img = item.dataset.img || '';
-            if (!selectedArtists.find(a => a.name === name)) {
-                selectedArtists.push({ name, img });
-                renderArtistTags();
-            }
+            // Limit to 1 artist
+            selectedArtists = [{ name, img }];
+            renderArtistTags();
             artistInput.value = '';
             artistResults.classList.remove('visible');
         });
@@ -1071,6 +1070,12 @@ function renderArtistTags() {
             <button class="artist-tag-remove" data-index="${i}" type="button">&times;</button>
         </span>`;
     }).join('');
+
+    // Hide searchbar when artist selected, show when removed
+    const artistWrapper = document.querySelector('.artist-search-wrapper');
+    if (artistWrapper) {
+        artistWrapper.style.display = selectedArtists.length > 0 ? 'none' : '';
+    }
 
     artistTagsContainer.querySelectorAll('.artist-tag-remove').forEach(btn => {
         btn.addEventListener('click', () => {
