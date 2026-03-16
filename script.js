@@ -1415,12 +1415,20 @@ async function analyzeWithEssentia(buffer) {
 
         const results = {};
 
-        // BPM
+        // BPM (RhythmExtractor2013 is more accurate than PercivalBpmEstimator)
         try {
-            const bpmResult = essentiaInstance.PercivalBpmEstimator(audioVector);
-            results.bpm = bpmResult.bpm;
-            console.log('[Essentia] BPM:', results.bpm);
-        } catch (e) { console.warn('[Essentia] BPM extraction failed:', e.message); }
+            const rhythmResult = essentiaInstance.RhythmExtractor2013(audioVector);
+            results.bpm = rhythmResult.bpm;
+            results.confidence = rhythmResult.confidence;
+            console.log('[Essentia] BPM:', results.bpm, 'confidence:', results.confidence);
+        } catch (e) {
+            console.warn('[Essentia] RhythmExtractor2013 failed, trying PercivalBpmEstimator:', e.message);
+            try {
+                const bpmResult = essentiaInstance.PercivalBpmEstimator(audioVector);
+                results.bpm = bpmResult.bpm;
+                console.log('[Essentia] BPM (Percival fallback):', results.bpm);
+            } catch (e2) { console.warn('[Essentia] BPM extraction failed:', e2.message); }
+        }
 
         // Key + Scale
         try {
