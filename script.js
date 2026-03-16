@@ -1177,11 +1177,11 @@ function removeUploadedTrack() {
     if (waveformProgress) waveformProgress.style.width = '0%';
     if (waveformTimeEl) waveformTimeEl.textContent = '0:00';
 
-    // Hide pricing & campaign
-    const pricingSection = document.getElementById('pricing');
-    if (pricingSection) pricingSection.style.display = 'none';
-    const campaignSetup = document.getElementById('campaignSetup');
-    if (campaignSetup) campaignSetup.style.display = 'none';
+    // Hide inline campaign form & pricing card
+    const inlineForm = document.getElementById('inlineCampaignForm');
+    if (inlineForm) inlineForm.style.display = 'none';
+    const inlinePricing = document.getElementById('inlinePricingCard');
+    if (inlinePricing) inlinePricing.style.display = 'none';
     const banner = document.getElementById('selectedTrackBanner');
     if (banner) banner.remove();
 }
@@ -1351,33 +1351,35 @@ async function handleAudioUpload(file) {
         audioElement = new Audio();
         audioElement.src = URL.createObjectURL(file);
 
-        // Check if user already has a subscription — skip pricing if so
-        let skipPricing = false;
+        // Show inline campaign form or pricing card based on subscription status
+        selectedPack = 'mastering';
+        let userSubStatus = null;
         try {
             const user = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
             if (user) {
                 const profile = await BeatpushAuth.getProfile();
-                const subStatus = profile?.subscription_status;
-                if (subStatus === 'active' || subStatus === 'trialing') {
-                    skipPricing = true;
-                }
+                userSubStatus = profile?.subscription_status;
             }
         } catch (e) {}
 
-        if (skipPricing) {
-            // Auto-select mastering pack and go straight to campaign setup
-            selectedPack = 'mastering';
-            showCampaignSetup('mastering');
+        const inlineForm = document.getElementById('inlineCampaignForm');
+        const inlinePricing = document.getElementById('inlinePricingCard');
+
+        if (userSubStatus === 'active' || userSubStatus === 'trialing') {
+            // Subscribed user — show campaign form directly
+            if (inlineForm) inlineForm.style.display = '';
+            if (inlinePricing) inlinePricing.style.display = 'none';
         } else {
-            // Show pricing section for new users
-            const pricingSection = document.getElementById('pricing');
-            if (pricingSection) {
-                pricingSection.style.display = '';
-                setTimeout(() => {
-                    pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 200);
-            }
+            // Unknown user — show pricing card with Start Free Trial
+            if (inlineForm) inlineForm.style.display = 'none';
+            if (inlinePricing) inlinePricing.style.display = '';
         }
+
+        // Scroll to the track preview
+        setTimeout(() => {
+            const preview = document.getElementById('trackPreview');
+            if (preview) preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
 
         // Analyze with Essentia (non-blocking, runs in browser)
         analyzeWithEssentia(audioBuffer);
@@ -1737,122 +1739,27 @@ function changeTrack() {
 }
 
 // ===== Package Selection =====
-document.querySelectorAll('.pack-select-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
+// Inline pricing "Start Free Trial" button — show campaign form, then checkout with trial
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('#inlinePricingBtn');
+    if (!btn) return;
+    e.preventDefault();
 
-        // Require a track to be selected first
-        if (!selectedTrack) {
-            const lang = detectLanguage();
-            const t = translations[lang] || translations.en;
-            showToast(t.choose_validate_track || 'Please upload a track first before choosing a package.', true);
-            return;
-        }
+    if (!selectedTrack) {
+        showToast('Please upload a track first.');
+        return;
+    }
 
-        const pack = btn.dataset.pack;
-        selectedPack = pack;
-        showCampaignSetup(pack);
-    });
+    selectedPack = 'mastering';
+    // Hide pricing card, show inline campaign form
+    const inlinePricing = document.getElementById('inlinePricingCard');
+    const inlineForm = document.getElementById('inlineCampaignForm');
+    if (inlinePricing) inlinePricing.style.display = 'none';
+    if (inlineForm) {
+        inlineForm.style.display = '';
+        inlineForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 });
-
-function showCampaignSetup(pack) {
-    const campaignSetup = document.getElementById('campaignSetup');
-    if (!campaignSetup) return;
-
-    campaignSetup.style.display = '';
-    genreConfirmed = false;
-
-    const lang = detectLanguage();
-    const t = translations[lang] || translations.en;
-
-    // Update summary
-    const summary = document.getElementById('campaignSummary');
-    if (summary && selectedTrack) {
-        const safeTitle = escapeHtml(selectedTrack.title);
-        const safeArtist = escapeHtml(selectedTrack.artist);
-        const artworkUrl = selectedTrack.artwork ? escapeHtml(selectedTrack.artwork.startsWith('data:') ? selectedTrack.artwork : selectedTrack.artwork.replace('200x200', '500x500')) : '';
-        summary.innerHTML = `
-            <div class="campaign-summary-track">
-                ${artworkUrl ? `<img src="${artworkUrl}" alt="${safeTitle}" class="campaign-summary-art">` : ''}
-                <div class="campaign-summary-details">
-                    <div class="campaign-summary-row">
-                        <span class="campaign-summary-label">${t.campaign_summary_track || 'Track'}:</span>
-                        <span class="campaign-summary-value">${safeTitle} - ${safeArtist}</span>
-                    </div>
-                    <div class="campaign-summary-row">
-                        <span class="campaign-summary-label">${t.campaign_summary_pack || 'Package'}:</span>
-                        <span class="campaign-summary-value">${pack === 'mastering' ? 'Mastering + Feedback + Labels' : pack}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Reset genre dropdown selection
-    selectedGenres = [];
-    renderGenreSelection();
-    genreConfirmed = false;
-
-    // Update tips based on pack
-    const tipsContent = document.getElementById('tipsContent');
-    if (tipsContent) {
-        if (pack === 'exclusive-800') {
-            tipsContent.innerHTML = `
-                <p style="margin: 0 0 8px 0; color: #ccc;">${t.top10_tooltip_title || 'To qualify for this promotion, tracks must meet the following criteria:'}</p>
-                <ul>
-                    <li data-i18n="top10_tip_1">${t.top10_tip_1 || 'Released within the last six days.'}</li>
-                    <li data-i18n="top10_tip_2">${t.top10_tip_2 || 'Not currently in a downward trend.'}</li>
-                    <li data-i18n="top10_tip_3">${t.top10_tip_3 || 'Current minimum position number 20.'}</li>
-                    <li data-i18n="top10_tip_4">${t.top10_tip_4 || 'Must be the track\'s first time appearing on the chart.'}</li>
-                </ul>
-                <p style="margin: 8px 0 0 0; color: #999; font-size: 0.75rem; line-height: 1.4;">${t.top10_tip_footer_1 || 'If your track does not yet meet these requirements, you can begin with our'} <span style="color: #4CAF50;">${t.top10_tip_footer_daily_push || 'Daily Push Promotion'}</span>, ${t.top10_tip_footer_2 || 'designed to help tracks gain momentum and climb the charts.'}<br>${t.top10_tip_footer_3 || 'After reaching approximately position #20, you will be able to access and benefit from this exclusive promotion package.'}</p>
-            `;
-        } else if (pack === 'daily-push') {
-            tipsContent.innerHTML = `
-                <ul>
-                    <li data-i18n="dailypush_tip_1">${t.dailypush_tip_1 || 'Once you get in the chart, to keep the position, to continue and climb, you can purchase a discounted DAILY PUSH.'}</li>
-                    <li data-i18n="dailypush_tip_2">${t.dailypush_tip_2 || 'This consists in 10 daily purchases of your track, from DJ\'s all around the world and fitting with your genre.'}</li>
-                    <li data-i18n="dailypush_tip_3">${t.dailypush_tip_3 || 'Challenges at the Top: The closer you get to the top, the more challenging it becomes to move up.'}</li>
-                </ul>
-            `;
-        } else {
-            tipsContent.innerHTML = `
-                <p style="margin: 0 0 8px 0; color: #ccc;">${t.top100_tooltip_title || 'To ensure an effective promotion, the track(s) must meet the following criteria:'}</p>
-                <ul>
-                    <li data-i18n="top100_tip_1">${t.top100_tip_1 || 'The track must be brand new (ideally in pre-order stage).'}</li>
-                    <li data-i18n="top100_tip_2">${t.top100_tip_2 || 'The release must be no older than 24 hours at the time the campaign begins.'}</li>
-                    <li data-i18n="top100_tip_3">${t.top100_tip_3 || 'The track must never have been charted before.'}</li>
-                    <li data-i18n="top100_tip_4">${t.top100_tip_4 || 'The track should be properly mixed before mastering.'}</li>
-                    <li data-i18n="top100_tip_5">${t.top100_tip_5 || 'Include any reference tracks for the mastering style you prefer.'}</li>
-                    <li data-i18n="top100_tip_6">${t.top100_tip_6 || 'Provide accurate metadata for label submission.'}</li>
-                    <li data-i18n="top100_tip_7">${t.top100_tip_7 || 'Campaigns cannot start on Sundays or Mondays.'}</li>
-                </ul>
-            `;
-        }
-    }
-
-    // Display price summary above launch button
-    const priceSummary = document.getElementById('campaignPriceSummary');
-    if (priceSummary) {
-        const PACK_PRICES = {
-            'mastering': '$1'
-        };
-        const priceLabel = t.campaign_total || 'Total';
-        priceSummary.textContent = `${priceLabel}: ${PACK_PRICES[pack] || ''}`;
-    }
-
-    // Update launch button text and store pack on the button itself
-    const launchBtn = document.getElementById('launchCampaignBtn');
-    if (launchBtn) {
-        launchBtn.dataset.selectedPack = pack;
-        launchBtn.textContent = t.campaign_launch_btn || 'Place my order';
-    }
-
-    // Scroll to campaign setup
-    setTimeout(() => {
-        campaignSetup.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-}
 
 // Genre dropdown selector
 const GENRE_LIST = [
@@ -2055,12 +1962,8 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
     const lang = detectLanguage();
     const t = translations[lang] || translations.en;
 
-    // Use pack stored on button as source of truth (set in showCampaignSetup)
-    const activePack = this.dataset.selectedPack || selectedPack;
-    if (activePack && activePack !== selectedPack) {
-        console.warn('Pack mismatch! button:', activePack, 'variable:', selectedPack);
-        selectedPack = activePack;
-    }
+    // Pack is always 'mastering' (auto-selected)
+    if (!selectedPack) selectedPack = 'mastering';
 
     // Validate genre selected
     if (!selectedGenres.length) {
@@ -2077,14 +1980,7 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         return;
     }
 
-    // Create Stripe Checkout Session with metadata
-    // Use pack from button data attribute as primary source of truth
-    const packToSend = this.dataset.selectedPack || selectedPack;
-    if (!packToSend) return;
-
-    console.log('[AlphaStudios] selectedPack variable:', selectedPack);
-    console.log('[AlphaStudios] button data-selected-pack:', this.dataset.selectedPack);
-    console.log('[AlphaStudios] pack being sent to API:', packToSend);
+    const packToSend = selectedPack || 'mastering';
 
     const track = selectedTrack || {};
     const genre = selectedGenres.join(', ') || track.genre || '';

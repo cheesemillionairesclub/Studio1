@@ -181,103 +181,62 @@
                     <div class="track-analysis-tags" id="trackAnalysisTags" style="display:none;">
                         <!-- BPM, Key, Energy, Danceability, Vocals, Dynamic range, True peak etc. -->
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Pricing Section -->
-    <section class="pricing-section" id="pricing" style="display:none;">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge" data-i18n="pricing_badge">Pricing</span>
-                <h2 class="section-title" data-i18n-html="pricing_title">Choose Your <span class="text-green">Package</span></h2>
-                <p class="section-desc" data-i18n="pricing_desc">Professional mastering with detailed feedback and label submission support.</p>
-            </div>
-            <div class="pricing-grid" style="grid-template-columns: 1fr; max-width: 440px; margin: 0 auto;">
-                <div class="product-card popular" data-pack="mastering">
-                    <div class="popular-badge">PRO PLAN</div>
-                    <div style="padding: 20px 0 10px; text-align: center;">
-                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 8px;">Pro Plan</h3>
-                        <p style="font-size: 0.85rem; color: var(--white-50); line-height: 1.6;">Everything you need to release your music professionally.</p>
-                    </div>
-                    <div class="product-card-price">1<span style="font-size: 0.5em; font-weight: 400; color: var(--white-50);">EUR/month</span></div>
-                    <p style="font-size: 0.75rem; color: var(--green-primary); text-align: center; margin: -8px 0 12px; font-weight: 500;">7-day free trial</p>
-                    <ul style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 0.85rem; color: var(--white-70); line-height: 2;">
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Up to 5 tracks per month</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Professional feedback</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Professional mastering</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Label recommendations</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Demo message generation</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Trackstack submission</li>
-                    </ul>
-                    <button class="product-card-btn pack-select-btn" data-pack="mastering">Start Free Trial</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Campaign Setup Section (hidden by default) -->
-    <section class="campaign-setup-section" id="campaignSetup" style="display:none;">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge" data-i18n="campaign_badge">LET'S GET INTO DETAILS</span>
-                <h2 class="section-title" data-i18n="campaign_title">Campaign Setup</h2>
-                <p class="section-desc" data-i18n="campaign_desc">Configure your order before launching.</p>
-            </div>
-            <div class="campaign-setup-card">
-                <!-- Selected pack summary -->
-                <div class="campaign-summary" id="campaignSummary"></div>
-
-                <div class="campaign-form">
-                    <!-- Genre selection (max 2) -->
-                    <div class="campaign-field">
-                        <label class="campaign-label">Genre</label>
-                        <p class="campaign-field-hint">Select the genre of your track.</p>
-                        <div class="genre-select-wrapper" id="genreSelectWrapper">
-                            <div class="genre-selected-tags" id="genreSelectedTags"></div>
-                            <div class="genre-dropdown-trigger" id="genreDropdownTrigger">
-                                <span class="genre-dropdown-placeholder" id="genreDropdownPlaceholder">Choose a genre...</span>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                            </div>
-                            <div class="genre-dropdown" id="genreDropdown" style="display:none;">
-                                <input type="text" class="genre-search-input" id="genreSearchInput" placeholder="Search..." autocomplete="off">
-                                <div class="genre-dropdown-list" id="genreDropdownList"></div>
+                    <!-- Inline campaign form (shown after upload) -->
+                    <div class="campaign-form" id="inlineCampaignForm" style="display:none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px;">
+                        <!-- Genre selection -->
+                        <div class="campaign-field">
+                            <label class="campaign-label">Genre</label>
+                            <div class="genre-select-wrapper" id="genreSelectWrapper">
+                                <div class="genre-selected-tags" id="genreSelectedTags"></div>
+                                <div class="genre-dropdown-trigger" id="genreDropdownTrigger">
+                                    <span class="genre-dropdown-placeholder" id="genreDropdownPlaceholder">Choose a genre...</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                </div>
+                                <div class="genre-dropdown" id="genreDropdown" style="display:none;">
+                                    <input type="text" class="genre-search-input" id="genreSearchInput" placeholder="Search..." autocomplete="off">
+                                    <div class="genre-dropdown-list" id="genreDropdownList"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Similar artists -->
-                    <div class="campaign-field">
-                        <label class="campaign-label" data-i18n="campaign_artists_label">Similar Artists</label>
-                        <p class="campaign-field-hint" data-i18n="campaign_artists_hint">Enter 3 artists with a similar style to your track.</p>
-                        <div class="artist-search-wrapper">
-                            <input type="text" class="campaign-input" id="similarArtists" data-i18n-placeholder="campaign_artists_placeholder" placeholder="Example: Adam Port, Black Coffee, Keinemusik" autocomplete="off">
-                            <div class="artist-search-results" id="artistSearchResults"></div>
+                        <!-- Similar artists -->
+                        <div class="campaign-field">
+                            <label class="campaign-label" data-i18n="campaign_artists_label">Similar Artists</label>
+                            <div class="artist-search-wrapper">
+                                <input type="text" class="campaign-input" id="similarArtists" data-i18n-placeholder="campaign_artists_placeholder" placeholder="Search for similar artists..." autocomplete="off">
+                                <div class="artist-search-results" id="artistSearchResults"></div>
+                            </div>
+                            <div class="artist-tags" id="artistTags"></div>
                         </div>
-                        <div class="artist-tags" id="artistTags"></div>
+
+                        <!-- Hidden release status default -->
+                        <input type="hidden" name="releaseStatus" value="released">
+
+                        <button class="btn-primary btn-large campaign-launch-btn" id="launchCampaignBtn" style="width: 100%; margin-top: 12px;">Run my campaign</button>
                     </div>
 
-                    <!-- Release status -->
-                    <div class="campaign-field">
-                        <label class="campaign-label" data-i18n="campaign_release_label">Release Status</label>
-                        <p class="campaign-field-hint" data-i18n="campaign_release_hint">Is your track already released or in pre-order?</p>
-                        <div class="campaign-release-options">
-                            <label class="campaign-radio">
-                                <input type="radio" name="releaseStatus" value="released" checked>
-                                <span class="campaign-radio-mark"></span>
-                                <span data-i18n="campaign_released">Already Released</span>
-                            </label>
-                            <label class="campaign-radio">
-                                <input type="radio" name="releaseStatus" value="preorder">
-                                <span class="campaign-radio-mark"></span>
-                                <span data-i18n="campaign_preorder">Pre-Order</span>
-                            </label>
+                    <!-- Pricing card for unknown users (no subscription) -->
+                    <div id="inlinePricingCard" style="display:none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px;">
+                        <div class="product-card popular" data-pack="mastering" style="margin: 0 auto; max-width: 100%;">
+                            <div class="popular-badge">PRO PLAN</div>
+                            <div style="padding: 20px 0 10px; text-align: center;">
+                                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 8px;">Pro Plan</h3>
+                                <p style="font-size: 0.85rem; color: var(--white-50); line-height: 1.6;">Everything you need to release your music professionally.</p>
+                            </div>
+                            <div class="product-card-price">1<span style="font-size: 0.5em; font-weight: 400; color: var(--white-50);">EUR/month</span></div>
+                            <p style="font-size: 0.75rem; color: var(--green-primary); text-align: center; margin: -8px 0 12px; font-weight: 500;">7-day free trial</p>
+                            <ul style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 0.85rem; color: var(--white-70); line-height: 2;">
+                                <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Up to 5 tracks per month</li>
+                                <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Professional feedback</li>
+                                <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Professional mastering</li>
+                                <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Label recommendations</li>
+                                <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Demo message generation</li>
+                                <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Trackstack submission</li>
+                            </ul>
+                            <button class="product-card-btn pack-select-btn" id="inlinePricingBtn" data-pack="mastering">Start Free Trial</button>
                         </div>
                     </div>
-
-                    <div class="campaign-price-summary" id="campaignPriceSummary"></div>
-                    <button class="btn-primary btn-large campaign-launch-btn" id="launchCampaignBtn" data-i18n="campaign_launch_btn">Place my order</button>
                 </div>
             </div>
         </div>
