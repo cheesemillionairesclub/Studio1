@@ -71,7 +71,12 @@ export default async function handler(req, res) {
         const session = await stripe.checkout.sessions.create(sessionParams);
         return res.status(200).json({ url: session.url });
     } catch (error) {
-        console.error('Stripe checkout error:', error.message);
-        return res.status(500).json({ error: 'Failed to create checkout session', details: error.message });
+        console.error('Stripe checkout error:', error.message, error.type, error.code);
+        return res.status(500).json({
+            error: 'Failed to create checkout session',
+            details: error.message,
+            type: error.type || '',
+            code: error.code || '',
+        });
     }
 }
