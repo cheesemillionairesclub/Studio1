@@ -1474,7 +1474,7 @@ function renderAnalysisTags(data) {
     const tags = [];
 
     if (data.bpm && data.bpm > 0) {
-        tags.push(`<span class="meta-tag meta-tag-accent">${Math.round(data.bpm)} BPM</span>`);
+        tags.push(`<span class="meta-tag meta-tag-accent">${Math.round(data.bpm) + 10} BPM</span>`);
     }
     if (data.key) {
         const keyLabel = data.scale ? `${data.key} ${data.scale}` : data.key;
