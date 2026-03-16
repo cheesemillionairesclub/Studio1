@@ -416,6 +416,37 @@ body {
     flex-shrink: 0;
 }
 
+/* Logo carousel */
+.hero-logo-carousel {
+    width: 280px;
+    margin: 28px auto 0;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 20%, #000 80%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 20%, #000 80%, transparent 100%);
+}
+.hero-logo-track {
+    display: flex;
+    gap: 40px;
+    animation: logo-scroll 15s linear infinite;
+    width: max-content;
+}
+.hero-logo-item {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    opacity: 0.4;
+    flex-shrink: 0;
+    filter: grayscale(100%);
+    transition: opacity 0.3s;
+}
+.hero-logo-item:hover {
+    opacity: 0.7;
+}
+@keyframes logo-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-50% - 20px)); }
+}
+
 .btn-primary {
     display: inline-flex;
     align-items: center;
