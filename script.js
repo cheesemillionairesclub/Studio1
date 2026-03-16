@@ -1311,21 +1311,22 @@ async function handleAudioUpload(file) {
 
     uploadedAudioFile = file;
 
+    const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+
     // Start countdown IMMEDIATELY so user sees animation from the start
     const countdown = showUploadCountdown();
 
-    // Let the countdown render & animate for a frame before heavy work
-    await new Promise(r => setTimeout(r, 100));
+    // Let the countdown render & start animating before any work
+    await new Promise(r => setTimeout(r, 150));
 
     try {
-        const trackTitle = file.name.replace(/\.[^/.]+$/, '');
         generatedArtworkDataUrl = generateTrackArtwork(400);
 
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
 
-        // Start upload to Supabase right away (don't wait for decode)
+        // Start upload to Supabase (network — non-blocking)
         const uploadPromise = uploadTrackFiles(file, generatedArtworkDataUrl).then(urls => {
             if (urls.audioUrl) {
                 window._preUploadedAudioUrl = urls.audioUrl;
@@ -1338,58 +1339,45 @@ async function handleAudioUpload(file) {
             return urls;
         });
 
-        // Decode audio — yield to event loop so countdown keeps ticking
-        const arrayBuffer = await file.arrayBuffer();
-        await new Promise(r => setTimeout(r, 0)); // yield
-        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        // Start decode (CPU-heavy, may block on Safari/iOS)
+        const decodePromise = file.arrayBuffer().then(ab => audioContext.decodeAudioData(ab));
 
-        const metadata = extractMetadata(file, audioBuffer);
+        // ---- Wait for upload ONLY to cancel countdown ----
+        // Upload is network-bound, does NOT freeze the UI
+        const urls = await uploadPromise;
 
+        // Cancel countdown as soon as upload is done — no more waiting
+        countdown.cancel();
+
+        // Set up selectedTrack with what we have so far
         selectedTrack = {
             title: trackTitle,
             artist: '',
             artwork: generatedArtworkDataUrl,
-            id: '',
+            id: urls.audioUrl || '',
             genre: '',
             file: file,
-            metadata: metadata
+            metadata: null
         };
-
-        // Wait for upload to finish too
-        const urls = await uploadPromise;
-        if (urls.audioUrl) selectedTrack.id = urls.audioUrl;
         if (urls.artworkUrl) selectedTrack.artwork = urls.artworkUrl;
 
-        // Everything done — cancel countdown and show preview immediately
-        countdown.cancel();
-
-        // Hide dropzone and show track preview
+        // Show track preview immediately (waveform will fill in later)
         if (uploadDropzone) uploadDropzone.style.display = 'none';
         if (trackPreview) trackPreview.style.display = '';
 
-        // Set title
         const titleEl = document.getElementById('trackPreviewTitle');
         if (titleEl) titleEl.textContent = trackTitle;
 
-        // Set generated artwork
         const artworkEl = document.getElementById('trackPreviewArtwork');
         if (artworkEl && generatedArtworkDataUrl) {
             artworkEl.innerHTML = `<img src="${generatedArtworkDataUrl}" alt="Track artwork">`;
         }
 
-        // Render metadata tags
-        renderMetaTags(metadata);
-
-        // Set duration display
-        if (waveformDurationEl) {
-            waveformDurationEl.textContent = formatTime(audioBuffer.duration);
-        }
-
-        // Create audio element for playback
+        // Create audio element for playback (from local file, instant)
         audioElement = new Audio();
         audioElement.src = URL.createObjectURL(file);
 
-        // Show inline campaign form for ALL users after upload
+        // Show inline campaign form
         selectedPack = 'mastering';
         const inlineForm = document.getElementById('inlineCampaignForm');
         if (inlineForm) inlineForm.style.display = '';
@@ -1400,15 +1388,28 @@ async function handleAudioUpload(file) {
             if (preview) preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 200);
 
-        // Draw waveform AFTER UI is visible (deferred so it doesn't block)
-        requestAnimationFrame(() => drawWaveform(audioBuffer));
+        // ---- Now wait for decode in background, fill in waveform + metadata ----
+        decodePromise.then(decodedBuffer => {
+            audioBuffer = decodedBuffer;
+            const metadata = extractMetadata(file, decodedBuffer);
+            selectedTrack.metadata = metadata;
 
-        // Analyze with Essentia (non-blocking, runs in browser)
-        analyzeWithEssentia(audioBuffer);
+            renderMetaTags(metadata);
+
+            if (waveformDurationEl) {
+                waveformDurationEl.textContent = formatTime(decodedBuffer.duration);
+            }
+
+            requestAnimationFrame(() => drawWaveform(decodedBuffer));
+
+            analyzeWithEssentia(decodedBuffer);
+        }).catch(err => {
+            console.error('Audio decode error (background):', err);
+        });
 
     } catch (err) {
         countdown.cancel();
-        console.error('Audio decode error:', err);
+        console.error('Audio upload error:', err);
         showToast('Could not process this audio file. Please try a different format.');
     }
 }
