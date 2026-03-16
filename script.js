@@ -1318,42 +1318,36 @@ async function handleAudioUpload(file) {
 
     uploadedAudioFile = file;
 
-    // Show progress
-    const progressEl = document.getElementById('uploadProgress');
-    const progressBar = document.getElementById('uploadProgressBar');
-    const progressText = document.getElementById('uploadProgressText');
-    if (progressEl) progressEl.style.display = '';
-    if (progressBar) progressBar.style.width = '0%';
-
-    // Simulate loading progress while decoding
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        progress = Math.min(progress + Math.random() * 15, 90);
-        if (progressBar) progressBar.style.width = progress + '%';
-        if (progressText) progressText.textContent = Math.round(progress) + '%';
-    }, 200);
+    // Start countdown IMMEDIATELY so user sees animation from the start
+    const countdown = showUploadCountdown();
 
     try {
-        // Create AudioContext and decode
+        // Run decode + upload in parallel behind the countdown
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
 
+        const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+        generatedArtworkDataUrl = generateTrackArtwork(400);
+
+        // Start upload to Supabase right away (don't wait for decode)
+        const uploadPromise = uploadTrackFiles(file, generatedArtworkDataUrl).then(urls => {
+            if (urls.audioUrl) {
+                window._preUploadedAudioUrl = urls.audioUrl;
+                console.log('[AlphaStudios] Audio ready:', urls.audioUrl);
+            }
+            if (urls.artworkUrl) {
+                window._preUploadedArtworkUrl = urls.artworkUrl;
+                console.log('[AlphaStudios] Artwork ready:', urls.artworkUrl);
+            }
+            return urls;
+        });
+
+        // Decode audio in parallel
         const arrayBuffer = await file.arrayBuffer();
         audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-        // Complete progress
-        clearInterval(progressInterval);
-        if (progressBar) progressBar.style.width = '100%';
-        if (progressText) progressText.textContent = '100%';
-
-        // Extract metadata
         const metadata = extractMetadata(file, audioBuffer);
-
-        // Set selectedTrack (for compatibility with rest of flow)
-        const trackTitle = file.name.replace(/\.[^/.]+$/, '');
-        // Generate unique artwork for this track
-        generatedArtworkDataUrl = generateTrackArtwork(400);
 
         selectedTrack = {
             title: trackTitle,
@@ -1365,27 +1359,13 @@ async function handleAudioUpload(file) {
             metadata: metadata
         };
 
-        // Upload to Supabase Storage + show countdown in parallel
-        if (progressEl) progressEl.style.display = 'none';
+        // Wait for upload to finish too
+        const urls = await uploadPromise;
+        if (urls.audioUrl) selectedTrack.id = urls.audioUrl;
+        if (urls.artworkUrl) selectedTrack.artwork = urls.artworkUrl;
 
-        const countdown = showUploadCountdown();
-
-        const uploadPromise = uploadTrackFiles(file, generatedArtworkDataUrl).then(urls => {
-            if (urls.audioUrl) {
-                selectedTrack.id = urls.audioUrl;
-                window._preUploadedAudioUrl = urls.audioUrl;
-                console.log('[AlphaStudios] Audio ready:', urls.audioUrl);
-            }
-            if (urls.artworkUrl) {
-                selectedTrack.artwork = urls.artworkUrl;
-                window._preUploadedArtworkUrl = urls.artworkUrl;
-                console.log('[AlphaStudios] Artwork ready:', urls.artworkUrl);
-            }
-            // Upload done — skip remaining countdown immediately
-            countdown.cancel();
-        });
-
-        await Promise.all([countdown.promise, uploadPromise]);
+        // Everything done — cancel countdown immediately
+        countdown.cancel();
 
         // Hide dropzone and show track preview
         if (uploadDropzone) uploadDropzone.style.display = 'none';
@@ -1431,8 +1411,7 @@ async function handleAudioUpload(file) {
         analyzeWithEssentia(audioBuffer);
 
     } catch (err) {
-        clearInterval(progressInterval);
-        if (progressEl) progressEl.style.display = 'none';
+        countdown.cancel();
         console.error('Audio decode error:', err);
         showToast('Could not process this audio file. Please try a different format.');
     }
