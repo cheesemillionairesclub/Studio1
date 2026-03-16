@@ -628,6 +628,8 @@
                 localStorage.removeItem('alphastudios_pending_campaign');
                 console.log('[Dashboard] Pending campaign:', campaignRaw ? 'found' : 'none');
 
+                let postCheckoutTracksUsed = null;
+
                 if (campaignRaw) {
                     try {
                         const campaign = JSON.parse(campaignRaw);
@@ -645,6 +647,7 @@
                             const profile = await BeatpushAuth.getProfile();
                             const token = BeatpushAuth.getToken();
                             const newCount = (profile?.tracks_used_this_month || 0) + 1;
+                            postCheckoutTracksUsed = newCount;
                             const patchRes = await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
                                 method: 'PATCH',
                                 headers: {
@@ -667,8 +670,8 @@
                     showSubscriptionSuccess(null);
                 }
 
-                // Refresh UI
-                await renderSubscriptionBanner();
+                // Refresh UI with known track count to avoid stale data
+                await renderSubscriptionBanner(postCheckoutTracksUsed);
                 loadDashboard();
             }
 
