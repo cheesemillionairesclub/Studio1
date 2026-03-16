@@ -336,15 +336,19 @@
                     localStorage.removeItem('alphastudios_pending_audio_url');
                     localStorage.removeItem('alphastudios_pending_artwork_url');
                     try {
+                        console.log('[AlphaStudios] Post-login: calling create-checkout for user', user.id);
                         const res = await fetch('/api/create-checkout', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ user_id: user.id, user_email: user.email }),
                         });
                         const data = await res.json();
+                        console.log('[AlphaStudios] Checkout response:', res.status, data);
                         if (data.url) {
                             window.location.href = data.url;
                             return; // Stop further init
+                        } else {
+                            console.error('[AlphaStudios] No checkout URL:', data);
                         }
                     } catch (e) {
                         console.error('[AlphaStudios] Failed to create checkout after login:', e);

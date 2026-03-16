@@ -2148,25 +2148,26 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
 
         setBtnLoading('Redirecting...');
-        fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: user?.id || '', user_email: user?.email || '' }),
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.url) {
-                window.location.href = data.url;
+        try {
+            const checkoutRes = await fetch('/api/create-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user?.id || '', user_email: user?.email || '' }),
+            });
+            const checkoutData = await checkoutRes.json();
+            console.log('[AlphaStudios] Checkout response:', checkoutRes.status, checkoutData);
+            if (checkoutData.url) {
+                window.location.href = checkoutData.url;
             } else {
+                console.error('[AlphaStudios] No checkout URL returned:', checkoutData);
                 showToast('Failed to start subscription. Please try again.');
                 resetBtn();
             }
-        })
-        .catch(err => {
+        } catch (err) {
             console.error('[AlphaStudios] Checkout error:', err);
             showToast('Failed to start subscription. Please try again.');
             resetBtn();
-        });
+        }
     }
 });
 
