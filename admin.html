@@ -180,6 +180,21 @@
             cursor: not-allowed;
         }
         input[type="file"] { display: none; }
+        .admin-feedback-cell { min-width: 200px; }
+        .admin-feedback-input {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px 10px;
+            background: var(--white-05);
+            border: 1px solid var(--white-15);
+            border-radius: 6px;
+            color: var(--white);
+            font-family: inherit;
+            font-size: 0.8rem;
+            resize: vertical;
+        }
+        .admin-feedback-input::placeholder { color: var(--white-30); }
+        .admin-feedback-input:focus { outline: none; border-color: var(--green-primary); }
         .admin-loading {
             text-align: center;
             padding: 60px;
@@ -234,11 +249,12 @@
                             <th>Genre</th>
                             <th>Status</th>
                             <th>Mastered File</th>
+                            <th>Feedback</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="adminOrdersBody">
-                        <tr><td colspan="8" class="admin-loading">Loading orders...</td></tr>
+                        <tr><td colspan="9" class="admin-loading">Loading orders...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -336,7 +352,7 @@
         function renderOrders(orders) {
             const tbody = document.getElementById('adminOrdersBody');
             if (!orders.length) {
-                tbody.innerHTML = '<tr><td colspan="8" class="admin-loading">No orders yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="admin-loading">No orders yet.</td></tr>';
                 return;
             }
 
@@ -363,6 +379,12 @@
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${hasReceipt ? `<a href="${esc(order.receipt_url)}" target="_blank" class="admin-btn" style="text-decoration:none;">Download</a>` : '<span style="color:var(--white-30)">-</span>'}</td>
                     <td>
+                        <div class="admin-feedback-cell">
+                            <textarea class="admin-feedback-input" id="feedback-${order.id}" placeholder="Write feedback...">${esc(order.feedback || '')}</textarea>
+                            <button class="admin-btn" onclick="saveFeedback('${order.id}')" style="margin-top:4px;width:100%;">Send Feedback</button>
+                        </div>
+                    </td>
+                    <td>
                         <div class="admin-actions">
                             ${order.order_status === 'in_progress' ? `<button class="admin-btn btn-green" onclick="toggleStatus('${order.id}', 'completed')">Mark Complete</button>` : `<button class="admin-btn" onclick="toggleStatus('${order.id}', 'in_progress')">Mark In Progress</button>`}
                             <label class="admin-btn">
@@ -373,6 +395,57 @@
                     </td>
                 </tr>`;
             }).join('');
+        }
+
+        async function saveFeedback(orderId) {
+            const textarea = document.getElementById(`feedback-${orderId}`);
+            const feedbackText = textarea ? textarea.value.trim() : '';
+            if (!feedbackText) {
+                showNotification('Please write some feedback first.', 'warning');
+                return;
+            }
+
+            const token = BeatpushAuth.getToken();
+            try {
+                // Save feedback to order
+                const res = await fetch('/api/admin/orders', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ order_id: orderId, feedback: feedbackText }),
+                });
+                if (!res.ok) throw new Error('Failed to save feedback');
+
+                // Send email notification
+                try {
+                    const emailRes = await fetch('/api/admin/send-receipt-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ order_id: orderId, type: 'feedback' }),
+                    });
+                    const emailData = await emailRes.json();
+                    if (emailRes.ok) {
+                        showNotification(`Feedback saved & email sent to ${emailData.sent_to}`, 'success');
+                    } else {
+                        showNotification(`Feedback saved but email failed: ${emailData.error}`, 'warning');
+                    }
+                } catch (emailErr) {
+                    showNotification('Feedback saved but email notification failed', 'warning');
+                }
+
+                // Reload
+                const listRes = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } });
+                const orders = await listRes.json();
+                renderStats(orders);
+                renderOrders(orders);
+            } catch (e) {
+                alert('Failed to save feedback: ' + e.message);
+            }
         }
 
         async function toggleStatus(orderId, newStatus) {

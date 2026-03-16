@@ -33,8 +33,10 @@ export default async function handler(req, res) {
     const profiles = await profileRes.json();
     if (!profiles[0]?.is_admin) return res.status(403).json({ error: 'Not admin' });
 
-    const { order_id } = req.body;
+    const { order_id, type } = req.body;
     if (!order_id) return res.status(400).json({ error: 'Missing order_id' });
+
+    const isFeedback = type === 'feedback';
 
     try {
         // Fetch order details
@@ -46,8 +48,11 @@ export default async function handler(req, res) {
         if (!orders.length) return res.status(404).json({ error: 'Order not found' });
         const order = orders[0];
 
-        if (!order.receipt_url) {
+        if (!isFeedback && !order.receipt_url) {
             return res.status(400).json({ error: 'No mastered file uploaded for this order yet' });
+        }
+        if (isFeedback && !order.feedback) {
+            return res.status(400).json({ error: 'No feedback written for this order yet' });
         }
 
         // Determine recipient email: try user profile first, fallback to order customer_email
@@ -74,11 +79,20 @@ export default async function handler(req, res) {
         const greeting = recipientName ? recipientName.split(' ')[0] : 'there';
 
         const resend = new Resend(RESEND_API_KEY);
+
+        const subject = isFeedback
+            ? `New feedback on your track 🎧`
+            : `Your mastered track is ready! 🎵`;
+
+        const html = isFeedback
+            ? buildFeedbackEmailHtml({ greeting, packLabel, order })
+            : buildEmailHtml({ greeting, packLabel, order });
+
         const { error: emailError } = await resend.emails.send({
             from: process.env.RESEND_FROM_EMAIL || 'AlphaStudios <noreply@alphastudios.app>',
             to: [recipientEmail],
-            subject: `Your mastered track is ready! 🎵`,
-            html: buildEmailHtml({ greeting, packLabel, order }),
+            subject,
+            html,
         });
 
         if (emailError) {
@@ -144,6 +158,57 @@ function buildEmailHtml({ greeting, packLabel, order }) {
             <p style="color:rgba(26,26,46,0.4);font-size:13px;margin-top:16px;">
                 You can also access your file from your <a href="${escapeHtml(dashboardUrl)}" style="color:#00a854;">dashboard</a>.
             </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="border-top:1px solid rgba(0,0,0,0.08);padding-top:20px;text-align:center;">
+            <p style="color:rgba(26,26,46,0.3);font-size:12px;margin:0;line-height:1.5;">
+                AlphaStudios - Professional Music Services<br>
+                You received this email because you placed an order on AlphaStudios.
+            </p>
+        </div>
+    </div>
+</body>
+</html>`;
+}
+
+function buildFeedbackEmailHtml({ greeting, packLabel, order }) {
+    const trackTitle = order.track_title || 'your track';
+    const trackArtist = order.track_artist || '';
+    const dashboardUrl = process.env.APP_URL ? `${process.env.APP_URL}/dashboard` : 'https://alphastudios.app/dashboard';
+    const feedbackText = (order.feedback || '').replace(/\n/g, '<br>');
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#f5f7fa;font-family:'Helvetica Neue',Arial,sans-serif;">
+    <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:40px 20px;">
+        <!-- Header -->
+        <div style="text-align:center;padding-bottom:30px;border-bottom:1px solid rgba(0,0,0,0.08);">
+            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="AlphaStudios" style="height:50px;" />
+        </div>
+
+        <!-- Content -->
+        <div style="padding:40px 0;text-align:center;">
+            <h1 style="color:#1a1a2e;font-size:24px;font-weight:700;margin:0 0 10px;">New Feedback on Your Track</h1>
+            <p style="color:rgba(26,26,46,0.6);font-size:16px;margin:0 0 30px;line-height:1.5;">
+                Hey ${escapeHtml(greeting)}, you have new feedback on<br>
+                <strong>${escapeHtml(trackTitle)}${trackArtist ? ` - ${escapeHtml(trackArtist)}` : ''}</strong>
+            </p>
+
+            <!-- Feedback -->
+            <div style="background:rgba(26,26,46,0.03);border:1px solid rgba(26,26,46,0.08);border-radius:12px;padding:24px;margin-bottom:30px;text-align:left;">
+                <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:rgba(26,26,46,0.4);margin-bottom:12px;font-weight:600;">Engineer Feedback</div>
+                <p style="color:#1a1a2e;font-size:15px;line-height:1.7;margin:0;">${feedbackText}</p>
+            </div>
+
+            <!-- CTA Button -->
+            <a href="${escapeHtml(dashboardUrl)}" style="display:inline-block;padding:14px 40px;background:#00a854;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
+                VIEW MY DASHBOARD
+            </a>
         </div>
 
         <!-- Footer -->

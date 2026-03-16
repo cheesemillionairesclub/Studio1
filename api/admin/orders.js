@@ -53,12 +53,13 @@ export default async function handler(req, res) {
             try { body = JSON.parse(body); } catch (e) { body = {}; }
         }
 
-        const { order_id, order_status, receipt_url } = body;
+        const { order_id, order_status, receipt_url, feedback } = body;
         if (!order_id) return res.status(400).json({ error: 'Missing order_id' });
 
         const updates = { updated_at: new Date().toISOString() };
         if (order_status) updates.order_status = order_status;
         if (receipt_url !== undefined) updates.receipt_url = receipt_url;
+        if (feedback !== undefined) updates.feedback = feedback;
 
         const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${order_id}`, {
             method: 'PATCH',
