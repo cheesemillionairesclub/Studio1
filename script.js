@@ -1786,7 +1786,7 @@ function renderGenreSelection() {
 
     // Update placeholder and trigger state
     if (placeholder) {
-        placeholder.textContent = selectedGenres.length >= 1 ? '' : 'Choose a genre...';
+        placeholder.textContent = selectedGenres.length >= 1 ? '' : 'Select your genre';
     }
     if (trigger) {
         trigger.style.display = selectedGenres.length >= 1 ? 'none' : '';

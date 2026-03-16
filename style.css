@@ -1694,16 +1694,16 @@ body {
 /* Inline campaign compact layout */
 .inline-campaign-row {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     align-items: flex-start;
 }
 
 .inline-campaign-row .campaign-field-compact {
-    flex: 1;
+    flex: 1 1 0;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .campaign-label-compact {
@@ -1715,8 +1715,9 @@ body {
 }
 
 .campaign-field-compact .genre-dropdown-trigger {
-    padding: 8px 12px;
-    font-size: 0.8rem;
+    padding: 9px 12px;
+    font-size: 0.82rem;
+    height: 38px;
 }
 
 .campaign-field-compact .genre-selected-tags {
@@ -1730,8 +1731,15 @@ body {
 }
 
 .campaign-input-compact {
-    padding: 8px 12px !important;
-    font-size: 0.8rem !important;
+    padding: 9px 12px !important;
+    font-size: 0.82rem !important;
+    height: 38px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.campaign-field-compact .artist-search-wrapper {
+    width: 100%;
 }
 
 .campaign-field-compact .artist-tags {

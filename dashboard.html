@@ -33,28 +33,29 @@
         /* Success Popup */
         .dash-success-overlay {
             position: fixed; inset: 0; z-index: 99999;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(8px);
             display: flex; align-items: center; justify-content: center;
             opacity: 0; transition: opacity 0.3s ease;
         }
         .dash-success-overlay.visible { opacity: 1; }
         .dash-success-box {
-            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px; padding: 32px; max-width: 380px; width: 90%;
+            background: #ffffff; border: 1px solid rgba(26,26,46,0.08);
+            border-radius: 16px; padding: 36px 32px; max-width: 380px; width: 90%;
             text-align: center; transform: scale(0.95); transition: transform 0.3s ease;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
         }
         .dash-success-overlay.visible .dash-success-box { transform: scale(1); }
         .dash-success-logo { width: 48px; height: 48px; border-radius: 10px; margin-bottom: 16px; }
-        .dash-success-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin: 0 0 8px; }
-        .dash-success-text { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; margin: 0 0 16px; }
-        .dash-success-text strong { color: #fff; }
-        .dash-success-art { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; margin-bottom: 16px; }
+        .dash-success-title { font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin: 0 0 8px; }
+        .dash-success-text { font-size: 0.85rem; color: rgba(26,26,46,0.55); line-height: 1.6; margin: 0 0 20px; }
+        .dash-success-text strong { color: #1a1a2e; }
+        .dash-success-art { display: none; }
         .dash-success-btn {
-            background: #4CAF50; color: #fff; border: none; border-radius: 8px;
+            background: #00a854; color: #fff; border: none; border-radius: 8px;
             padding: 10px 32px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
             transition: background 0.2s;
         }
-        .dash-success-btn:hover { background: #43A047; }
+        .dash-success-btn:hover { background: #008f47; }
 
         .sub-active { background: rgba(76,175,80,0.04); border-color: rgba(76,175,80,0.15); }
         .sub-trial { background: rgba(33,150,243,0.04); border-color: rgba(33,150,243,0.15); }
