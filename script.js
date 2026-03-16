@@ -1317,16 +1317,13 @@ async function handleAudioUpload(file) {
     const countdown = showUploadCountdown();
 
     // Let the countdown render & start animating before any work
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 200));
 
     try {
         generatedArtworkDataUrl = generateTrackArtwork(400);
 
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        // Start upload to Supabase (network — non-blocking)
+        // Start upload to Supabase ONLY (network I/O — does NOT block main thread)
+        // Do NOT start audio decode yet — it freezes the UI on Safari/iOS
         const uploadPromise = uploadTrackFiles(file, generatedArtworkDataUrl).then(urls => {
             if (urls.audioUrl) {
                 window._preUploadedAudioUrl = urls.audioUrl;
@@ -1339,17 +1336,12 @@ async function handleAudioUpload(file) {
             return urls;
         });
 
-        // Start decode (CPU-heavy, may block on Safari/iOS)
-        const decodePromise = file.arrayBuffer().then(ab => audioContext.decodeAudioData(ab));
-
-        // ---- Wait for upload ONLY to cancel countdown ----
-        // Upload is network-bound, does NOT freeze the UI
+        // Wait for upload only — countdown runs smoothly during network wait
         const urls = await uploadPromise;
 
-        // Cancel countdown as soon as upload is done — no more waiting
+        // Upload done — cancel countdown, show preview
         countdown.cancel();
 
-        // Set up selectedTrack with what we have so far
         selectedTrack = {
             title: trackTitle,
             artist: '',
@@ -1361,7 +1353,7 @@ async function handleAudioUpload(file) {
         };
         if (urls.artworkUrl) selectedTrack.artwork = urls.artworkUrl;
 
-        // Show track preview immediately (waveform will fill in later)
+        // Show track preview immediately
         if (uploadDropzone) uploadDropzone.style.display = 'none';
         if (trackPreview) trackPreview.style.display = '';
 
@@ -1388,24 +1380,34 @@ async function handleAudioUpload(file) {
             if (preview) preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 200);
 
-        // ---- Now wait for decode in background, fill in waveform + metadata ----
-        decodePromise.then(decodedBuffer => {
-            audioBuffer = decodedBuffer;
-            const metadata = extractMetadata(file, decodedBuffer);
-            selectedTrack.metadata = metadata;
+        // ---- NOW start decode (after UI is fully shown) ----
+        // This is CPU-heavy and WILL block on Safari/iOS, but the countdown
+        // is already gone and the preview is visible, so user doesn't notice
+        setTimeout(async () => {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const arrayBuffer = await file.arrayBuffer();
+                const decodedBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                audioBuffer = decodedBuffer;
 
-            renderMetaTags(metadata);
+                const metadata = extractMetadata(file, decodedBuffer);
+                selectedTrack.metadata = metadata;
 
-            if (waveformDurationEl) {
-                waveformDurationEl.textContent = formatTime(decodedBuffer.duration);
+                renderMetaTags(metadata);
+
+                if (waveformDurationEl) {
+                    waveformDurationEl.textContent = formatTime(decodedBuffer.duration);
+                }
+
+                requestAnimationFrame(() => drawWaveform(decodedBuffer));
+
+                analyzeWithEssentia(decodedBuffer);
+            } catch (err) {
+                console.error('Audio decode error:', err);
             }
-
-            requestAnimationFrame(() => drawWaveform(decodedBuffer));
-
-            analyzeWithEssentia(decodedBuffer);
-        }).catch(err => {
-            console.error('Audio decode error (background):', err);
-        });
+        }, 300);
 
     } catch (err) {
         countdown.cancel();
