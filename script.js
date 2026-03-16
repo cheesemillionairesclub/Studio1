@@ -2007,10 +2007,20 @@ window.uploadTrackFiles = uploadTrackFiles;
 
 // Launch campaign button
 document.getElementById('launchCampaignBtn').addEventListener('click', async function() {
+    // Helper to update launch button state
+    const launchBtn = document.getElementById('launchCampaignBtn');
+    const originalBtnText = launchBtn ? launchBtn.textContent : '';
+    function setBtnLoading(text) {
+        if (launchBtn) { launchBtn.disabled = true; launchBtn.style.opacity = '0.7'; launchBtn.textContent = text; }
+    }
+    function resetBtn() {
+        if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; launchBtn.textContent = originalBtnText; }
+    }
+
     // If user is NOT logged in, upload files BEFORE OAuth redirect (file is lost after redirect)
     const currentUser = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
     if (!currentUser && uploadedAudioFile) {
-        showToast('Uploading your track...');
+        setBtnLoading('Uploading...');
         const urls = await uploadTrackFiles(uploadedAudioFile, generatedArtworkDataUrl);
         campaignData.track_url = urls.audioUrl;
         if (urls.artworkUrl) campaignData.track_artwork = urls.artworkUrl;
@@ -2071,8 +2081,7 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         release_status: releaseStatus,
     };
 
-    const launchBtn = document.getElementById('launchCampaignBtn');
-    if (launchBtn) { launchBtn.disabled = true; launchBtn.style.opacity = '0.6'; }
+    setBtnLoading('Processing...');
 
     // Check subscription status
     const user = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
@@ -2091,18 +2100,18 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
 
         if (tracksUsed >= tracksLimit) {
             showToast(`You've reached your limit of ${tracksLimit} track${tracksLimit > 1 ? 's' : ''} this month.`);
-            if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
+            resetBtn();
             return;
         }
 
         // Upload files then save order
         try {
-            showToast('Uploading your track...');
+            setBtnLoading('Uploading...');
             const urls = await uploadTrackFiles(uploadedAudioFile, generatedArtworkDataUrl);
             campaignData.track_url = urls.audioUrl;
             if (urls.artworkUrl) campaignData.track_artwork = urls.artworkUrl;
 
-            showToast('Submitting your track...');
+            setBtnLoading('Submitting...');
             const result = await saveOrderToSupabase(campaignData, {
                 session_id: '',
                 customer_email: user.email,
@@ -2112,7 +2121,7 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
 
             if (!result) {
                 showToast('Failed to submit track. Please try again.');
-                if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
+                resetBtn();
                 return;
             }
 
@@ -2133,18 +2142,18 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         } catch (err) {
             console.error('[AlphaStudios] Submit error:', err);
             showToast('Failed to submit track. Please try again.');
-        } finally {
-            if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
+            resetBtn();
         }
     } else {
         // No subscription — upload files first, then save campaign and redirect to Stripe
-        showToast('Uploading your track...');
+        setBtnLoading('Uploading...');
         const urls = await uploadTrackFiles(uploadedAudioFile, generatedArtworkDataUrl);
         campaignData.track_url = urls.audioUrl;
         if (urls.artworkUrl) campaignData.track_artwork = urls.artworkUrl;
 
         localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
 
+        setBtnLoading('Redirecting...');
         fetch('/api/create-checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2156,14 +2165,13 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
                 window.location.href = data.url;
             } else {
                 showToast('Failed to start subscription. Please try again.');
+                resetBtn();
             }
         })
         .catch(err => {
             console.error('[AlphaStudios] Checkout error:', err);
             showToast('Failed to start subscription. Please try again.');
-        })
-        .finally(() => {
-            if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
+            resetBtn();
         });
     }
 });
