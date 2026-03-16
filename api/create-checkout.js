@@ -23,6 +23,7 @@ export default async function handler(req, res) {
     const pack = String(body.pack || '');
     const track_title = body.track_title || '';
     const track_artist = body.track_artist || '';
+    const track_artwork = body.track_artwork || '';
     const track_url = body.track_url || '';
     const genre = body.genre || '';
     const similar_artists = body.similar_artists || '';
@@ -51,6 +52,7 @@ export default async function handler(req, res) {
         pack,
         track_title:     track_title.substring(0, 500),
         track_artist:    track_artist.substring(0, 500),
+        track_artwork:   track_artwork.substring(0, 500),
         track_url:       track_url.substring(0, 500),
         genre:           genre.substring(0, 500),
         similar_artists: similar_artists.substring(0, 500),

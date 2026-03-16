@@ -884,11 +884,79 @@ document.addEventListener('click', (e) => {
 const menuToggle = document.querySelector('.menu-toggle');
 const navLinks = document.querySelector('.nav-links');
 
+// ===== Artwork Generator =====
+function generateTrackArtwork(size = 400) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // Generate 3 random vibrant colors
+    const hue1 = Math.random() * 360;
+    const hue2 = (hue1 + 60 + Math.random() * 120) % 360;
+    const hue3 = (hue2 + 60 + Math.random() * 120) % 360;
+    const c1 = `hsl(${hue1}, 80%, 55%)`;
+    const c2 = `hsl(${hue2}, 75%, 45%)`;
+    const c3 = `hsl(${hue3}, 85%, 50%)`;
+
+    // Base: diagonal gradient
+    const grad1 = ctx.createLinearGradient(0, 0, size, size);
+    grad1.addColorStop(0, c1);
+    grad1.addColorStop(0.5, c2);
+    grad1.addColorStop(1, c3);
+    ctx.fillStyle = grad1;
+    ctx.fillRect(0, 0, size, size);
+
+    // Layer: large radial glow (top-right)
+    const grad2 = ctx.createRadialGradient(size * 0.75, size * 0.2, 0, size * 0.75, size * 0.2, size * 0.7);
+    grad2.addColorStop(0, c1.replace('55%)', '65%)').replace('rgb', 'rgb') );
+    grad2.addColorStop(0, `hsla(${hue1}, 80%, 65%, 0.6)`);
+    grad2.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad2;
+    ctx.fillRect(0, 0, size, size);
+
+    // Layer: second radial glow (bottom-left)
+    const grad3 = ctx.createRadialGradient(size * 0.2, size * 0.8, 0, size * 0.2, size * 0.8, size * 0.65);
+    grad3.addColorStop(0, `hsla(${hue3}, 85%, 60%, 0.5)`);
+    grad3.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad3;
+    ctx.fillRect(0, 0, size, size);
+
+    // Abstract geometric: flowing curves
+    ctx.globalCompositeOperation = 'soft-light';
+    for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        const yOff = size * (0.15 + i * 0.2) + (Math.random() - 0.5) * size * 0.1;
+        ctx.moveTo(-10, yOff);
+        const cp1x = size * 0.3 + Math.random() * size * 0.1;
+        const cp1y = yOff - size * 0.15 + Math.random() * size * 0.3;
+        const cp2x = size * 0.7 + Math.random() * size * 0.1;
+        const cp2y = yOff + size * 0.15 - Math.random() * size * 0.3;
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, size + 10, yOff + (Math.random() - 0.5) * size * 0.2);
+        ctx.lineWidth = size * (0.03 + Math.random() * 0.04);
+        ctx.strokeStyle = [c1, c2, c3][i % 3];
+        ctx.stroke();
+    }
+
+    // Subtle grain overlay
+    ctx.globalCompositeOperation = 'overlay';
+    const grad4 = ctx.createLinearGradient(0, 0, 0, size);
+    grad4.addColorStop(0, 'rgba(255,255,255,0.08)');
+    grad4.addColorStop(0.5, 'transparent');
+    grad4.addColorStop(1, 'rgba(0,0,0,0.12)');
+    ctx.fillStyle = grad4;
+    ctx.fillRect(0, 0, size, size);
+
+    ctx.globalCompositeOperation = 'source-over';
+    return canvas.toDataURL('image/jpeg', 0.85);
+}
+
 // ===== State =====
 let selectedTrack = null;
 let selectedPack = null;
 let genreConfirmed = false;
 let uploadedAudioFile = null;
+let generatedArtworkDataUrl = null;
 let audioContext = null;
 let audioBuffer = null;
 let audioElement = null;
@@ -1088,6 +1156,13 @@ function removeUploadedTrack() {
     audioBuffer = null;
     selectedTrack = null;
     selectedPack = null;
+    generatedArtworkDataUrl = null;
+
+    // Reset artwork to placeholder
+    const artworkEl = document.getElementById('trackPreviewArtwork');
+    if (artworkEl) {
+        artworkEl.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+    }
 
     if (trackPreview) trackPreview.style.display = 'none';
     if (uploadDropzone) uploadDropzone.style.display = '';
@@ -1155,10 +1230,13 @@ async function handleAudioUpload(file) {
 
         // Set selectedTrack (for compatibility with rest of flow)
         const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+        // Generate unique artwork for this track
+        generatedArtworkDataUrl = generateTrackArtwork(400);
+
         selectedTrack = {
             title: trackTitle,
             artist: '',
-            artwork: '',
+            artwork: generatedArtworkDataUrl,
             id: '',
             genre: '',
             file: file,
@@ -1174,6 +1252,12 @@ async function handleAudioUpload(file) {
             // Set title
             const titleEl = document.getElementById('trackPreviewTitle');
             if (titleEl) titleEl.textContent = trackTitle;
+
+            // Set generated artwork
+            const artworkEl = document.getElementById('trackPreviewArtwork');
+            if (artworkEl && generatedArtworkDataUrl) {
+                artworkEl.innerHTML = `<img src="${generatedArtworkDataUrl}" alt="Track artwork">`;
+            }
 
             // Render metadata tags
             renderMetaTags(metadata);
@@ -1591,7 +1675,7 @@ function showCampaignSetup(pack) {
     if (summary && selectedTrack) {
         const safeTitle = escapeHtml(selectedTrack.title);
         const safeArtist = escapeHtml(selectedTrack.artist);
-        const artworkUrl = selectedTrack.artwork ? escapeHtml(selectedTrack.artwork.replace('200x200', '500x500')) : '';
+        const artworkUrl = selectedTrack.artwork ? escapeHtml(selectedTrack.artwork.startsWith('data:') ? selectedTrack.artwork : selectedTrack.artwork.replace('200x200', '500x500')) : '';
         summary.innerHTML = `
             <div class="campaign-summary-track">
                 ${artworkUrl ? `<img src="${artworkUrl}" alt="${safeTitle}" class="campaign-summary-art">` : ''}
@@ -1840,6 +1924,34 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
     const artists = selectedArtists.map(a => a.name).join(', ');
     const releaseStatus = document.querySelector('input[name="releaseStatus"]:checked')?.value || '';
 
+    // Upload generated artwork to Supabase Storage
+    let artworkUrl = '';
+    if (generatedArtworkDataUrl) {
+        try {
+            const signRes = await fetch('/api/upload-artwork', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: `artwork_${Date.now()}.jpg` }),
+            });
+            const signData = await signRes.json();
+            if (signRes.ok && signData.uploadUrl) {
+                // Convert data URL to blob
+                const artBlob = await (await fetch(generatedArtworkDataUrl)).blob();
+                const upRes = await fetch(signData.uploadUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'image/jpeg' },
+                    body: artBlob,
+                });
+                if (upRes.ok) {
+                    artworkUrl = signData.publicUrl;
+                    console.log('[AlphaStudios] Artwork uploaded:', artworkUrl);
+                }
+            }
+        } catch (e) {
+            console.warn('[AlphaStudios] Artwork upload error:', e.message);
+        }
+    }
+
     // Upload audio file to Supabase Storage if available
     let audioUrl = track.id || '';
     if (uploadedAudioFile) {
@@ -1881,6 +1993,7 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         pack: packToSend,
         track_title: track.title || '',
         track_artist: track.artist || '',
+        track_artwork: artworkUrl,
         track_url: audioUrl,
         genre: genre,
         similar_artists: artists,
@@ -1893,7 +2006,8 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         pack: packToSend,
         track_title: track.title || '',
         track_artist: track.artist || '',
-        track_artwork: track.artwork ? track.artwork.replace('200x200', '500x500') : '',
+        track_artwork: artworkUrl || (track.artwork ? track.artwork.replace('200x200', '500x500') : ''),
+        track_url: audioUrl,
         genre: genre,
         similar_artists: selectedArtists.map(a => ({ name: a.name, img: a.img || '' })),
         release_status: releaseStatus,
