@@ -39,15 +39,15 @@
         }
         .dash-success-overlay.visible { opacity: 1; }
         .dash-success-box {
-            background: var(--card-bg, #1a1a2e); border: 1px solid var(--white-10, rgba(255,255,255,0.1));
+            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
             border-radius: 16px; padding: 32px; max-width: 380px; width: 90%;
             text-align: center; transform: scale(0.95); transition: transform 0.3s ease;
         }
         .dash-success-overlay.visible .dash-success-box { transform: scale(1); }
         .dash-success-logo { width: 48px; height: 48px; border-radius: 10px; margin-bottom: 16px; }
-        .dash-success-title { font-size: 1.2rem; font-weight: 700; color: var(--white, #fff); margin: 0 0 8px; }
-        .dash-success-text { font-size: 0.85rem; color: var(--white-50, rgba(255,255,255,0.5)); line-height: 1.6; margin: 0 0 16px; }
-        .dash-success-text strong { color: var(--white, #fff); }
+        .dash-success-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin: 0 0 8px; }
+        .dash-success-text { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; margin: 0 0 16px; }
+        .dash-success-text strong { color: #fff; }
         .dash-success-art { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; margin-bottom: 16px; }
         .dash-success-btn {
             background: #4CAF50; color: #fff; border: none; border-radius: 8px;
@@ -293,7 +293,7 @@
                         ${order.track_artwork ? `<img src="${escapeHtmlAttr(order.track_artwork)}" alt="" class="dash-track-art" onerror="this.style.display='none'">` : '<div class="dash-track-art-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white-30)" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>'}
                         <div>
                             <div class="dash-track-title">${escapeHtmlAttr(order.track_title || 'Unknown Track')}</div>
-                            <div class="dash-track-artist">${escapeHtmlAttr(order.track_artist || 'Unknown Artist')}</div>
+                            ${order.track_artist ? `<div class="dash-track-artist">${escapeHtmlAttr(order.track_artist)}</div>` : ''}
                         </div>
                     </div>
                     <div class="dash-order-status ${statusClass}">${statusText}</div>
@@ -342,11 +342,16 @@
                     </div>`}
                 </div>` : ''}
                 ${order.track_url ? `
-                <div class="dash-original-file">
-                    <a href="${escapeHtmlAttr(order.track_url)}" target="_blank" class="dash-original-link">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                        Original File
-                    </a>
+                <div class="dash-audio-player" data-src="${escapeHtmlAttr(order.track_url)}">
+                    <button class="dash-play-btn" aria-label="Play">
+                        <svg class="dash-play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <svg class="dash-pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    </button>
+                    <div class="dash-waveform-wrap">
+                        <canvas class="dash-waveform" height="40"></canvas>
+                        <div class="dash-waveform-progress"></div>
+                    </div>
+                    <span class="dash-audio-time">0:00</span>
                 </div>` : ''}
                 <div class="dash-order-footer">
                     ${order.receipt_url ? `
@@ -385,10 +390,177 @@
                 }
 
                 orders.forEach(order => grid.appendChild(createOrderCard(order)));
+                // Initialize waveform players after cards are in the DOM
+                initAudioPlayers();
             } catch (e) {
                 const t2 = getT();
                 grid.innerHTML = '<p style="text-align:center;color:var(--white-50);padding:40px;">' + (t2.dashboard_error || 'Failed to load campaigns.') + '</p>';
             }
+        }
+
+        // ===== Audio Waveform Player =====
+        let currentAudioPlayer = null; // Track active player for single-play
+
+        function initAudioPlayers() {
+            document.querySelectorAll('.dash-audio-player').forEach(player => {
+                if (player._initialized) return;
+                player._initialized = true;
+
+                const src = player.dataset.src;
+                const canvas = player.querySelector('.dash-waveform');
+                const playBtn = player.querySelector('.dash-play-btn');
+                const playIcon = player.querySelector('.dash-play-icon');
+                const pauseIcon = player.querySelector('.dash-pause-icon');
+                const progressEl = player.querySelector('.dash-waveform-progress');
+                const timeEl = player.querySelector('.dash-audio-time');
+                const wrapEl = player.querySelector('.dash-waveform-wrap');
+
+                let audio = null;
+                let waveformData = null;
+                let loaded = false;
+
+                // Draw placeholder bars
+                drawWaveform(canvas, null, 0);
+
+                function formatTime(s) {
+                    if (!s || isNaN(s)) return '0:00';
+                    const m = Math.floor(s / 60);
+                    const sec = Math.floor(s % 60);
+                    return m + ':' + (sec < 10 ? '0' : '') + sec;
+                }
+
+                function drawWaveform(cvs, data, progress) {
+                    const ctx = cvs.getContext('2d');
+                    const dpr = window.devicePixelRatio || 1;
+                    const w = cvs.clientWidth;
+                    const h = cvs.clientHeight;
+                    cvs.width = w * dpr;
+                    cvs.height = h * dpr;
+                    ctx.scale(dpr, dpr);
+                    ctx.clearRect(0, 0, w, h);
+
+                    const bars = Math.floor(w / 3.5);
+                    const barW = 2;
+                    const gap = (w - bars * barW) / (bars - 1);
+                    const mid = h / 2;
+
+                    const style = getComputedStyle(document.documentElement);
+                    const baseColor = style.getPropertyValue('--white-15').trim() || 'rgba(0,0,0,0.1)';
+                    const activeColor = style.getPropertyValue('--green-primary').trim() || '#00a854';
+
+                    for (let i = 0; i < bars; i++) {
+                        const x = i * (barW + gap);
+                        const val = data ? data[Math.floor(i * data.length / bars)] : (0.2 + Math.random() * 0.3);
+                        const barH = Math.max(2, val * (h - 4));
+                        const progressFrac = progress || 0;
+                        const isFilled = (i / bars) <= progressFrac;
+
+                        ctx.fillStyle = isFilled ? activeColor : baseColor;
+                        ctx.beginPath();
+                        ctx.roundRect(x, mid - barH / 2, barW, barH, 1);
+                        ctx.fill();
+                    }
+                }
+
+                async function loadAudio() {
+                    if (loaded) return;
+                    loaded = true;
+                    audio = new Audio();
+                    audio.crossOrigin = 'anonymous';
+                    audio.preload = 'auto';
+                    audio.src = src;
+
+                    // Decode waveform
+                    try {
+                        const resp = await fetch(src);
+                        const buf = await resp.arrayBuffer();
+                        const actx = new (window.AudioContext || window.webkitAudioContext)();
+                        const decoded = await actx.decodeAudioData(buf);
+                        const raw = decoded.getChannelData(0);
+                        const samples = 200;
+                        const blockSize = Math.floor(raw.length / samples);
+                        waveformData = [];
+                        for (let i = 0; i < samples; i++) {
+                            let sum = 0;
+                            for (let j = 0; j < blockSize; j++) {
+                                sum += Math.abs(raw[i * blockSize + j]);
+                            }
+                            waveformData.push(sum / blockSize);
+                        }
+                        // Normalize
+                        const max = Math.max(...waveformData) || 1;
+                        waveformData = waveformData.map(v => v / max);
+                        drawWaveform(canvas, waveformData, 0);
+                        actx.close();
+                    } catch (e) {
+                        console.warn('[Dashboard] Waveform decode failed:', e);
+                    }
+
+                    audio.addEventListener('timeupdate', () => {
+                        const prog = audio.duration ? audio.currentTime / audio.duration : 0;
+                        progressEl.style.width = (prog * 100) + '%';
+                        timeEl.textContent = formatTime(audio.currentTime);
+                        drawWaveform(canvas, waveformData, prog);
+                    });
+
+                    audio.addEventListener('ended', () => {
+                        playIcon.style.display = '';
+                        pauseIcon.style.display = 'none';
+                        progressEl.style.width = '0%';
+                        drawWaveform(canvas, waveformData, 0);
+                        timeEl.textContent = formatTime(audio.duration);
+                        currentAudioPlayer = null;
+                    });
+
+                    audio.addEventListener('loadedmetadata', () => {
+                        timeEl.textContent = formatTime(audio.duration);
+                    });
+                }
+
+                playBtn.addEventListener('click', async () => {
+                    await loadAudio();
+                    if (!audio) return;
+
+                    // Stop other player
+                    if (currentAudioPlayer && currentAudioPlayer !== audio) {
+                        currentAudioPlayer.pause();
+                        const otherPlayer = currentAudioPlayer._playerEl;
+                        if (otherPlayer) {
+                            otherPlayer.querySelector('.dash-play-icon').style.display = '';
+                            otherPlayer.querySelector('.dash-pause-icon').style.display = 'none';
+                        }
+                    }
+
+                    if (audio.paused) {
+                        audio.play();
+                        audio._playerEl = player;
+                        currentAudioPlayer = audio;
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = '';
+                    } else {
+                        audio.pause();
+                        currentAudioPlayer = null;
+                        playIcon.style.display = '';
+                        pauseIcon.style.display = 'none';
+                    }
+                });
+
+                // Click on waveform to seek
+                wrapEl.addEventListener('click', async (e) => {
+                    await loadAudio();
+                    if (!audio || !audio.duration) return;
+                    const rect = wrapEl.getBoundingClientRect();
+                    const frac = (e.clientX - rect.left) / rect.width;
+                    audio.currentTime = frac * audio.duration;
+                    if (audio.paused) {
+                        audio.play();
+                        audio._playerEl = player;
+                        currentAudioPlayer = audio;
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = '';
+                    }
+                });
+            });
         }
 
         async function init() {
