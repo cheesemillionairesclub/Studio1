@@ -472,6 +472,7 @@
                             // Increment track count
                             const profile = await BeatpushAuth.getProfile();
                             const token = BeatpushAuth.getToken();
+                            const newCount = (profile?.tracks_used_this_month || 0) + 1;
                             const patchRes = await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
                                 method: 'PATCH',
                                 headers: {
@@ -479,9 +480,9 @@
                                     'Authorization': `Bearer ${token}`,
                                     'apikey': BeatpushAuth.supabaseKey,
                                 },
-                                body: JSON.stringify({ tracks_used_this_month: (profile?.tracks_used_this_month || 0) + 1 }),
+                                body: JSON.stringify({ tracks_used_this_month: newCount }),
                             });
-                            console.log('[Dashboard] Track count updated:', patchRes.ok);
+                            console.log('[Dashboard] Track count updated:', patchRes.ok, 'new count:', newCount);
 
                             // Show success popup
                             showSubscriptionSuccess(campaign);
