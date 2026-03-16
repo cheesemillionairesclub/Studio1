@@ -1531,9 +1531,12 @@ document.getElementById('genreConfirmBtn').addEventListener('click', function() 
 });
 
 // Tips toggle
-document.getElementById('tipsToggle').addEventListener('click', function() {
-    this.closest('.campaign-tips').classList.toggle('open');
-});
+const tipsToggleEl = document.getElementById('tipsToggle');
+if (tipsToggleEl) {
+    tipsToggleEl.addEventListener('click', function() {
+        this.closest('.campaign-tips').classList.toggle('open');
+    });
+}
 
 // Launch campaign button
 document.getElementById('launchCampaignBtn').addEventListener('click', function() {
