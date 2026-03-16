@@ -1395,10 +1395,20 @@ async function analyzeWithEssentia(buffer) {
             throw new Error('Essentia not available');
         }
 
-        // Convert AudioBuffer to mono Float32Array then to Essentia vector
-        const monoData = buffer.numberOfChannels > 1
-            ? essentiaInstance.audioBufferToMono(buffer)
-            : buffer.getChannelData(0);
+        // Convert AudioBuffer to mono Float32Array
+        let monoData;
+        if (buffer.numberOfChannels === 1) {
+            monoData = buffer.getChannelData(0);
+        } else {
+            // Manual downmix: average all channels
+            const len = buffer.length;
+            monoData = new Float32Array(len);
+            const ch0 = buffer.getChannelData(0);
+            const ch1 = buffer.getChannelData(1);
+            for (let i = 0; i < len; i++) {
+                monoData[i] = (ch0[i] + ch1[i]) / 2;
+            }
+        }
         const audioVector = essentiaInstance.arrayToVector(monoData);
 
         console.log('[Essentia] Analyzing', monoData.length, 'samples at', buffer.sampleRate, 'Hz');
