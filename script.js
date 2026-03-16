@@ -1442,7 +1442,8 @@ function pollCyaniteResults(analysisId, attempt = 0) {
 
     cyanitePollTimer = setTimeout(async () => {
         try {
-            const res = await fetch(`/api/cyanite-result?id=${encodeURIComponent(analysisId)}`);
+            // Poll our own DB (populated by Cyanite webhook)
+            const res = await fetch(`/api/track-analysis?cyanite_id=${encodeURIComponent(analysisId)}`);
             const data = await res.json();
 
             console.log('[Cyanite] Poll result:', data.status, data);
@@ -1460,7 +1461,7 @@ function pollCyaniteResults(analysisId, attempt = 0) {
                     analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">Analysis failed</span>';
                 }
             } else {
-                // Still processing, poll again
+                // Still processing (webhook hasn't arrived yet), poll again
                 pollCyaniteResults(analysisId, attempt + 1);
             }
         } catch (err) {
