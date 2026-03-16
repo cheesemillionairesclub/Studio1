@@ -1989,20 +1989,7 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         }
     }
 
-    const requestBody = {
-        pack: packToSend,
-        track_title: track.title || '',
-        track_artist: track.artist || '',
-        track_artwork: artworkUrl,
-        track_url: audioUrl,
-        genre: genre,
-        similar_artists: artists,
-        release_status: releaseStatus,
-    };
-    console.log('[AlphaStudios] Request body:', JSON.stringify(requestBody));
-
-    // Save rich campaign data for confirmation popup on return
-    localStorage.setItem('alphastudios_pending_campaign', JSON.stringify({
+    const campaignData = {
         pack: packToSend,
         track_title: track.title || '',
         track_artist: track.artist || '',
@@ -2011,42 +1998,87 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         genre: genre,
         similar_artists: selectedArtists.map(a => ({ name: a.name, img: a.img || '' })),
         release_status: releaseStatus,
-    }));
+    };
 
     const launchBtn = document.getElementById('launchCampaignBtn');
-    if (launchBtn) {
-        launchBtn.disabled = true;
-        launchBtn.style.opacity = '0.6';
+    if (launchBtn) { launchBtn.disabled = true; launchBtn.style.opacity = '0.6'; }
+
+    // Check subscription status
+    const user = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
+    let profile = null;
+    if (user) {
+        try { profile = await BeatpushAuth.getProfile(); } catch (e) {}
     }
 
-    fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-    })
-    .then(r => {
-        console.log('[AlphaStudios] API response status:', r.status);
-        return r.json();
-    })
-    .then(data => {
-        console.log('[AlphaStudios] API response:', JSON.stringify(data));
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            console.warn('[AlphaStudios] No URL in response, using fallback Payment Link');
-            window.open(STRIPE_LINKS[packToSend], '_blank');
+    const subStatus = profile?.subscription_status;
+    const hasSubscription = subStatus === 'active' || subStatus === 'trialing';
+
+    if (hasSubscription) {
+        // User is subscribed — check track limit
+        const tracksUsed = profile.tracks_used_this_month || 0;
+        const tracksLimit = subStatus === 'trialing' ? 1 : 5;
+
+        if (tracksUsed >= tracksLimit) {
+            showToast(`You've reached your limit of ${tracksLimit} track${tracksLimit > 1 ? 's' : ''} this month.`);
+            if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
+            return;
         }
-    })
-    .catch((err) => {
-        console.error('[AlphaStudios] Fetch error:', err);
-        window.open(STRIPE_LINKS[packToSend], '_blank');
-    })
-    .finally(() => {
-        if (launchBtn) {
-            launchBtn.disabled = false;
-            launchBtn.style.opacity = '';
+
+        // Save order directly (no Stripe checkout needed)
+        try {
+            showToast('Submitting your track...');
+            await saveOrderToSupabase(campaignData, {
+                session_id: '',
+                customer_email: user.email,
+                amount_total: 0,
+                currency: 'eur',
+            });
+
+            // Increment tracks_used_this_month
+            const token = BeatpushAuth.getToken();
+            await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'apikey': BeatpushAuth.supabaseKey,
+                },
+                body: JSON.stringify({ tracks_used_this_month: tracksUsed + 1 }),
+            });
+
+            // Redirect to dashboard
+            window.location.href = '/dashboard';
+        } catch (err) {
+            console.error('[AlphaStudios] Submit error:', err);
+            showToast('Failed to submit track. Please try again.');
+        } finally {
+            if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
         }
-    });
+    } else {
+        // No subscription — save campaign data and redirect to subscription checkout
+        localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
+
+        fetch('/api/create-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: user?.id || '', user_email: user?.email || '' }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                showToast('Failed to start subscription. Please try again.');
+            }
+        })
+        .catch(err => {
+            console.error('[AlphaStudios] Checkout error:', err);
+            showToast('Failed to start subscription. Please try again.');
+        })
+        .finally(() => {
+            if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
+        });
+    }
 });
 
 // ===== Field Highlight =====
@@ -2183,49 +2215,15 @@ function showPaymentConfirmation(campaign, paymentData) {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 }
 
+// Handle post-checkout return (subscription mode redirects to /dashboard,
+// but handle here as fallback for any /?session_id=... landing)
 (function() {
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
     if (!sessionId) return;
 
-    // Clean URL
-    window.history.replaceState({}, '', window.location.pathname);
-
-    // Retrieve saved campaign data
-    let campaign = {};
-    try {
-        campaign = JSON.parse(localStorage.getItem('alphastudios_pending_campaign') || '{}');
-        localStorage.removeItem('alphastudios_pending_campaign');
-    } catch (e) {}
-
-    fetch(`/api/checkout-success?session_id=${encodeURIComponent(sessionId)}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.status === 'paid') {
-                // Merge API metadata with local campaign data
-                if (!campaign.track_title && data.metadata) {
-                    campaign.track_title = data.metadata.track_title || '';
-                    campaign.track_artist = data.metadata.track_artist || '';
-                    campaign.pack = data.metadata.pack || '';
-                    campaign.genre = data.metadata.genre || '';
-                }
-                // Save order to Supabase
-                if (typeof saveOrderToSupabase === 'function') {
-                    saveOrderToSupabase(campaign, {
-                        session_id: sessionId,
-                        customer_email: data.customer_email,
-                        amount_total: data.amount_total,
-                        currency: data.currency,
-                    });
-                }
-                showPaymentConfirmation(campaign, data);
-            } else {
-                showPaymentConfirmation(campaign, data);
-            }
-        })
-        .catch(() => {
-            showPaymentConfirmation(campaign, null);
-        });
+    // Subscription checkout redirects to /dashboard — redirect there
+    window.location.href = `/dashboard?session_id=${encodeURIComponent(sessionId)}`;
 })();
 
 // ===== FAQ Toggle =====

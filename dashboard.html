@@ -10,6 +10,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=3">
     <style>
+        /* Subscription Banner */
+        .sub-banner {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; border-radius: 12px; margin-bottom: 24px;
+            border: 1px solid var(--white-10); flex-wrap: wrap; gap: 10px;
+        }
+        .sub-banner-left, .sub-banner-right { display: flex; align-items: center; gap: 10px; }
+        .sub-badge {
+            padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+        }
+        .sub-badge.active { background: rgba(76,175,80,0.15); color: #4CAF50; }
+        .sub-badge.trial { background: rgba(33,150,243,0.15); color: #2196F3; }
+        .sub-badge.inactive { background: rgba(255,82,82,0.15); color: #ff5252; }
+        .sub-status { font-size: 0.85rem; color: var(--white-50); }
+        .sub-tracks { font-size: 0.85rem; font-weight: 600; color: var(--white-70); }
+        .sub-trial-note { font-size: 0.7rem; color: var(--white-30); }
+        .sub-reactivate {
+            padding: 6px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+            background: #4CAF50; color: #fff; text-decoration: none;
+        }
+        .sub-active { background: rgba(76,175,80,0.04); border-color: rgba(76,175,80,0.15); }
+        .sub-trial { background: rgba(33,150,243,0.04); border-color: rgba(33,150,243,0.15); }
+        .sub-inactive, .sub-none { background: rgba(255,82,82,0.04); border-color: rgba(255,82,82,0.15); }
+
         .dash-feedback-actions {
             display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;
         }
@@ -171,6 +195,8 @@
                 <h2 class="section-title" data-i18n="dashboard_title">Your Campaign Dashboard</h2>
                 <p class="section-desc" data-i18n="dashboard_desc">Track the status of all your promotions.</p>
             </div>
+            <!-- Subscription Banner -->
+            <div id="subscriptionBanner" style="display:none;"></div>
             <div class="dashboard-grid" id="dashboardGrid">
                 <div class="dashboard-loading">
                     <div class="search-spinner" style="display:block;width:32px;height:32px;margin:40px auto;"></div>
@@ -347,10 +373,114 @@
                 return;
             }
 
+            await renderSubscriptionBanner();
             loadDashboard();
+
+            // Handle ?session_id for post-checkout return
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+            if (sessionId) {
+                window.history.replaceState({}, '', '/dashboard');
+                // Save pending campaign if exists
+                try {
+                    const campaign = JSON.parse(localStorage.getItem('alphastudios_pending_campaign') || '{}');
+                    localStorage.removeItem('alphastudios_pending_campaign');
+                    if (campaign.track_title) {
+                        const res = await fetch(`/api/checkout-success?session_id=${encodeURIComponent(sessionId)}`);
+                        const data = await res.json();
+                        await saveOrderToSupabase(campaign, {
+                            session_id: sessionId,
+                            customer_email: data.customer_email || user.email,
+                            amount_total: 0,
+                            currency: 'eur',
+                        });
+                        // Increment track count
+                        const profile = await BeatpushAuth.getProfile();
+                        const token = BeatpushAuth.getToken();
+                        await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`,
+                                'apikey': BeatpushAuth.supabaseKey,
+                            },
+                            body: JSON.stringify({ tracks_used_this_month: (profile?.tracks_used_this_month || 0) + 1 }),
+                        });
+                        await renderSubscriptionBanner();
+                        loadDashboard();
+                    }
+                } catch (e) {
+                    console.error('Post-checkout save error:', e);
+                }
+            }
 
             // Re-render cards when language changes
             window.addEventListener('alphastudios-langchange', () => loadDashboard());
+        }
+
+        // ===== Subscription Banner =====
+        async function renderSubscriptionBanner() {
+            const banner = document.getElementById('subscriptionBanner');
+            if (!banner) return;
+
+            const profile = await BeatpushAuth.getProfile();
+            if (!profile) { banner.style.display = 'none'; return; }
+
+            const status = profile.subscription_status || 'none';
+            const tracksUsed = profile.tracks_used_this_month || 0;
+
+            if (status === 'active') {
+                const tracksLeft = 5 - tracksUsed;
+                banner.style.display = '';
+                banner.innerHTML = `
+                    <div class="sub-banner sub-active">
+                        <div class="sub-banner-left">
+                            <span class="sub-badge active">Pro Plan</span>
+                            <span class="sub-status">Active</span>
+                        </div>
+                        <div class="sub-banner-right">
+                            <span class="sub-tracks">${tracksLeft}/5 tracks remaining</span>
+                        </div>
+                    </div>`;
+            } else if (status === 'trialing') {
+                const trialEnd = profile.trial_end ? new Date(profile.trial_end) : null;
+                const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd - Date.now()) / 86400000)) : 0;
+                const tracksLeft = 1 - tracksUsed;
+                banner.style.display = '';
+                banner.innerHTML = `
+                    <div class="sub-banner sub-trial">
+                        <div class="sub-banner-left">
+                            <span class="sub-badge trial">Free Trial</span>
+                            <span class="sub-status">${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining</span>
+                        </div>
+                        <div class="sub-banner-right">
+                            <span class="sub-tracks">${Math.max(0, tracksLeft)}/1 track remaining</span>
+                            <span class="sub-trial-note">Feedback only &middot; Mastering locked</span>
+                        </div>
+                    </div>`;
+            } else if (status === 'canceled' || status === 'unpaid') {
+                banner.style.display = '';
+                banner.innerHTML = `
+                    <div class="sub-banner sub-inactive">
+                        <div class="sub-banner-left">
+                            <span class="sub-badge inactive">${status === 'unpaid' ? 'Payment Failed' : 'Canceled'}</span>
+                        </div>
+                        <div class="sub-banner-right">
+                            <a href="/" class="sub-reactivate">Reactivate Subscription</a>
+                        </div>
+                    </div>`;
+            } else {
+                banner.style.display = '';
+                banner.innerHTML = `
+                    <div class="sub-banner sub-none">
+                        <div class="sub-banner-left">
+                            <span class="sub-badge inactive">No Subscription</span>
+                        </div>
+                        <div class="sub-banner-right">
+                            <a href="/" class="sub-reactivate">Start Free Trial</a>
+                        </div>
+                    </div>`;
+            }
         }
 
         // ===== Re-upload Modal =====
