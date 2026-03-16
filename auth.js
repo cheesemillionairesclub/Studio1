@@ -304,32 +304,37 @@
                         console.error('[AlphaStudios] Failed to restore campaign state:', e);
                     }
                 } else {
-                    // No subscription — save campaign data then redirect to Stripe Checkout
+                    // No subscription — redirect to Stripe Checkout
+                    // Campaign data with uploaded URLs is already in localStorage
+                    // (saved before OAuth redirect in script.js)
                     console.log('[AlphaStudios] Post-login: redirecting to Stripe Checkout');
-                    try {
-                        // Build campaign from saved state for post-checkout order creation
-                        const savedTrack = localStorage.getItem('alphastudios_pending_track');
-                        const savedPack = localStorage.getItem('alphastudios_pending_pack');
-                        const savedArtists = localStorage.getItem('alphastudios_pending_artists');
-                        const track = savedTrack ? JSON.parse(savedTrack) : {};
-                        const artists = savedArtists ? JSON.parse(savedArtists) : [];
-                        const preAudioUrl = localStorage.getItem('alphastudios_pending_audio_url') || '';
-                        const preArtworkUrl = localStorage.getItem('alphastudios_pending_artwork_url') || '';
-                        localStorage.setItem('alphastudios_pending_campaign', JSON.stringify({
-                            pack: savedPack || 'pro',
-                            track_title: track.title || '',
-                            track_artist: track.artist || '',
-                            track_artwork: preArtworkUrl || track.artwork || '',
-                            track_url: preAudioUrl || track.id || '',
-                            genre: track.genre || '',
-                            similar_artists: artists,
-                            release_status: '',
-                        }));
-                        // Clean up individual saved items
-                        localStorage.removeItem('alphastudios_pending_track');
-                        localStorage.removeItem('alphastudios_pending_pack');
-                        localStorage.removeItem('alphastudios_pending_artists');
-                    } catch (e) {}
+                    const existingCampaign = localStorage.getItem('alphastudios_pending_campaign');
+                    if (!existingCampaign) {
+                        // Fallback: build campaign from individual saved items
+                        try {
+                            const savedTrack = localStorage.getItem('alphastudios_pending_track');
+                            const savedPack = localStorage.getItem('alphastudios_pending_pack');
+                            const savedArtists = localStorage.getItem('alphastudios_pending_artists');
+                            const track = savedTrack ? JSON.parse(savedTrack) : {};
+                            const artists = savedArtists ? JSON.parse(savedArtists) : [];
+                            localStorage.setItem('alphastudios_pending_campaign', JSON.stringify({
+                                pack: savedPack || 'pro',
+                                track_title: track.title || '',
+                                track_artist: track.artist || '',
+                                track_artwork: track.artwork || '',
+                                track_url: track.id || '',
+                                genre: track.genre || '',
+                                similar_artists: artists,
+                                release_status: '',
+                            }));
+                        } catch (e) {}
+                    }
+                    // Clean up individual saved items
+                    localStorage.removeItem('alphastudios_pending_track');
+                    localStorage.removeItem('alphastudios_pending_pack');
+                    localStorage.removeItem('alphastudios_pending_artists');
+                    localStorage.removeItem('alphastudios_pending_audio_url');
+                    localStorage.removeItem('alphastudios_pending_artwork_url');
                     try {
                         const res = await fetch('/api/create-checkout', {
                             method: 'POST',
