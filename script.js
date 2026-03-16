@@ -1304,13 +1304,13 @@ async function handleAudioUpload(file) {
             metadata: metadata
         };
 
-        // Show countdown overlay then reveal track preview
+        // Show countdown inside the dropzone, then reveal track preview
         if (progressEl) progressEl.style.display = 'none';
-        if (uploadDropzone) uploadDropzone.style.display = 'none';
 
         await showUploadCountdown();
 
-        // Reveal track preview
+        // Hide dropzone and show track preview
+        if (uploadDropzone) uploadDropzone.style.display = 'none';
         if (trackPreview) trackPreview.style.display = '';
 
         // Set title
