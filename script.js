@@ -1191,9 +1191,21 @@ function showUploadCountdown() {
     if (!dropzone) return { cancel: () => {} };
 
     const originalContent = dropzone.innerHTML;
-    const DURATION = 10; // seconds
 
-    // 100% CSS-driven countdown — runs on compositor thread, NEVER freezes
+    // Build number spans (10 → 0) and message spans — all CSS animated, ZERO JS
+    const nums = [];
+    for (let i = 10; i >= 0; i--) nums.push(`<span class="cd-n" style="animation-delay:${(10 - i)}s">${i}</span>`);
+
+    const msgs = [
+        { t: 'Uploading your track...', d: 0 },
+        { t: 'Reading audio data...', d: 2 },
+        { t: 'Analyzing frequencies...', d: 4 },
+        { t: 'Detecting BPM & key...', d: 6 },
+        { t: 'Measuring loudness...', d: 8 },
+        { t: 'Almost there! We are as excited as you are!', d: 10 },
+    ];
+    const msgSpans = msgs.map(m => `<span class="cd-m" style="animation-delay:${m.d}s">${m.t}</span>`);
+
     dropzone.innerHTML = `
         <div class="cd-wrap">
             <div class="cd-ring-wrap">
@@ -1204,13 +1216,13 @@ function showUploadCountdown() {
                 </svg>
                 <img class="cd-icon" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" width="32" height="32">
             </div>
-            <div class="cd-num-wrap"><span class="cd-num"></span></div>
-            <span class="cd-text"></span>
+            <div class="cd-nums">${nums.join('')}</div>
+            <div class="cd-msgs">${msgSpans.join('')}</div>
             <div class="cd-dots"><span></span><span></span><span></span></div>
         </div>
     `;
 
-    // Inject styles once — ALL animations are CSS, no JS intervals
+    // Inject styles once — 100% CSS, zero JS animation code
     if (!document.getElementById('cd-styles')) {
         const s = document.createElement('style');
         s.id = 'cd-styles';
@@ -1218,91 +1230,34 @@ function showUploadCountdown() {
             .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 0;animation:cd-in .35s ease}
             .cd-ring-wrap{position:relative;width:80px;height:80px}
             .cd-ring{width:100%;height:100%;color:var(--text-primary,#333)}
-            .cd-ring-fill{animation:cd-ring-progress ${DURATION}s linear forwards}
+            .cd-ring-fill{animation:cd-ring-anim 10s linear forwards}
             .cd-icon{position:absolute;top:50%;left:50%;width:32px;height:32px;border-radius:50%;object-fit:cover;transform:translate(-50%,-50%);animation:cd-spin 3s linear infinite}
-            .cd-num-wrap{height:1.8rem;overflow:hidden}
-            .cd-num{display:block;font-size:1.6rem;font-weight:800;color:var(--green-primary,#00a854);font-variant-numeric:tabular-nums;line-height:1.8rem;animation:cd-count ${DURATION}s steps(1) forwards}
-            .cd-text{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;min-height:1.2em;animation:cd-msgs ${DURATION}s steps(1) forwards}
+
+            .cd-nums{position:relative;height:1.8rem;width:3rem;text-align:center}
+            .cd-n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:var(--green-primary,#00a854);font-variant-numeric:tabular-nums;opacity:0;animation:cd-show 1s steps(1) forwards}
+            .cd-n:first-child{opacity:1}
+
+            .cd-msgs{position:relative;height:1.2em;min-width:200px;text-align:center}
+            .cd-m{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;opacity:0;animation:cd-show 2s steps(1) forwards}
+            .cd-m:first-child{opacity:1}
+            .cd-m:last-child{animation:cd-show-last 2s steps(1) forwards}
+
             .cd-dots{display:flex;gap:5px}
             .cd-dots span{width:6px;height:6px;border-radius:50%;background:var(--green-primary,#00a854);opacity:.25;animation:cd-bounce 1.4s ease-in-out infinite}
             .cd-dots span:nth-child(2){animation-delay:.2s}
             .cd-dots span:nth-child(3){animation-delay:.4s}
-            .cd-wait-text{font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;animation:cd-fade 2s ease-in-out infinite;text-align:center}
+
             @keyframes cd-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
             @keyframes cd-spin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
             @keyframes cd-bounce{0%,80%,100%{opacity:.25;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
-            @keyframes cd-fade{0%,100%{opacity:.5}50%{opacity:1}}
-            @keyframes cd-ring-progress{
-                0%{stroke-dashoffset:0}
-                100%{stroke-dashoffset:226.195}
-            }
-            @keyframes cd-count{
-                0%{content:"10"} 0.1%{content:"10"}
-                10%{content:"9"} 10.1%{content:"9"}
-                20%{content:"8"} 20.1%{content:"8"}
-                30%{content:"7"} 30.1%{content:"7"}
-                40%{content:"6"} 40.1%{content:"6"}
-                50%{content:"5"} 50.1%{content:"5"}
-                60%{content:"4"} 60.1%{content:"4"}
-                70%{content:"3"} 70.1%{content:"3"}
-                80%{content:"2"} 80.1%{content:"2"}
-                90%{content:"1"} 90.1%{content:"1"}
-                100%{content:"0"}
-            }
-            @keyframes cd-msgs{
-                0%{content:"Uploading your track..."}
-                20%{content:"Reading audio data..."}
-                40%{content:"Analyzing frequencies..."}
-                60%{content:"Detecting BPM & key..."}
-                80%{content:"Measuring loudness..."}
-                100%{content:"Almost there..."}
-            }
+            @keyframes cd-ring-anim{0%{stroke-dashoffset:0}100%{stroke-dashoffset:226.195}}
+            @keyframes cd-show{0%{opacity:0}0.1%{opacity:1}99.9%{opacity:1}100%{opacity:0}}
+            @keyframes cd-show-last{0%{opacity:0}0.1%{opacity:1}100%{opacity:1}}
         `;
         document.head.appendChild(s);
     }
 
-    // Use CSS content property for number and text (works via ::after pseudo-elements won't work on span directly)
-    // Fallback: set initial content and use animation on the elements directly
-    const numEl = dropzone.querySelector('.cd-num');
-    const textEl = dropzone.querySelector('.cd-text');
-    if (numEl) numEl.textContent = '10';
-    if (textEl) textEl.textContent = 'Uploading your track...';
-
-    // CSS content animation doesn't work on regular elements — use a lightweight rAF loop instead
-    // rAF runs at paint time and is NOT blocked by heavy JS like setInterval is on Safari
-    let startTime = performance.now();
-    let rafId;
-    let done = false;
-
-    function tick() {
-        if (done) return;
-        const elapsed = (performance.now() - startTime) / 1000;
-        const remaining = Math.max(0, Math.ceil(DURATION - elapsed));
-
-        if (numEl) numEl.textContent = remaining;
-
-        const msgs = ['Uploading your track...', 'Reading audio data...', 'Analyzing frequencies...', 'Detecting BPM & key...', 'Measuring loudness...'];
-        const msgIdx = Math.min(Math.floor(elapsed / 2), msgs.length - 1);
-        if (textEl) textEl.textContent = msgs[msgIdx];
-
-        if (elapsed >= DURATION && !done) {
-            // Timer expired — show waiting message
-            if (numEl) numEl.style.display = 'none';
-            if (textEl) {
-                textEl.className = 'cd-wait-text';
-                textEl.textContent = 'Almost there! We are as excited as you are!';
-            }
-            return; // stop rAF, but don't resolve — wait for cancel()
-        }
-
-        rafId = requestAnimationFrame(tick);
-    }
-    rafId = requestAnimationFrame(tick);
-
     const cancel = () => {
-        if (done) return;
-        done = true;
-        cancelAnimationFrame(rafId);
         dropzone.innerHTML = originalContent;
     };
 
