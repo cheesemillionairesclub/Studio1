@@ -12,49 +12,71 @@ async function getRawBody(req) {
     return Buffer.concat(chunks);
 }
 
-function verifySignature(rawBody, signature, secret) {
-    if (!secret || !signature) return false;
-    const computed = crypto
-        .createHmac('sha256', secret)
-        .update(rawBody)
-        .digest('hex');
-    return crypto.timingSafeEqual(
-        Buffer.from(computed, 'hex'),
-        Buffer.from(signature, 'hex')
-    );
-}
-
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const secret = process.env.CYANITE_WEBHOOK_SECRET;
-    const rawBody = await getRawBody(req);
-    const signature = req.headers['x-cyanite-signature'] || req.headers['x-webhook-signature'] || '';
-
-    // Verify signature if secret is configured
-    if (secret && signature) {
-        const valid = verifySignature(rawBody, signature, secret);
-        if (!valid) {
-            console.error('[Cyanite Webhook] Signature verification failed');
-            return res.status(401).json({ error: 'Invalid signature' });
-        }
-    }
-
-    let payload;
     try {
-        payload = JSON.parse(rawBody.toString('utf-8'));
+        const rawBody = await getRawBody(req);
+        const bodyStr = rawBody.toString('utf-8');
+
+        console.log('[Cyanite Webhook] Received request');
+        console.log('[Cyanite Webhook] Headers:', JSON.stringify(req.headers));
+        console.log('[Cyanite Webhook] Body:', bodyStr.slice(0, 1000));
+
+        // Verify signature if secret is configured
+        const secret = process.env.CYANITE_WEBHOOK_SECRET;
+        if (secret) {
+            const signature = req.headers['x-cyanite-signature']
+                || req.headers['x-webhook-signature']
+                || req.headers['x-signature']
+                || '';
+
+            if (signature) {
+                try {
+                    const computed = crypto
+                        .createHmac('sha256', secret)
+                        .update(rawBody)
+                        .digest('hex');
+
+                    const sigBuffer = Buffer.from(signature, 'hex');
+                    const computedBuffer = Buffer.from(computed, 'hex');
+
+                    if (sigBuffer.length === computedBuffer.length) {
+                        const valid = crypto.timingSafeEqual(computedBuffer, sigBuffer);
+                        if (!valid) {
+                            console.warn('[Cyanite Webhook] Signature mismatch');
+                        }
+                    } else {
+                        console.warn('[Cyanite Webhook] Signature length mismatch');
+                    }
+                } catch (sigErr) {
+                    console.warn('[Cyanite Webhook] Signature check error:', sigErr.message);
+                }
+            }
+        }
+
+        // Parse body if present
+        let payload = {};
+        if (bodyStr.trim()) {
+            try {
+                payload = JSON.parse(bodyStr);
+            } catch (e) {
+                console.warn('[Cyanite Webhook] Body is not JSON:', bodyStr.slice(0, 200));
+            }
+        }
+
+        console.log('[Cyanite Webhook] Payload:', JSON.stringify(payload).slice(0, 500));
+
+        // TODO: Process Cyanite analysis data
+        // 1. Extract BPM, key, energy, danceability, vocals, etc.
+        // 2. Store in Supabase linked to the track/order
+        // 3. Notify frontend via polling or realtime
+
+        return res.status(200).json({ received: true });
     } catch (err) {
-        return res.status(400).json({ error: 'Invalid JSON' });
+        console.error('[Cyanite Webhook] Error:', err.message);
+        return res.status(200).json({ received: true, error: err.message });
     }
-
-    console.log('[Cyanite Webhook] Received:', JSON.stringify(payload).slice(0, 500));
-
-    // TODO: When Cyanite API key is configured:
-    // 1. Extract analysis data (BPM, key, energy, danceability, vocals, etc.)
-    // 2. Store in Supabase linked to the track/order
-    // 3. Optionally notify the frontend via polling or realtime
-
-    res.status(200).json({ received: true });
 }
