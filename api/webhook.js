@@ -128,6 +128,16 @@ export default async function handler(req, res) {
                 trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
                 current_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
             };
+
+            // Reset track counter when trial ends and subscription becomes active (trial → paid)
+            if (event.type === 'customer.subscription.updated' && sub.status === 'active') {
+                const prevAttrs = event.data.previous_attributes;
+                if (prevAttrs?.status === 'trialing') {
+                    updates.tracks_used_this_month = 0;
+                    console.log(`[Webhook] Trial→Active upgrade for profile ${profile.id}, resetting track counter`);
+                }
+            }
+
             await updateProfile(serviceKey, { id: profile.id }, updates);
             console.log(`[Webhook] Subscription ${sub.status} for profile ${profile.id}`);
         }
@@ -153,15 +163,15 @@ export default async function handler(req, res) {
         const invoice = event.data.object;
         const customerId = invoice.customer;
 
-        // Reset monthly track counter on successful renewal
-        if (invoice.billing_reason === 'subscription_cycle') {
+        // Reset monthly track counter on renewal OR first payment after trial
+        if (invoice.billing_reason === 'subscription_cycle' || invoice.billing_reason === 'subscription_update') {
             const profile = await findProfileByStripeCustomer(serviceKey, customerId);
             if (profile) {
                 await updateProfile(serviceKey, { id: profile.id }, {
                     tracks_used_this_month: 0,
                     subscription_status: 'active',
                 });
-                console.log(`[Webhook] Monthly reset for profile ${profile.id}`);
+                console.log(`[Webhook] Track counter reset for profile ${profile.id} (reason: ${invoice.billing_reason})`);
             }
         }
     }
