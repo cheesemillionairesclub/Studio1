@@ -1,4 +1,4 @@
-// Admin API: Upload receipt PDF to Supabase Storage
+// Admin API: Upload mastered audio file to Supabase Storage
 export const config = {
     api: { bodyParser: false },
 };
@@ -42,20 +42,21 @@ export default async function handler(req, res) {
     if (!profiles[0]?.is_admin) return res.status(403).json({ error: 'Not admin' });
 
     const orderId = req.headers['x-order-id'];
-    const fileName = req.headers['x-file-name'] || 'receipt.pdf';
+    const fileName = req.headers['x-file-name'] || 'mastered.wav';
+    const contentType = req.headers['content-type'] || 'audio/wav';
     if (!orderId) return res.status(400).json({ error: 'Missing order ID' });
 
     try {
-        const rawBody = await getRawBody(req);
+        const rawBody = await getRawBody(req, 200 * 1024 * 1024); // 200MB limit for audio
         const storagePath = `${orderId}/${fileName}`;
 
-        // Upload to Supabase Storage
-        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/receipts/${storagePath}`, {
+        // Upload to Supabase Storage (mastered bucket)
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/mastered/${storagePath}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
                 'apikey': SUPABASE_SERVICE_KEY,
-                'Content-Type': 'application/pdf',
+                'Content-Type': contentType,
                 'x-upsert': 'true',
             },
             body: rawBody,
@@ -67,9 +68,9 @@ export default async function handler(req, res) {
         }
 
         // Get public URL
-        const receiptUrl = `${SUPABASE_URL}/storage/v1/object/public/receipts/${storagePath}`;
+        const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/mastered/${storagePath}`;
 
-        // Update order with receipt URL and mark as completed
+        // Update order with mastered file URL and mark as completed
         await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
             method: 'PATCH',
             headers: {
@@ -78,13 +79,13 @@ export default async function handler(req, res) {
                 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
             },
             body: JSON.stringify({
-                receipt_url: receiptUrl,
+                receipt_url: fileUrl,
                 order_status: 'completed',
                 updated_at: new Date().toISOString(),
             }),
         });
 
-        return res.status(200).json({ success: true, receipt_url: receiptUrl });
+        return res.status(200).json({ success: true, receipt_url: fileUrl });
     } catch (error) {
         console.error('Upload error:', error.message);
         return res.status(500).json({ error: 'Upload failed', details: error.message });

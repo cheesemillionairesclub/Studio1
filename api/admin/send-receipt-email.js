@@ -1,4 +1,4 @@
-// Admin API: Send receipt notification email to customer
+// Admin API: Send mastered file notification email to customer
 import { Resend } from 'resend';
 
 export default async function handler(req, res) {
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
         const order = orders[0];
 
         if (!order.receipt_url) {
-            return res.status(400).json({ error: 'No receipt uploaded for this order yet' });
+            return res.status(400).json({ error: 'No mastered file uploaded for this order yet' });
         }
 
         // Determine recipient email: try user profile first, fallback to order customer_email
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
         const { error: emailError } = await resend.emails.send({
             from: process.env.RESEND_FROM_EMAIL || 'AlphaStudios <noreply@alphastudios.app>',
             to: [recipientEmail],
-            subject: `Your AlphaStudios Order is Complete! 🎵`,
+            subject: `Your mastered track is ready! 🎵`,
             html: buildEmailHtml({ greeting, packLabel, order }),
         });
 
@@ -113,10 +113,10 @@ function buildEmailHtml({ greeting, packLabel, order }) {
 
         <!-- Content -->
         <div style="padding:40px 0;text-align:center;">
-            <h1 style="color:#1a1a2e;font-size:24px;font-weight:700;margin:0 0 10px;">Order Completed!</h1>
+            <h1 style="color:#1a1a2e;font-size:24px;font-weight:700;margin:0 0 10px;">Your mastered track is ready!</h1>
             <p style="color:rgba(26,26,46,0.6);font-size:16px;margin:0 0 30px;line-height:1.5;">
                 Hey ${escapeHtml(greeting)}, great news!<br>
-                Your order receipt is ready to download.
+                Your mastered file is ready to download.
             </p>
 
             <!-- Track Info -->
@@ -137,12 +137,12 @@ function buildEmailHtml({ greeting, packLabel, order }) {
                 </table>
             </div>
 
-            <!-- CTA Button -->
-            <a href="${escapeHtml(dashboardUrl)}" style="display:inline-block;padding:14px 40px;background:#00a854;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
-                VIEW MY DASHBOARD
+            <!-- Download Button -->
+            <a href="${escapeHtml(order.receipt_url)}" style="display:inline-block;padding:14px 40px;background:#00a854;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
+                DOWNLOAD MY MASTERED TRACK
             </a>
             <p style="color:rgba(26,26,46,0.4);font-size:13px;margin-top:16px;">
-                Log in to your dashboard to download your receipt PDF.
+                You can also access your file from your <a href="${escapeHtml(dashboardUrl)}" style="color:#00a854;">dashboard</a>.
             </p>
         </div>
 

@@ -233,7 +233,7 @@
                             <th>Pack</th>
                             <th>Genre</th>
                             <th>Status</th>
-                            <th>Receipt</th>
+                            <th>Mastered File</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -361,13 +361,13 @@
                     <td>${esc(packLabel)}</td>
                     <td>${esc(order.genre || '-')}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${hasReceipt ? `<a href="${esc(order.receipt_url)}" target="_blank" class="admin-btn" style="text-decoration:none;">View PDF</a>` : '<span style="color:var(--white-30)">-</span>'}</td>
+                    <td>${hasReceipt ? `<a href="${esc(order.receipt_url)}" target="_blank" class="admin-btn" style="text-decoration:none;">Download</a>` : '<span style="color:var(--white-30)">-</span>'}</td>
                     <td>
                         <div class="admin-actions">
                             ${order.order_status === 'in_progress' ? `<button class="admin-btn btn-green" onclick="toggleStatus('${order.id}', 'completed')">Mark Complete</button>` : `<button class="admin-btn" onclick="toggleStatus('${order.id}', 'in_progress')">Mark In Progress</button>`}
                             <label class="admin-btn">
-                                Upload PDF
-                                <input type="file" accept=".pdf" onchange="uploadReceipt('${order.id}', this)">
+                                Upload Audio
+                                <input type="file" accept="audio/*,.wav,.mp3,.flac,.aiff,.aif" onchange="uploadMasteredFile('${order.id}', this)">
                             </label>
                         </div>
                     </td>
@@ -398,7 +398,7 @@
             }
         }
 
-        async function uploadReceipt(orderId, input) {
+        async function uploadMasteredFile(orderId, input) {
             const file = input.files[0];
             if (!file) return;
 
@@ -410,12 +410,12 @@
                         'Authorization': `Bearer ${token}`,
                         'X-Order-Id': orderId,
                         'X-File-Name': file.name,
-                        'Content-Type': 'application/pdf',
+                        'Content-Type': file.type || 'audio/wav',
                     },
                     body: file,
                 });
                 if (res.ok) {
-                    // Auto-send receipt notification email
+                    // Auto-send email notification to customer
                     try {
                         const emailRes = await fetch('/api/admin/send-receipt-email', {
                             method: 'POST',
@@ -427,12 +427,12 @@
                         });
                         const emailData = await emailRes.json();
                         if (emailRes.ok) {
-                            showNotification(`Receipt uploaded & email sent to ${emailData.sent_to}`, 'success');
+                            showNotification(`Audio uploaded & email sent to ${emailData.sent_to}`, 'success');
                         } else {
-                            showNotification(`Receipt uploaded but email failed: ${emailData.error}`, 'warning');
+                            showNotification(`Audio uploaded but email failed: ${emailData.error}`, 'warning');
                         }
                     } catch (emailErr) {
-                        showNotification('Receipt uploaded but email notification failed', 'warning');
+                        showNotification('Audio uploaded but email notification failed', 'warning');
                     }
 
                     // Reload orders

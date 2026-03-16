@@ -1702,10 +1702,10 @@ function renderGenreSelection() {
 
     // Update placeholder and trigger state
     if (placeholder) {
-        placeholder.textContent = selectedGenres.length >= 2 ? 'Max 2 genres selected' : 'Choose a genre...';
+        placeholder.textContent = selectedGenres.length >= 1 ? '' : 'Choose a genre...';
     }
     if (trigger) {
-        trigger.classList.toggle('disabled', selectedGenres.length >= 2);
+        trigger.classList.toggle('disabled', selectedGenres.length >= 1);
     }
 
     // Auto-confirm when at least 1 genre is selected
@@ -1736,7 +1736,7 @@ function renderGenreDropdownList(filter = '') {
 
 // Toggle dropdown
 document.getElementById('genreDropdownTrigger')?.addEventListener('click', function() {
-    if (selectedGenres.length >= 2) return;
+    if (selectedGenres.length >= 1) return;
     const dropdown = document.getElementById('genreDropdown');
     const isOpen = dropdown.style.display !== 'none';
     dropdown.style.display = isOpen ? 'none' : '';
@@ -1760,13 +1760,13 @@ document.getElementById('genreDropdownList')?.addEventListener('click', function
     const genre = item.dataset.genre;
     if (selectedGenres.includes(genre)) {
         selectedGenres = selectedGenres.filter(g => g !== genre);
-    } else if (selectedGenres.length < 2) {
+    } else if (selectedGenres.length < 1) {
         selectedGenres.push(genre);
     }
     renderGenreSelection();
     renderGenreDropdownList(document.getElementById('genreSearchInput')?.value || '');
     // Close dropdown if 2 selected
-    if (selectedGenres.length >= 2) {
+    if (selectedGenres.length >= 1) {
         document.getElementById('genreDropdown').style.display = 'none';
     }
 });
