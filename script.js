@@ -1083,6 +1083,8 @@ if (trackRemoveBtn) {
 function removeUploadedTrack() {
     if (audioElement) { audioElement.pause(); audioElement = null; }
     if (animFrameId) cancelAnimationFrame(animFrameId);
+    if (cyanitePollTimer) clearTimeout(cyanitePollTimer);
+    cyaniteAnalysisId = null;
     isPlaying = false;
     uploadedAudioFile = null;
     audioBuffer = null;
@@ -1092,6 +1094,10 @@ function removeUploadedTrack() {
     if (trackPreview) trackPreview.style.display = 'none';
     if (uploadDropzone) uploadDropzone.style.display = '';
     if (audioFileInput) audioFileInput.value = '';
+
+    // Reset analysis tags
+    const analysisTags = document.getElementById('trackAnalysisTags');
+    if (analysisTags) { analysisTags.style.display = 'none'; analysisTags.innerHTML = ''; }
 
     // Reset play button
     if (waveformPlayBtn) waveformPlayBtn.classList.remove('playing');
@@ -1194,6 +1200,9 @@ async function handleAudioUpload(file) {
                     pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 200);
             }
+
+            // Send to Cyanite for AI analysis (non-blocking)
+            sendToCyanite(file, trackTitle);
         }, 400);
 
     } catch (err) {
@@ -1353,6 +1362,161 @@ function formatFileSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+// ===== Cyanite AI Analysis =====
+let cyaniteAnalysisId = null;
+let cyanitePollTimer = null;
+
+async function sendToCyanite(file, title) {
+    const analysisTags = document.getElementById('trackAnalysisTags');
+    if (analysisTags) {
+        analysisTags.style.display = '';
+        analysisTags.innerHTML = '<span class="meta-tag meta-tag-accent"><span class="cyanite-spinner"></span> Analyzing with AI...</span>';
+    }
+
+    try {
+        // Step 1: Get upload URL from Cyanite
+        const uploadReq = await fetch('/api/cyanite-upload-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        const uploadData = await uploadReq.json();
+        if (!uploadData.uploadUrl) {
+            throw new Error(uploadData.error || 'No upload URL');
+        }
+
+        console.log('[Cyanite] Got upload URL, fileUploadId:', uploadData.fileUploadId);
+
+        // Step 2: PUT the file directly to Cyanite's upload URL
+        const putRes = await fetch(uploadData.uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type || 'audio/mpeg' },
+        });
+        if (!putRes.ok) {
+            throw new Error('File upload to Cyanite failed: ' + putRes.status);
+        }
+
+        console.log('[Cyanite] File uploaded successfully');
+
+        // Step 3: Create and enqueue the analysis
+        const analyzeRes = await fetch('/api/cyanite-analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fileUploadId: uploadData.fileUploadId,
+                title: title,
+            }),
+        });
+        const analyzeData = await analyzeRes.json();
+        if (!analyzeData.analysisId) {
+            throw new Error(analyzeData.error || 'No analysis ID');
+        }
+
+        cyaniteAnalysisId = analyzeData.analysisId;
+        console.log('[Cyanite] Analysis created:', cyaniteAnalysisId);
+
+        // Step 4: Poll for results
+        pollCyaniteResults(cyaniteAnalysisId);
+
+    } catch (err) {
+        console.error('[Cyanite] Error:', err);
+        if (analysisTags) {
+            analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">AI analysis unavailable</span>';
+        }
+    }
+}
+
+function pollCyaniteResults(analysisId, attempt = 0) {
+    const maxAttempts = 30; // ~5 minutes with 10s interval
+    const interval = 10000; // 10 seconds
+
+    if (attempt >= maxAttempts) {
+        const analysisTags = document.getElementById('trackAnalysisTags');
+        if (analysisTags) {
+            analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">Analysis timed out</span>';
+        }
+        return;
+    }
+
+    cyanitePollTimer = setTimeout(async () => {
+        try {
+            const res = await fetch(`/api/cyanite-result?id=${encodeURIComponent(analysisId)}`);
+            const data = await res.json();
+
+            console.log('[Cyanite] Poll result:', data.status, data);
+
+            if (data.status === 'finished' || data.bpm || data.key || data.genre) {
+                renderCyaniteTags(data);
+
+                // Update selectedTrack genre if detected
+                if (data.genre && data.genre.length > 0 && selectedTrack) {
+                    selectedTrack.genre = data.genre[0];
+                }
+            } else if (data.status === 'failed') {
+                const analysisTags = document.getElementById('trackAnalysisTags');
+                if (analysisTags) {
+                    analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">Analysis failed</span>';
+                }
+            } else {
+                // Still processing, poll again
+                pollCyaniteResults(analysisId, attempt + 1);
+            }
+        } catch (err) {
+            console.error('[Cyanite] Poll error:', err);
+            pollCyaniteResults(analysisId, attempt + 1);
+        }
+    }, interval);
+}
+
+function renderCyaniteTags(data) {
+    const container = document.getElementById('trackAnalysisTags');
+    if (!container) return;
+
+    const tags = [];
+
+    if (data.bpm) {
+        tags.push(`<span class="meta-tag meta-tag-accent">${Math.round(data.bpm)} bpm</span>`);
+    }
+    if (data.key) {
+        tags.push(`<span class="meta-tag meta-tag-accent">${data.key}</span>`);
+    }
+    if (data.energyLevel) {
+        const energyLabel = data.energyLevel.charAt(0).toUpperCase() + data.energyLevel.slice(1).toLowerCase();
+        const bars = data.energyLevel === 'high' ? 3 : data.energyLevel === 'medium' ? 2 : 1;
+        let barsHtml = '';
+        for (let i = 0; i < 3; i++) {
+            barsHtml += `<span class="meta-tag-energy-bar ${i < bars ? 'active' : ''}${bars === 3 ? ' high' : ''}"></span>`;
+        }
+        tags.push(`<span class="meta-tag"><span class="meta-tag-energy">${barsHtml}</span> Energy</span>`);
+    }
+    if (data.genre && data.genre.length > 0) {
+        tags.push(`<span class="meta-tag meta-tag-accent">${escapeHtml(data.genre[0])}</span>`);
+    }
+    if (data.mood && data.mood.length > 0) {
+        tags.push(`<span class="meta-tag">${escapeHtml(data.mood[0])}</span>`);
+    }
+    if (data.voicePresenceProfile) {
+        const voiceLabel = data.voicePresenceProfile === 'vocal' ? 'Vocals - dominant'
+            : data.voicePresenceProfile === 'instrumental' ? 'Instrumental'
+            : 'Vocals - ' + data.voicePresenceProfile;
+        tags.push(`<span class="meta-tag">${voiceLabel}</span>`);
+    }
+    if (data.energyDynamics) {
+        const dynLabel = data.energyDynamics === 'high' ? 'Dynamic range - very dynamic'
+            : data.energyDynamics === 'low' ? 'Dynamic range - stable'
+            : 'Dynamic range - ' + data.energyDynamics;
+        tags.push(`<span class="meta-tag">${dynLabel}</span>`);
+    }
+    if (data.instruments && data.instruments.length > 0) {
+        data.instruments.slice(0, 3).forEach(inst => {
+            tags.push(`<span class="meta-tag">${escapeHtml(inst)}</span>`);
+        });
+    }
+
+    container.innerHTML = tags.join('');
+    container.style.display = '';
 }
 
 // ===== Scroll Animations =====
