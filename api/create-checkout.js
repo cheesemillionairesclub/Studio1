@@ -53,7 +53,8 @@ export default async function handler(req, res) {
             line_items: [{ price: priceId, quantity: 1 }],
             mode: 'subscription',
             subscription_data: {
-                trial_period_days: 7,
+                // TEMP: 7 minutes trial for testing (change back to trial_period_days: 7 for production)
+                trial_end: Math.floor(Date.now() / 1000) + (7 * 60),
                 metadata: { user_id },
             },
             metadata: { user_id },
