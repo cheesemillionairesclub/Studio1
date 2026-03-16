@@ -562,6 +562,13 @@
             return canvas.toDataURL('image/jpeg', 0.85);
         }
 
+        // Expose functions to onclick handlers
+        window.openReuploadModal = openReuploadModal;
+        window.closeReuploadModal = closeReuploadModal;
+        window.clearReuploadFile = clearReuploadFile;
+        window.submitReupload = submitReupload;
+        window.approveMastering = approveMastering;
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
