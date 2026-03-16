@@ -1188,97 +1188,61 @@ function removeUploadedTrack() {
 
 function showUploadCountdown() {
     return new Promise(resolve => {
-        const existing = document.querySelector('.countdown-overlay');
-        if (existing) existing.remove();
+        const dropzone = document.getElementById('uploadDropzone');
+        if (!dropzone) { resolve(); return; }
 
-        const overlay = document.createElement('div');
-        overlay.className = 'countdown-overlay';
-        overlay.innerHTML = `
-            <div class="countdown-inner">
-                <div class="countdown-logo-wrap">
-                    <svg class="countdown-ring" viewBox="0 0 120 120">
-                        <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
-                        <circle class="countdown-ring-progress" cx="60" cy="60" r="54" fill="none" stroke="url(#countdownGrad)" stroke-width="4" stroke-linecap="round"
-                            stroke-dasharray="339.292" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
-                        <defs><linearGradient id="countdownGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#4CAF50"/>
-                            <stop offset="100%" stop-color="#81C784"/>
-                        </linearGradient></defs>
+        // Save original content and replace with countdown
+        const originalContent = dropzone.innerHTML;
+        dropzone.innerHTML = `
+            <div class="cd-wrap">
+                <div class="cd-ring-wrap">
+                    <svg class="cd-ring" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                        <circle class="cd-ring-fill" cx="40" cy="40" r="36" fill="none" stroke="#4CAF50" stroke-width="3" stroke-linecap="round"
+                            stroke-dasharray="226.195" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
                     </svg>
-                    <img class="countdown-logo" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="AlphaStudios">
+                    <img class="cd-logo" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773639380/Dark_Blue_Minimalist_Letter_A_Logo_olmb2b.png" alt="">
                 </div>
-                <div class="countdown-number">10</div>
-                <div class="countdown-label">Analyzing your track...</div>
+                <span class="cd-num">10</span>
+                <span class="cd-text">Analyzing...</span>
             </div>
         `;
 
-        // Inject scoped styles
-        const style = document.createElement('style');
-        style.id = 'countdown-styles';
-        if (!document.getElementById('countdown-styles')) {
-            style.textContent = `
-                .countdown-overlay {
-                    position: fixed; inset: 0; z-index: 99999;
-                    background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
-                    display: flex; align-items: center; justify-content: center;
-                    opacity: 0; transition: opacity 0.4s ease;
-                }
-                .countdown-overlay.visible { opacity: 1; }
-                .countdown-overlay.fade-out { opacity: 0; transition: opacity 0.5s ease; }
-                .countdown-inner { text-align: center; }
-                .countdown-logo-wrap {
-                    position: relative; width: 120px; height: 120px; margin: 0 auto 24px;
-                }
-                .countdown-ring { position: absolute; inset: 0; width: 100%; height: 100%; }
-                .countdown-ring-progress { transition: stroke-dashoffset 1s linear; }
-                .countdown-logo {
-                    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    width: 60px; height: 60px; border-radius: 14px;
-                    animation: countdown-pulse 2s ease-in-out infinite;
-                }
-                .countdown-number {
-                    font-size: 3rem; font-weight: 800; color: #fff;
-                    font-variant-numeric: tabular-nums;
-                    transition: transform 0.3s ease, opacity 0.3s ease;
-                }
-                .countdown-number.tick { transform: scale(1.2); opacity: 0.6; }
-                .countdown-label {
-                    font-size: 0.85rem; color: rgba(255,255,255,0.5);
-                    margin-top: 8px; letter-spacing: 0.5px;
-                }
-                @keyframes countdown-pulse {
-                    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-                    50% { transform: translate(-50%, -50%) scale(1.06); }
-                }
+        // Inject styles once
+        if (!document.getElementById('cd-styles')) {
+            const s = document.createElement('style');
+            s.id = 'cd-styles';
+            s.textContent = `
+                .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 0;animation:cd-in .35s ease}
+                .cd-ring-wrap{position:relative;width:72px;height:72px}
+                .cd-ring{width:100%;height:100%}
+                .cd-ring-fill{transition:stroke-dashoffset 1s linear}
+                .cd-logo{position:absolute;top:50%;left:50%;width:34px;height:34px;border-radius:8px;transform:translate(-50%,-50%);animation:cd-pulse 2.5s ease-in-out infinite}
+                .cd-num{font-size:1.5rem;font-weight:700;color:var(--white,#fff);font-variant-numeric:tabular-nums;line-height:1;transition:transform .25s ease,opacity .25s ease}
+                .cd-num.tick{transform:scale(1.25);opacity:.5}
+                .cd-text{font-size:.75rem;color:rgba(255,255,255,.4);letter-spacing:.3px}
+                @keyframes cd-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+                @keyframes cd-pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
             `;
-            document.head.appendChild(style);
+            document.head.appendChild(s);
         }
 
-        document.body.appendChild(overlay);
-        requestAnimationFrame(() => overlay.classList.add('visible'));
-
-        const numberEl = overlay.querySelector('.countdown-number');
-        const ringProgress = overlay.querySelector('.countdown-ring-progress');
-        const totalDash = 339.292; // 2 * PI * 54
+        const numEl = dropzone.querySelector('.cd-num');
+        const ringFill = dropzone.querySelector('.cd-ring-fill');
+        const totalDash = 226.195; // 2 * PI * 36
         let count = 10;
 
-        const interval = setInterval(() => {
+        const tick = setInterval(() => {
             count--;
             if (count < 0) {
-                clearInterval(interval);
-                overlay.classList.add('fade-out');
-                setTimeout(() => { overlay.remove(); resolve(); }, 500);
+                clearInterval(tick);
+                dropzone.innerHTML = originalContent;
+                resolve();
                 return;
             }
-            // Animate number
-            numberEl.classList.add('tick');
-            setTimeout(() => {
-                numberEl.textContent = count;
-                numberEl.classList.remove('tick');
-            }, 150);
-            // Animate ring
-            const offset = totalDash * ((10 - count) / 10);
-            ringProgress.style.strokeDashoffset = offset;
+            numEl.classList.add('tick');
+            setTimeout(() => { numEl.textContent = count; numEl.classList.remove('tick'); }, 120);
+            ringFill.style.strokeDashoffset = totalDash * ((10 - count) / 10);
         }, 1000);
     });
 }
