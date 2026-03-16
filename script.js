@@ -1233,9 +1233,9 @@ function showUploadCountdown() {
             .cd-n:first-child{opacity:1}
 
             .cd-msgs{position:relative;height:1.2em;min-width:200px;text-align:center}
-            .cd-m{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;opacity:0;animation:cd-show 2s steps(1) forwards}
+            .cd-m{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;opacity:0;animation:cd-msg-show 2s ease forwards}
             .cd-m:first-child{opacity:1}
-            .cd-m:last-child{animation:cd-show-last 2s steps(1) forwards}
+            .cd-m:last-child{animation:cd-msg-show-last 2s ease forwards}
 
             .cd-dots{display:flex;gap:5px}
             .cd-dots span{width:6px;height:6px;border-radius:50%;background:var(--green-primary,#e8720c);opacity:.25;animation:cd-bounce 1.4s ease-in-out infinite}
@@ -1247,6 +1247,8 @@ function showUploadCountdown() {
             @keyframes cd-bounce{0%,80%,100%{opacity:.25;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
             @keyframes cd-show{0%{opacity:0}0.1%{opacity:1}99.9%{opacity:1}100%{opacity:0}}
             @keyframes cd-show-last{0%{opacity:0}0.1%{opacity:1}100%{opacity:1}}
+            @keyframes cd-msg-show{0%{opacity:0}10%{opacity:1}85%{opacity:1}100%{opacity:0}}
+            @keyframes cd-msg-show-last{0%{opacity:0}10%{opacity:1}100%{opacity:1}}
         `;
         document.head.appendChild(s);
     }
