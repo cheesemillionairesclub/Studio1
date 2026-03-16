@@ -737,7 +737,6 @@
             }
 
             if (status === 'active') {
-                const tracksLeft = 5 - tracksUsed;
                 banner.style.display = '';
                 banner.innerHTML = `
                     <div class="sub-banner sub-active">
@@ -746,13 +745,12 @@
                             <span class="sub-status">Active</span>
                         </div>
                         <div class="sub-banner-right">
-                            <span class="sub-tracks">${tracksLeft}/5 tracks remaining</span>
+                            <span class="sub-tracks">${tracksUsed}/5 tracks used</span>
                         </div>
                     </div>`;
             } else if (status === 'trialing') {
                 const trialEnd = profile.trial_end ? new Date(profile.trial_end) : null;
                 const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd - Date.now()) / 86400000)) : 0;
-                const tracksLeft = 1 - tracksUsed;
                 banner.style.display = '';
                 banner.innerHTML = `
                     <div class="sub-banner sub-trial">
@@ -761,7 +759,7 @@
                             <span class="sub-status">${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining</span>
                         </div>
                         <div class="sub-banner-right">
-                            <span class="sub-tracks">${Math.max(0, tracksLeft)}/1 track remaining</span>
+                            <span class="sub-tracks">${tracksUsed}/1 track used</span>
                             <span class="sub-trial-note">Feedback only &middot; Mastering locked</span>
                         </div>
                     </div>`;
