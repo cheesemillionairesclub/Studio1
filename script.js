@@ -1213,11 +1213,7 @@ function showUploadCountdown() {
 
     dropzone.innerHTML = `
         <div class="cd-wrap">
-            <div class="cd-ring-wrap">
-                <div class="cd-ring-bg"></div>
-                <div class="cd-ring-fill"></div>
-                <img class="cd-icon" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" width="32" height="32">
-            </div>
+            <img class="cd-icon" src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" width="40" height="40">
             <div class="cd-nums">${nums.join('')}</div>
             <div class="cd-msgs">${msgSpans.join('')}</div>
             <div class="cd-dots"><span></span><span></span><span></span></div>
@@ -1229,12 +1225,8 @@ function showUploadCountdown() {
         const s = document.createElement('style');
         s.id = 'cd-styles';
         s.textContent = `
-            @property --cd-progress{syntax:"<percentage>";inherits:false;initial-value:0%}
             .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 0;animation:cd-in .35s ease}
-            .cd-ring-wrap{position:relative;width:80px;height:80px}
-            .cd-ring-bg{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(128,128,128,0.15)}
-            .cd-ring-fill{position:absolute;inset:0;border-radius:50%;--cd-progress:0%;background:conic-gradient(var(--green-primary,#00a854) var(--cd-progress),transparent var(--cd-progress));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3.5px),#000 calc(100% - 3.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 3.5px),#000 calc(100% - 3.5px));animation:cd-ring-anim 10s linear forwards}
-            .cd-icon{position:absolute;top:50%;left:50%;width:32px;height:32px;border-radius:50%;object-fit:cover;transform:translate(-50%,-50%);animation:cd-spin 3s linear infinite}
+            .cd-icon{width:40px;height:40px;border-radius:50%;object-fit:cover;animation:cd-spin 3s linear infinite}
 
             .cd-nums{position:relative;height:1.8rem;width:3rem;text-align:center}
             .cd-n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:var(--green-primary,#00a854);font-variant-numeric:tabular-nums;opacity:0;animation:cd-show 1s steps(1) forwards}
@@ -1251,9 +1243,8 @@ function showUploadCountdown() {
             .cd-dots span:nth-child(3){animation-delay:.4s}
 
             @keyframes cd-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
-            @keyframes cd-spin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+            @keyframes cd-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
             @keyframes cd-bounce{0%,80%,100%{opacity:.25;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
-            @keyframes cd-ring-anim{0%{--cd-progress:0%}100%{--cd-progress:100%}}
             @keyframes cd-show{0%{opacity:0}0.1%{opacity:1}99.9%{opacity:1}100%{opacity:0}}
             @keyframes cd-show-last{0%{opacity:0}0.1%{opacity:1}100%{opacity:1}}
         `;
