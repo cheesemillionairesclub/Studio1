@@ -181,19 +181,22 @@
     // ===== Save order after payment =====
     window.saveOrderToSupabase = async function (campaign, paymentData) {
         const user = BeatpushAuth.getUser();
-        if (!user) return;
+        if (!user) {
+            console.error('[AlphaStudios] Cannot save order: no user logged in');
+            return null;
+        }
 
         try {
-            await fetch('/api/save-order', {
+            const res = await fetch('/api/save-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user_id: user.id,
                     stripe_session_id: paymentData?.session_id || '',
                     customer_email: paymentData?.customer_email || user.email,
-                    pack: campaign.pack || '',
+                    pack: campaign.pack || 'pro',
                     amount: paymentData?.amount_total || 0,
-                    currency: paymentData?.currency || 'usd',
+                    currency: paymentData?.currency || 'eur',
                     track_title: campaign.track_title || '',
                     track_artist: campaign.track_artist || '',
                     track_artwork: campaign.track_artwork || '',
@@ -203,8 +206,17 @@
                     release_status: campaign.release_status || '',
                 }),
             });
+            if (!res.ok) {
+                const errText = await res.text();
+                console.error('[AlphaStudios] Save order API error:', res.status, errText);
+                return null;
+            }
+            const data = await res.json();
+            console.log('[AlphaStudios] Order saved:', data.order?.id);
+            return data;
         } catch (e) {
             console.error('[AlphaStudios] Failed to save order:', e);
+            return null;
         }
     };
 

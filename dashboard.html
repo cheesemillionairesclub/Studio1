@@ -381,37 +381,79 @@
             const sessionId = urlParams.get('session_id');
             if (sessionId) {
                 window.history.replaceState({}, '', '/dashboard');
-                // Save pending campaign if exists
+                console.log('[Dashboard] Post-checkout return, session:', sessionId);
+
+                // Verify subscription was activated and update profile immediately
+                // (don't wait for webhook — it may arrive later)
                 try {
-                    const campaign = JSON.parse(localStorage.getItem('alphastudios_pending_campaign') || '{}');
-                    localStorage.removeItem('alphastudios_pending_campaign');
-                    if (campaign.track_title) {
-                        const res = await fetch(`/api/checkout-success?session_id=${encodeURIComponent(sessionId)}`);
-                        const data = await res.json();
-                        await saveOrderToSupabase(campaign, {
+                    const checkoutRes = await fetch(`/api/checkout-success?session_id=${encodeURIComponent(sessionId)}`);
+                    if (checkoutRes.ok) {
+                        const checkoutData = await checkoutRes.json();
+                        console.log('[Dashboard] Checkout data:', JSON.stringify(checkoutData));
+
+                        // Update local profile with subscription status from Stripe
+                        if (checkoutData.subscription_status) {
+                            const token = BeatpushAuth.getToken();
+                            const profileUpdate = {
+                                subscription_status: checkoutData.subscription_status,
+                            };
+                            if (checkoutData.trial_end) profileUpdate.trial_end = checkoutData.trial_end;
+                            await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`,
+                                    'apikey': BeatpushAuth.supabaseKey,
+                                },
+                                body: JSON.stringify(profileUpdate),
+                            });
+                            console.log('[Dashboard] Profile subscription_status set to:', checkoutData.subscription_status);
+                        }
+                    }
+                } catch (e) {
+                    console.error('[Dashboard] Failed to verify checkout session:', e);
+                }
+
+                // Save pending campaign order if exists
+                const campaignRaw = localStorage.getItem('alphastudios_pending_campaign');
+                localStorage.removeItem('alphastudios_pending_campaign');
+                console.log('[Dashboard] Pending campaign:', campaignRaw ? 'found' : 'none');
+
+                if (campaignRaw) {
+                    try {
+                        const campaign = JSON.parse(campaignRaw);
+                        console.log('[Dashboard] Saving order for track:', campaign.track_title);
+
+                        const result = await saveOrderToSupabase(campaign, {
                             session_id: sessionId,
-                            customer_email: data.customer_email || user.email,
+                            customer_email: user.email,
                             amount_total: 0,
                             currency: 'eur',
                         });
-                        // Increment track count
-                        const profile = await BeatpushAuth.getProfile();
-                        const token = BeatpushAuth.getToken();
-                        await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`,
-                                'apikey': BeatpushAuth.supabaseKey,
-                            },
-                            body: JSON.stringify({ tracks_used_this_month: (profile?.tracks_used_this_month || 0) + 1 }),
-                        });
-                        await renderSubscriptionBanner();
-                        loadDashboard();
+
+                        if (result) {
+                            // Increment track count
+                            const profile = await BeatpushAuth.getProfile();
+                            const token = BeatpushAuth.getToken();
+                            const patchRes = await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`,
+                                    'apikey': BeatpushAuth.supabaseKey,
+                                },
+                                body: JSON.stringify({ tracks_used_this_month: (profile?.tracks_used_this_month || 0) + 1 }),
+                            });
+                            console.log('[Dashboard] Track count updated:', patchRes.ok);
+                        }
+                    } catch (e) {
+                        console.error('[Dashboard] Post-checkout save error:', e);
                     }
-                } catch (e) {
-                    console.error('Post-checkout save error:', e);
                 }
+
+                // Refresh UI
+                await renderSubscriptionBanner();
+                loadDashboard();
             }
 
             // Re-render cards when language changes

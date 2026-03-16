@@ -2027,12 +2027,18 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         // Save order directly (no Stripe checkout needed)
         try {
             showToast('Submitting your track...');
-            await saveOrderToSupabase(campaignData, {
+            const result = await saveOrderToSupabase(campaignData, {
                 session_id: '',
                 customer_email: user.email,
                 amount_total: 0,
                 currency: 'eur',
             });
+
+            if (!result) {
+                showToast('Failed to submit track. Please try again.');
+                if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; }
+                return;
+            }
 
             // Increment tracks_used_this_month
             const token = BeatpushAuth.getToken();
