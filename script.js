@@ -1314,14 +1314,16 @@ async function handleAudioUpload(file) {
     // Start countdown IMMEDIATELY so user sees animation from the start
     const countdown = showUploadCountdown();
 
+    // Let the countdown render & animate for a frame before heavy work
+    await new Promise(r => setTimeout(r, 100));
+
     try {
-        // Run decode + upload in parallel behind the countdown
+        const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+        generatedArtworkDataUrl = generateTrackArtwork(400);
+
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
-
-        const trackTitle = file.name.replace(/\.[^/.]+$/, '');
-        generatedArtworkDataUrl = generateTrackArtwork(400);
 
         // Start upload to Supabase right away (don't wait for decode)
         const uploadPromise = uploadTrackFiles(file, generatedArtworkDataUrl).then(urls => {
@@ -1336,8 +1338,9 @@ async function handleAudioUpload(file) {
             return urls;
         });
 
-        // Decode audio in parallel
+        // Decode audio — yield to event loop so countdown keeps ticking
         const arrayBuffer = await file.arrayBuffer();
+        await new Promise(r => setTimeout(r, 0)); // yield
         audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
         const metadata = extractMetadata(file, audioBuffer);
