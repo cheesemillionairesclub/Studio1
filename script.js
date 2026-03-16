@@ -1304,10 +1304,23 @@ async function handleAudioUpload(file) {
             metadata: metadata
         };
 
-        // Show countdown (analysis animation only — upload happens after confirmed purchase)
+        // Upload to Supabase Storage + show countdown in parallel
         if (progressEl) progressEl.style.display = 'none';
 
-        await showUploadCountdown();
+        const uploadPromise = uploadTrackFiles(file, generatedArtworkDataUrl).then(urls => {
+            if (urls.audioUrl) {
+                selectedTrack.id = urls.audioUrl;
+                window._preUploadedAudioUrl = urls.audioUrl;
+                console.log('[AlphaStudios] Audio ready:', urls.audioUrl);
+            }
+            if (urls.artworkUrl) {
+                selectedTrack.artwork = urls.artworkUrl;
+                window._preUploadedArtworkUrl = urls.artworkUrl;
+                console.log('[AlphaStudios] Artwork ready:', urls.artworkUrl);
+            }
+        });
+
+        await Promise.all([showUploadCountdown(), uploadPromise]);
 
         // Hide dropzone and show track preview
         if (uploadDropzone) uploadDropzone.style.display = 'none';
@@ -2017,17 +2030,6 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
         if (launchBtn) { launchBtn.disabled = false; launchBtn.style.opacity = ''; launchBtn.textContent = originalBtnText; }
     }
 
-    // If user is NOT logged in, upload files BEFORE OAuth redirect (file is lost after redirect)
-    const currentUser = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
-    if (!currentUser && uploadedAudioFile) {
-        setBtnLoading('Uploading...');
-        const urls = await uploadTrackFiles(uploadedAudioFile, generatedArtworkDataUrl);
-        campaignData.track_url = urls.audioUrl;
-        if (urls.artworkUrl) campaignData.track_artwork = urls.artworkUrl;
-        // Store in localStorage so it survives OAuth + Stripe redirects
-        localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
-    }
-
     // Require login before any payment action
     if (typeof requireAuth === 'function' && !requireAuth('payment')) return;
 
@@ -2070,12 +2072,13 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
     const artists = selectedArtists.map(a => a.name).join(', ');
     const releaseStatus = document.querySelector('input[name="releaseStatus"]:checked')?.value || '';
 
+    // Use URLs from countdown upload (already in selectedTrack.id and selectedTrack.artwork)
     const campaignData = {
         pack: packToSend,
         track_title: track.title || '',
         track_artist: track.artist || '',
-        track_artwork: track.artwork ? track.artwork.replace('200x200', '500x500') : '',
-        track_url: '',
+        track_artwork: window._preUploadedArtworkUrl || track.artwork || '',
+        track_url: window._preUploadedAudioUrl || track.id || '',
         genre: genre,
         similar_artists: selectedArtists.map(a => ({ name: a.name, img: a.img || '' })),
         release_status: releaseStatus,
@@ -2104,13 +2107,8 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
             return;
         }
 
-        // Upload files then save order
+        // Save order (files already uploaded during countdown)
         try {
-            setBtnLoading('Uploading...');
-            const urls = await uploadTrackFiles(uploadedAudioFile, generatedArtworkDataUrl);
-            campaignData.track_url = urls.audioUrl;
-            if (urls.artworkUrl) campaignData.track_artwork = urls.artworkUrl;
-
             setBtnLoading('Submitting...');
             const result = await saveOrderToSupabase(campaignData, {
                 session_id: '',
@@ -2145,12 +2143,8 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
             resetBtn();
         }
     } else {
-        // No subscription — upload files first, then save campaign and redirect to Stripe
-        setBtnLoading('Uploading...');
-        const urls = await uploadTrackFiles(uploadedAudioFile, generatedArtworkDataUrl);
-        campaignData.track_url = urls.audioUrl;
-        if (urls.artworkUrl) campaignData.track_artwork = urls.artworkUrl;
-
+        // No subscription — save campaign and redirect to Stripe
+        // Files already uploaded during countdown phase
         localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
 
         setBtnLoading('Redirecting...');
