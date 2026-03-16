@@ -51,11 +51,11 @@
         .dash-success-text strong { color: #1a1a2e; }
         .dash-success-art { display: none; }
         .dash-success-btn {
-            background: #e8720c; color: #fff; border: none; border-radius: 8px;
+            background: #1a1a2e; color: #fff; border: none; border-radius: 8px;
             padding: 10px 32px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
             transition: background 0.2s;
         }
-        .dash-success-btn:hover { background: #c75f0a; }
+        .dash-success-btn:hover { background: #0f0f1a; }
 
         .sub-active { background: rgba(76,175,80,0.04); border-color: rgba(76,175,80,0.15); }
         .sub-trial { background: rgba(33,150,243,0.04); border-color: rgba(33,150,243,0.15); }
@@ -463,7 +463,7 @@
 
                     const style = getComputedStyle(document.documentElement);
                     const baseColor = style.getPropertyValue('--white-15').trim() || 'rgba(0,0,0,0.1)';
-                    const activeColor = style.getPropertyValue('--green-primary').trim() || '#e8720c';
+                    const activeColor = style.getPropertyValue('--green-primary').trim() || '#1a1a2e';
 
                     for (let i = 0; i < bars; i++) {
                         const x = i * (barW + gap);
