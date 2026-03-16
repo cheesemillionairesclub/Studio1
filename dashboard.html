@@ -288,6 +288,15 @@
             const packLabel = order.pack === 'mastering' ? 'Mastering + Feedback + Labels' : order.pack;
             const receiptDisabled = !order.receipt_url;
 
+            // Pipeline step logic: 1=Feedbacks, 2=Mastering, 3=Labels
+            let pipelineStep = 1;
+            if (isCompleted) pipelineStep = 3;
+            else if (order.mastering_approved) pipelineStep = 2;
+
+            const stepClass = (n) => pipelineStep > n ? 'done' : pipelineStep === n ? 'active' : '';
+            const dotContent = (n) => pipelineStep > n ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : n;
+            const lineFill = pipelineStep >= 2 ? (pipelineStep >= 3 ? '100%' : '50%') : '0%';
+
             card.innerHTML = `
                 <div class="dash-order-header">
                     <div class="dash-track-info">
@@ -298,6 +307,21 @@
                         </div>
                     </div>
                     <div class="dash-order-status ${statusClass}">${statusText}</div>
+                </div>
+                <div class="dash-pipeline">
+                    <div class="dash-pipeline-line"><div class="dash-pipeline-line-fill" style="width:${lineFill}"></div></div>
+                    <div class="dash-pipeline-step ${stepClass(1)}">
+                        <div class="dash-pipeline-dot">${dotContent(1)}</div>
+                        <span class="dash-pipeline-label">Feedbacks</span>
+                    </div>
+                    <div class="dash-pipeline-step ${stepClass(2)}">
+                        <div class="dash-pipeline-dot">${dotContent(2)}</div>
+                        <span class="dash-pipeline-label">Mastering</span>
+                    </div>
+                    <div class="dash-pipeline-step ${stepClass(3)}">
+                        <div class="dash-pipeline-dot">${dotContent(3)}</div>
+                        <span class="dash-pipeline-label">Labels</span>
+                    </div>
                 </div>
                 <div class="dash-order-details">
                     <div class="dash-detail-row">
