@@ -195,6 +195,18 @@
         }
         .admin-feedback-input::placeholder { color: var(--white-30); }
         .admin-feedback-input:focus { outline: none; border-color: var(--green-primary); }
+        .badge-mastering {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px; font-size: 0.7rem;
+            font-weight: 600; background: rgba(76,175,80,0.12); color: #4CAF50;
+            margin-top: 4px;
+        }
+        .badge-reupload {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px; font-size: 0.7rem;
+            font-weight: 600; background: rgba(255,152,0,0.12); color: #ff9800;
+            margin-top: 4px;
+        }
         .admin-loading {
             text-align: center;
             padding: 60px;
@@ -370,13 +382,17 @@
                             <div>
                                 <div class="order-track-title">${esc(order.track_title || '-')}</div>
                                 <div class="order-track-artist">${esc(order.track_artist || '-')}</div>
+                                ${order.reupload_count ? `<div class="badge-reupload">Re-upload ${order.reupload_count}/3</div>` : ''}
                             </div>
                         </div>
                     </td>
                     <td>${esc(order.customer_email || '-')}</td>
                     <td>${esc(packLabel)}</td>
                     <td>${esc(order.genre || '-')}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        ${order.mastering_approved ? '<div class="badge-mastering"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Bon pour mastering</div>' : ''}
+                    </td>
                     <td>${hasReceipt ? `<a href="${esc(order.receipt_url)}" target="_blank" class="admin-btn" style="text-decoration:none;">Download</a>` : '<span style="color:var(--white-30)">-</span>'}</td>
                     <td>
                         <div class="admin-feedback-cell">

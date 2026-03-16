@@ -79,6 +79,9 @@ CREATE TABLE IF NOT EXISTS public.orders (
     release_status TEXT DEFAULT '',
     order_status TEXT DEFAULT 'in_progress',
     receipt_url TEXT,
+    feedback TEXT,
+    reupload_count INTEGER DEFAULT 0,
+    mastering_approved BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -9,6 +9,88 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=3">
+    <style>
+        .dash-feedback-actions {
+            display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;
+        }
+        .dash-action-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 8px; font-size: 0.8rem;
+            font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.2s;
+        }
+        .dash-reupload-btn {
+            background: transparent; color: var(--white-70);
+            border-color: var(--white-15);
+        }
+        .dash-reupload-btn:hover { border-color: var(--white-50); color: var(--white); }
+        .reupload-count {
+            font-size: 0.7rem; opacity: 0.5; margin-left: 2px;
+        }
+        .dash-reupload-maxed {
+            font-size: 0.75rem; color: var(--white-30); font-style: italic;
+        }
+        .dash-master-btn {
+            background: #4CAF50; color: #fff; border-color: #4CAF50;
+        }
+        .dash-master-btn:hover { background: #43a047; }
+        .dash-mastering-approved {
+            display: flex; align-items: center; gap: 6px;
+            margin-top: 12px; font-size: 0.8rem; font-weight: 600; color: #4CAF50;
+        }
+
+        /* Reupload Modal */
+        .reupload-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .reupload-overlay.visible { opacity: 1; }
+        .reupload-modal {
+            background: var(--bg-primary, #0e0e1a); border: 1px solid var(--white-10);
+            border-radius: 16px; padding: 28px; max-width: 420px; width: 90%;
+            position: relative;
+        }
+        .reupload-modal h3 {
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;
+        }
+        .reupload-close {
+            position: absolute; top: 12px; right: 16px; background: none;
+            border: none; color: var(--white-50); font-size: 1.5rem; cursor: pointer;
+        }
+        .reupload-warning {
+            font-size: 0.8rem; color: var(--white-50); line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .reupload-warning strong { color: var(--white-70); }
+        .reupload-dropzone {
+            border: 2px dashed var(--white-15); border-radius: 12px;
+            padding: 28px; text-align: center; cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .reupload-dropzone:hover, .reupload-dropzone.drag-over {
+            border-color: #4CAF50;
+        }
+        .reupload-dropzone p { font-size: 0.85rem; color: var(--white-50); margin: 8px 0 4px; }
+        .reupload-dropzone span { font-size: 0.75rem; color: var(--white-30); }
+        .reupload-browse { color: #4CAF50; cursor: pointer; text-decoration: underline; }
+        .reupload-file-info {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: var(--white-05); border-radius: 8px;
+            font-size: 0.85rem; color: var(--white-70);
+        }
+        .reupload-file-remove {
+            background: none; border: none; color: var(--white-30);
+            font-size: 1.2rem; cursor: pointer;
+        }
+        .reupload-submit {
+            width: 100%; margin-top: 16px; padding: 12px;
+            background: #4CAF50; color: #fff; border: none; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+        }
+        .reupload-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+        .reupload-submit:not(:disabled):hover { background: #43a047; }
+    </style>
 </head>
 <body>
 
@@ -190,6 +272,22 @@
                         Engineer Feedback
                     </div>
                     <div class="dash-feedback-text">${escapeHtmlAttr(order.feedback)}</div>
+                    ${!order.mastering_approved ? `
+                    <div class="dash-feedback-actions">
+                        ${(order.reupload_count || 0) < 3 ? `
+                        <button class="dash-action-btn dash-reupload-btn" onclick="openReuploadModal('${order.id}', ${order.reupload_count || 0})">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                            Re-upload Track <span class="reupload-count">${order.reupload_count || 0}/3</span>
+                        </button>` : `<span class="dash-reupload-maxed">Re-uploads used (3/3)</span>`}
+                        <button class="dash-action-btn dash-master-btn" onclick="approveMastering('${order.id}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Masterise
+                        </button>
+                    </div>` : `
+                    <div class="dash-mastering-approved">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Approved for mastering
+                    </div>`}
                 </div>` : ''}
                 <div class="dash-order-footer">
                     ${order.receipt_url ? `
@@ -253,6 +351,215 @@
 
             // Re-render cards when language changes
             window.addEventListener('alphastudios-langchange', () => loadDashboard());
+        }
+
+        // ===== Re-upload Modal =====
+        function openReuploadModal(orderId, currentCount) {
+            // Remove existing modal
+            const existing = document.getElementById('reuploadModal');
+            if (existing) existing.remove();
+
+            const remaining = 3 - currentCount;
+            const overlay = document.createElement('div');
+            overlay.id = 'reuploadModal';
+            overlay.className = 'reupload-overlay';
+            overlay.innerHTML = `
+                <div class="reupload-modal">
+                    <button class="reupload-close" onclick="closeReuploadModal()">&times;</button>
+                    <h3>Re-upload Track</h3>
+                    <p class="reupload-warning">This will replace your current track and reset all feedback. You have <strong>${remaining} re-upload${remaining > 1 ? 's' : ''}</strong> remaining.</p>
+                    <div class="reupload-dropzone" id="reuploadDropzone">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p>Drag & drop your track here</p>
+                        <span>or <label class="reupload-browse" for="reuploadFileInput">browse</label></span>
+                        <input type="file" id="reuploadFileInput" accept="audio/*,.wav,.mp3,.flac,.aiff,.aif" style="display:none;">
+                    </div>
+                    <div class="reupload-file-info" id="reuploadFileInfo" style="display:none;">
+                        <span id="reuploadFileName"></span>
+                        <button class="reupload-file-remove" onclick="clearReuploadFile()">&times;</button>
+                    </div>
+                    <button class="reupload-submit" id="reuploadSubmitBtn" disabled onclick="submitReupload('${orderId}')">
+                        Upload & Reset
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+
+            // File input + drag & drop
+            const dropzone = document.getElementById('reuploadDropzone');
+            const fileInput = document.getElementById('reuploadFileInput');
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) setReuploadFile(e.target.files[0]);
+            });
+            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+                if (e.dataTransfer.files[0]) setReuploadFile(e.dataTransfer.files[0]);
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeReuploadModal();
+            });
+        }
+
+        let _reuploadFile = null;
+
+        function setReuploadFile(file) {
+            _reuploadFile = file;
+            document.getElementById('reuploadDropzone').style.display = 'none';
+            document.getElementById('reuploadFileInfo').style.display = '';
+            document.getElementById('reuploadFileName').textContent = file.name;
+            document.getElementById('reuploadSubmitBtn').disabled = false;
+        }
+
+        function clearReuploadFile() {
+            _reuploadFile = null;
+            document.getElementById('reuploadDropzone').style.display = '';
+            document.getElementById('reuploadFileInfo').style.display = 'none';
+            document.getElementById('reuploadSubmitBtn').disabled = true;
+        }
+
+        function closeReuploadModal() {
+            const modal = document.getElementById('reuploadModal');
+            if (modal) {
+                modal.classList.remove('visible');
+                setTimeout(() => modal.remove(), 200);
+            }
+            _reuploadFile = null;
+        }
+
+        async function submitReupload(orderId) {
+            if (!_reuploadFile) return;
+            const btn = document.getElementById('reuploadSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+
+            const token = BeatpushAuth.getToken();
+            let trackUrl = '';
+            let artworkUrl = '';
+
+            try {
+                // 1. Upload audio via signed URL
+                const signRes = await fetch('/api/upload-audio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: _reuploadFile.name }),
+                });
+                const signData = await signRes.json();
+                if (signRes.ok && signData.uploadUrl) {
+                    const upRes = await fetch(signData.uploadUrl, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': _reuploadFile.type || 'audio/wav' },
+                        body: _reuploadFile,
+                    });
+                    if (upRes.ok) trackUrl = signData.publicUrl;
+                }
+
+                // 2. Generate & upload artwork
+                const artworkDataUrl = generateTrackArtwork(400);
+                const artSignRes = await fetch('/api/upload-artwork', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: `artwork_${Date.now()}.jpg` }),
+                });
+                const artSignData = await artSignRes.json();
+                if (artSignRes.ok && artSignData.uploadUrl) {
+                    const artBlob = await (await fetch(artworkDataUrl)).blob();
+                    const artUpRes = await fetch(artSignData.uploadUrl, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'image/jpeg' },
+                        body: artBlob,
+                    });
+                    if (artUpRes.ok) artworkUrl = artSignData.publicUrl;
+                }
+
+                // 3. Call reupload API
+                const res = await fetch('/api/reupload-track', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ order_id: orderId, track_url: trackUrl, track_artwork: artworkUrl }),
+                });
+
+                if (res.ok) {
+                    closeReuploadModal();
+                    loadDashboard();
+                } else {
+                    const err = await res.json();
+                    alert(err.error || 'Re-upload failed');
+                    btn.disabled = false;
+                    btn.textContent = 'Upload & Reset';
+                }
+            } catch (e) {
+                alert('Re-upload failed: ' + e.message);
+                btn.disabled = false;
+                btn.textContent = 'Upload & Reset';
+            }
+        }
+
+        // ===== Approve Mastering =====
+        async function approveMastering(orderId) {
+            const token = BeatpushAuth.getToken();
+            try {
+                const res = await fetch('/api/approve-mastering', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ order_id: orderId }),
+                });
+                if (res.ok) {
+                    loadDashboard();
+                } else {
+                    const err = await res.json();
+                    alert(err.error || 'Failed to approve');
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        // ===== Artwork Generator (same as main site) =====
+        function generateTrackArtwork(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const h1 = Math.random() * 360;
+            const h2 = (h1 + 60 + Math.random() * 120) % 360;
+            const h3 = (h2 + 60 + Math.random() * 120) % 360;
+            const c1 = `hsl(${h1}, 80%, 55%)`, c2 = `hsl(${h2}, 75%, 45%)`, c3 = `hsl(${h3}, 85%, 50%)`;
+            const g1 = ctx.createLinearGradient(0, 0, size, size);
+            g1.addColorStop(0, c1); g1.addColorStop(0.5, c2); g1.addColorStop(1, c3);
+            ctx.fillStyle = g1; ctx.fillRect(0, 0, size, size);
+            const g2 = ctx.createRadialGradient(size*0.75, size*0.2, 0, size*0.75, size*0.2, size*0.7);
+            g2.addColorStop(0, `hsla(${h1}, 80%, 65%, 0.6)`); g2.addColorStop(1, 'transparent');
+            ctx.fillStyle = g2; ctx.fillRect(0, 0, size, size);
+            const g3 = ctx.createRadialGradient(size*0.2, size*0.8, 0, size*0.2, size*0.8, size*0.65);
+            g3.addColorStop(0, `hsla(${h3}, 85%, 60%, 0.5)`); g3.addColorStop(1, 'transparent');
+            ctx.fillStyle = g3; ctx.fillRect(0, 0, size, size);
+            ctx.globalCompositeOperation = 'soft-light';
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                const y = size*(0.15+i*0.2)+(Math.random()-0.5)*size*0.1;
+                ctx.moveTo(-10, y);
+                ctx.bezierCurveTo(size*0.3+Math.random()*size*0.1, y-size*0.15+Math.random()*size*0.3, size*0.7+Math.random()*size*0.1, y+size*0.15-Math.random()*size*0.3, size+10, y+(Math.random()-0.5)*size*0.2);
+                ctx.lineWidth = size*(0.03+Math.random()*0.04);
+                ctx.strokeStyle = [c1,c2,c3][i%3]; ctx.stroke();
+            }
+            ctx.globalCompositeOperation = 'overlay';
+            const g4 = ctx.createLinearGradient(0,0,0,size);
+            g4.addColorStop(0,'rgba(255,255,255,0.08)'); g4.addColorStop(0.5,'transparent'); g4.addColorStop(1,'rgba(0,0,0,0.12)');
+            ctx.fillStyle = g4; ctx.fillRect(0,0,size,size);
+            ctx.globalCompositeOperation = 'source-over';
+            return canvas.toDataURL('image/jpeg', 0.85);
         }
 
         if (document.readyState === 'loading') {
