@@ -233,14 +233,20 @@ i
                 <div class="campaign-summary" id="campaignSummary"></div>
 
                 <div class="campaign-form">
-                    <!-- Genre confirmation -->
+                    <!-- Genre selection (max 2) -->
                     <div class="campaign-field">
-                        <label class="campaign-label" data-i18n="campaign_genre_label">Genre</label>
-                        <p class="campaign-field-hint" data-i18n="campaign_genre_hint">Confirm the genre detected for your track.</p>
-                        <div class="campaign-genre-display" id="campaignGenre">
-                            <span class="campaign-genre-tag" id="campaignGenreTag">--</span>
-                            <input type="text" class="campaign-input campaign-genre-input" id="campaignGenreInput" data-i18n-placeholder="campaign_genre_input_placeholder" placeholder="Type your genre (e.g. Afro House, Melodic Techno...)" autocomplete="off" style="display:none;">
-                            <button class="campaign-genre-confirm" id="genreConfirmBtn" data-i18n="campaign_confirm">Confirm</button>
+                        <label class="campaign-label">Genre</label>
+                        <p class="campaign-field-hint">Select up to 2 genres for your track.</p>
+                        <div class="genre-select-wrapper" id="genreSelectWrapper">
+                            <div class="genre-selected-tags" id="genreSelectedTags"></div>
+                            <div class="genre-dropdown-trigger" id="genreDropdownTrigger">
+                                <span class="genre-dropdown-placeholder" id="genreDropdownPlaceholder">Choose a genre...</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="genre-dropdown" id="genreDropdown" style="display:none;">
+                                <input type="text" class="genre-search-input" id="genreSearchInput" placeholder="Search..." autocomplete="off">
+                                <div class="genre-dropdown-list" id="genreDropdownList"></div>
+                            </div>
                         </div>
                     </div>
 

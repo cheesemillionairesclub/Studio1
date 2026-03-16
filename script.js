@@ -1609,34 +1609,10 @@ function showCampaignSetup(pack) {
         `;
     }
 
-    // Set genre from selected track
-    const genreTag = document.getElementById('campaignGenreTag');
-    const genreInput = document.getElementById('campaignGenreInput');
-    const hasGenre = selectedTrack && selectedTrack.genre;
-    if (genreTag) {
-        genreTag.textContent = hasGenre ? selectedTrack.genre : '';
-        genreTag.style.display = hasGenre ? '' : 'none';
-    }
-    if (genreInput) {
-        genreInput.style.display = hasGenre ? 'none' : '';
-        genreInput.value = '';
-    }
-
-    // Update hint text based on genre detection
-    const genreHint = document.querySelector('[data-i18n="campaign_genre_hint"]');
-    if (genreHint) {
-        genreHint.textContent = hasGenre
-            ? (t.campaign_genre_hint || 'Confirm the genre detected for your track.')
-            : (t.campaign_genre_hint_manual || 'Please type your genre below.');
-    }
-
-    // Reset confirm button
-    const confirmBtn = document.getElementById('genreConfirmBtn');
-    if (confirmBtn) {
-        confirmBtn.textContent = t.campaign_confirm || 'Confirm';
-        confirmBtn.classList.remove('confirmed');
-        confirmBtn.disabled = false;
-    }
+    // Reset genre dropdown selection
+    selectedGenres = [];
+    renderGenreSelection();
+    genreConfirmed = false;
 
     // Update tips based on pack
     const tipsContent = document.getElementById('tipsContent');
@@ -1699,43 +1675,116 @@ function showCampaignSetup(pack) {
     }, 100);
 }
 
-// Genre confirm button
-document.getElementById('genreConfirmBtn').addEventListener('click', function() {
-    const genreInput = document.getElementById('campaignGenreInput');
-    const genreTag = document.getElementById('campaignGenreTag');
+// Genre dropdown selector
+const GENRE_LIST = [
+    '140 / Deep Dubstep / Grime', 'Afro House', 'Amapiano', 'Ambient / Experimental',
+    'Bass / Club', 'Bass House', 'Brazilian Funk', 'Breaks / Breakbeat / UK Bass',
+    'Dance / Pop', 'Deep House', 'DJ Tools / Acapellas', 'Downtempo',
+    'Drum & Bass', 'Dubstep', 'Electro (Classic / Detroit / Modern)', 'Electronica',
+    'Funky House', 'Hard Dance / Hardcore / Neo Rave', 'Hard Techno', 'House',
+    'Indie Dance', 'Jackin House', 'Mainstage', 'Melodic House & Techno',
+    'Minimal / Deep Tech', 'Nu Disco / Disco', 'Organic House', 'Progressive House',
+    'Psy-Trance', 'Tech House', 'Techno (Peak Time / Driving)',
+    'Techno (Raw / Deep / Hypnotic)', 'Trance (Main Floor)',
+    'Trance (Raw / Deep / Hypnotic)', 'Trap / Future Bass', 'UK Garage / Bassline'
+];
+let selectedGenres = [];
 
-    // If manual input is visible, validate and use its value
-    if (genreInput && genreInput.style.display !== 'none') {
-        const manualGenre = genreInput.value.trim();
-        if (!manualGenre) {
-            genreInput.classList.add('field-highlight');
-            setTimeout(() => genreInput.classList.remove('field-highlight'), 2000);
-            return;
-        }
-        // Set the genre tag with manual value
-        if (genreTag) {
-            genreTag.textContent = manualGenre;
-            genreTag.style.display = '';
-        }
-        genreInput.style.display = 'none';
+function renderGenreSelection() {
+    const tagsContainer = document.getElementById('genreSelectedTags');
+    const trigger = document.getElementById('genreDropdownTrigger');
+    const placeholder = document.getElementById('genreDropdownPlaceholder');
+    if (!tagsContainer) return;
+
+    tagsContainer.innerHTML = selectedGenres.map(g =>
+        `<span class="genre-selected-tag">${g}<button class="genre-remove" data-genre="${g}">&times;</button></span>`
+    ).join('');
+
+    // Update placeholder and trigger state
+    if (placeholder) {
+        placeholder.textContent = selectedGenres.length >= 2 ? 'Max 2 genres selected' : 'Choose a genre...';
+    }
+    if (trigger) {
+        trigger.classList.toggle('disabled', selectedGenres.length >= 2);
     }
 
-    genreConfirmed = true;
-    this.classList.add('confirmed');
-    const lang = detectLanguage();
-    const t = translations[lang] || translations.en;
-    this.textContent = t.campaign_confirmed || 'Confirmed';
-    this.disabled = true;
+    // Auto-confirm when at least 1 genre is selected
+    genreConfirmed = selectedGenres.length > 0;
 
-    // Update price summary for Top 100 based on confirmed genre
-    if (selectedPack === 'promo-430') {
-        const confirmedGenre = genreTag ? genreTag.textContent.trim() : null;
-        const genrePrice = confirmedGenre ? getTop100Price(confirmedGenre) : null;
+    // Update price for Top 100 if applicable
+    if (selectedPack === 'promo-430' && selectedGenres.length > 0) {
+        const genrePrice = getTop100Price(selectedGenres[0]);
         const priceSummary = document.getElementById('campaignPriceSummary');
         if (priceSummary && genrePrice) {
+            const lang = detectLanguage();
+            const t = translations[lang] || translations.en;
             const priceLabel = t.campaign_total || 'Total';
             priceSummary.textContent = `${priceLabel}: $${genrePrice.toLocaleString('en-US')}`;
         }
+    }
+}
+
+function renderGenreDropdownList(filter = '') {
+    const list = document.getElementById('genreDropdownList');
+    if (!list) return;
+    const q = filter.toLowerCase();
+    list.innerHTML = GENRE_LIST
+        .filter(g => !q || g.toLowerCase().includes(q))
+        .map(g => `<div class="genre-dropdown-item${selectedGenres.includes(g) ? ' selected' : ''}" data-genre="${g}">${g}</div>`)
+        .join('');
+}
+
+// Toggle dropdown
+document.getElementById('genreDropdownTrigger')?.addEventListener('click', function() {
+    if (selectedGenres.length >= 2) return;
+    const dropdown = document.getElementById('genreDropdown');
+    const isOpen = dropdown.style.display !== 'none';
+    dropdown.style.display = isOpen ? 'none' : '';
+    if (!isOpen) {
+        const searchInput = document.getElementById('genreSearchInput');
+        searchInput.value = '';
+        renderGenreDropdownList();
+        searchInput.focus();
+    }
+});
+
+// Search filter
+document.getElementById('genreSearchInput')?.addEventListener('input', function() {
+    renderGenreDropdownList(this.value);
+});
+
+// Select genre from dropdown
+document.getElementById('genreDropdownList')?.addEventListener('click', function(e) {
+    const item = e.target.closest('.genre-dropdown-item');
+    if (!item) return;
+    const genre = item.dataset.genre;
+    if (selectedGenres.includes(genre)) {
+        selectedGenres = selectedGenres.filter(g => g !== genre);
+    } else if (selectedGenres.length < 2) {
+        selectedGenres.push(genre);
+    }
+    renderGenreSelection();
+    renderGenreDropdownList(document.getElementById('genreSearchInput')?.value || '');
+    // Close dropdown if 2 selected
+    if (selectedGenres.length >= 2) {
+        document.getElementById('genreDropdown').style.display = 'none';
+    }
+});
+
+// Remove genre tag
+document.getElementById('genreSelectedTags')?.addEventListener('click', function(e) {
+    const btn = e.target.closest('.genre-remove');
+    if (!btn) return;
+    selectedGenres = selectedGenres.filter(g => g !== btn.dataset.genre);
+    renderGenreSelection();
+});
+
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('genreSelectWrapper');
+    const dropdown = document.getElementById('genreDropdown');
+    if (wrapper && dropdown && !wrapper.contains(e.target)) {
+        dropdown.style.display = 'none';
     }
 });
 
@@ -1762,10 +1811,10 @@ document.getElementById('launchCampaignBtn').addEventListener('click', function(
         selectedPack = activePack;
     }
 
-    // Validate genre confirmed
-    if (!genreConfirmed) {
-        showToast(t.campaign_validate_genre || 'Please confirm the genre of your track before launching.');
-        highlightField(document.getElementById('genreConfirmBtn'));
+    // Validate genre selected
+    if (!selectedGenres.length) {
+        showToast(t.campaign_validate_genre || 'Please select at least one genre for your track.');
+        highlightField(document.getElementById('genreDropdownTrigger'));
         return;
     }
 
@@ -1787,7 +1836,7 @@ document.getElementById('launchCampaignBtn').addEventListener('click', function(
     console.log('[AlphaStudios] pack being sent to API:', packToSend);
 
     const track = selectedTrack || {};
-    const genre = document.getElementById('campaignGenreTag')?.textContent?.trim() || track.genre || '';
+    const genre = selectedGenres.join(', ') || track.genre || '';
     const artists = selectedArtists.map(a => a.name).join(', ');
     const releaseStatus = document.querySelector('input[name="releaseStatus"]:checked')?.value || '';
 
