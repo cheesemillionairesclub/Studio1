@@ -1083,8 +1083,6 @@ if (trackRemoveBtn) {
 function removeUploadedTrack() {
     if (audioElement) { audioElement.pause(); audioElement = null; }
     if (animFrameId) cancelAnimationFrame(animFrameId);
-    if (cyanitePollTimer) clearTimeout(cyanitePollTimer);
-    cyaniteAnalysisId = null;
     isPlaying = false;
     uploadedAudioFile = null;
     audioBuffer = null;
@@ -1201,8 +1199,8 @@ async function handleAudioUpload(file) {
                 }, 200);
             }
 
-            // Send to Cyanite for AI analysis (non-blocking)
-            sendToCyanite(file, trackTitle);
+            // Analyze with Essentia (non-blocking, runs in browser)
+            analyzeWithEssentia(audioBuffer);
         }, 400);
 
     } catch (err) {
@@ -1364,156 +1362,125 @@ function formatFileSize(bytes) {
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
-// ===== Cyanite AI Analysis =====
-let cyaniteAnalysisId = null;
-let cyanitePollTimer = null;
+// ===== Essentia Audio Analysis (runs in browser via WebAssembly) =====
+let essentiaInstance = null;
+let essentiaReady = false;
 
-async function sendToCyanite(file, title) {
+// Initialize Essentia WASM
+if (typeof EssentiaWASM !== 'undefined') {
+    EssentiaWASM().then(function(wasmModule) {
+        essentiaInstance = new Essentia(wasmModule);
+        essentiaReady = true;
+        console.log('[Essentia] Ready — version:', essentiaInstance.version);
+    }).catch(function(err) {
+        console.error('[Essentia] Failed to initialize:', err);
+    });
+}
+
+async function analyzeWithEssentia(buffer) {
     const analysisTags = document.getElementById('trackAnalysisTags');
     if (analysisTags) {
         analysisTags.style.display = '';
-        analysisTags.innerHTML = '<span class="meta-tag meta-tag-accent"><span class="cyanite-spinner"></span> Analyzing with AI...</span>';
+        analysisTags.innerHTML = '<span class="meta-tag meta-tag-accent"><span class="cyanite-spinner"></span> Analyzing...</span>';
     }
 
     try {
-        // Step 1: Get upload URL from Cyanite
-        const uploadReq = await fetch('/api/cyanite?action=upload-request', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-        });
-        const uploadData = await uploadReq.json();
-        if (!uploadData.uploadUrl) {
-            throw new Error(uploadData.error || 'No upload URL');
+        // Wait for Essentia to be ready (max 5s)
+        let waited = 0;
+        while (!essentiaReady && waited < 5000) {
+            await new Promise(r => setTimeout(r, 100));
+            waited += 100;
+        }
+        if (!essentiaReady || !essentiaInstance) {
+            throw new Error('Essentia not available');
         }
 
-        console.log('[Cyanite] Got upload URL, fileUploadId:', uploadData.fileUploadId);
+        // Convert AudioBuffer to mono Float32Array then to Essentia vector
+        const monoData = buffer.numberOfChannels > 1
+            ? essentiaInstance.audioBufferToMono(buffer)
+            : buffer.getChannelData(0);
+        const audioVector = essentiaInstance.arrayToVector(monoData);
 
-        // Step 2: PUT the file directly to Cyanite's upload URL
-        const putRes = await fetch(uploadData.uploadUrl, {
-            method: 'PUT',
-            body: file,
-            headers: { 'Content-Type': file.type || 'audio/mpeg' },
-        });
-        if (!putRes.ok) {
-            throw new Error('File upload to Cyanite failed: ' + putRes.status);
-        }
+        console.log('[Essentia] Analyzing', monoData.length, 'samples at', buffer.sampleRate, 'Hz');
 
-        console.log('[Cyanite] File uploaded successfully');
+        const results = {};
 
-        // Step 3: Create and enqueue the analysis
-        const analyzeRes = await fetch('/api/cyanite?action=analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                fileUploadId: uploadData.fileUploadId,
-                title: title,
-            }),
-        });
-        const analyzeData = await analyzeRes.json();
-        if (!analyzeData.analysisId) {
-            throw new Error(analyzeData.error || 'No analysis ID');
-        }
+        // BPM
+        try {
+            const bpmResult = essentiaInstance.PercivalBpmEstimator(audioVector);
+            results.bpm = bpmResult.bpm;
+            console.log('[Essentia] BPM:', results.bpm);
+        } catch (e) { console.warn('[Essentia] BPM extraction failed:', e.message); }
 
-        cyaniteAnalysisId = analyzeData.analysisId;
-        console.log('[Cyanite] Analysis created:', cyaniteAnalysisId);
+        // Key + Scale
+        try {
+            const keyResult = essentiaInstance.KeyExtractor(audioVector);
+            results.key = keyResult.key;
+            results.scale = keyResult.scale;
+            results.keyStrength = keyResult.strength;
+            console.log('[Essentia] Key:', results.key, results.scale);
+        } catch (e) { console.warn('[Essentia] Key extraction failed:', e.message); }
 
-        // Step 4: Poll for results
-        pollCyaniteResults(cyaniteAnalysisId);
+        // Energy
+        try {
+            const energyResult = essentiaInstance.Energy(audioVector);
+            results.energy = energyResult.energy;
+            console.log('[Essentia] Energy:', results.energy);
+        } catch (e) { console.warn('[Essentia] Energy extraction failed:', e.message); }
+
+        // Dynamic Complexity + Loudness
+        try {
+            const dynResult = essentiaInstance.DynamicComplexity(audioVector);
+            results.dynamicComplexity = dynResult.dynamicComplexity;
+            results.loudness = dynResult.loudness;
+            console.log('[Essentia] Dynamic complexity:', results.dynamicComplexity, 'Loudness:', results.loudness);
+        } catch (e) { console.warn('[Essentia] DynamicComplexity failed:', e.message); }
+
+        // Free the vector
+        audioVector.delete();
+
+        renderAnalysisTags(results);
 
     } catch (err) {
-        console.error('[Cyanite] Error:', err);
+        console.error('[Essentia] Error:', err);
         if (analysisTags) {
-            analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">AI analysis unavailable</span>';
+            analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">Analysis unavailable</span>';
         }
     }
 }
 
-function pollCyaniteResults(analysisId, attempt = 0) {
-    const maxAttempts = 30; // ~5 minutes with 10s interval
-    const interval = 10000; // 10 seconds
-
-    if (attempt >= maxAttempts) {
-        const analysisTags = document.getElementById('trackAnalysisTags');
-        if (analysisTags) {
-            analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">Analysis timed out</span>';
-        }
-        return;
-    }
-
-    cyanitePollTimer = setTimeout(async () => {
-        try {
-            // Poll our own DB (populated by Cyanite webhook)
-            const res = await fetch(`/api/cyanite?action=track-analysis&cyanite_id=${encodeURIComponent(analysisId)}`);
-            const data = await res.json();
-
-            console.log('[Cyanite] Poll result:', data.status, data);
-
-            if (data.status === 'finished' || data.bpm || data.key || data.genre) {
-                renderCyaniteTags(data);
-
-                // Update selectedTrack genre if detected
-                if (data.genre && data.genre.length > 0 && selectedTrack) {
-                    selectedTrack.genre = data.genre[0];
-                }
-            } else if (data.status === 'failed') {
-                const analysisTags = document.getElementById('trackAnalysisTags');
-                if (analysisTags) {
-                    analysisTags.innerHTML = '<span class="meta-tag" style="color: var(--white-40);">Analysis failed</span>';
-                }
-            } else {
-                // Still processing (webhook hasn't arrived yet), poll again
-                pollCyaniteResults(analysisId, attempt + 1);
-            }
-        } catch (err) {
-            console.error('[Cyanite] Poll error:', err);
-            pollCyaniteResults(analysisId, attempt + 1);
-        }
-    }, interval);
-}
-
-function renderCyaniteTags(data) {
+function renderAnalysisTags(data) {
     const container = document.getElementById('trackAnalysisTags');
     if (!container) return;
 
     const tags = [];
 
-    if (data.bpm) {
-        tags.push(`<span class="meta-tag meta-tag-accent">${Math.round(data.bpm)} bpm</span>`);
+    if (data.bpm && data.bpm > 0) {
+        tags.push(`<span class="meta-tag meta-tag-accent">${Math.round(data.bpm)} BPM</span>`);
     }
     if (data.key) {
-        tags.push(`<span class="meta-tag meta-tag-accent">${data.key}</span>`);
+        const keyLabel = data.scale ? `${data.key} ${data.scale}` : data.key;
+        tags.push(`<span class="meta-tag meta-tag-accent">${escapeHtml(keyLabel)}</span>`);
     }
-    if (data.energyLevel) {
-        const energyLabel = data.energyLevel.charAt(0).toUpperCase() + data.energyLevel.slice(1).toLowerCase();
-        const bars = data.energyLevel === 'high' ? 3 : data.energyLevel === 'medium' ? 2 : 1;
+    if (data.energy != null) {
+        // Normalize energy to low/medium/high based on RMS-like thresholds
+        const energyNorm = Math.sqrt(data.energy);
+        const level = energyNorm > 0.15 ? 'high' : energyNorm > 0.05 ? 'medium' : 'low';
+        const bars = level === 'high' ? 3 : level === 'medium' ? 2 : 1;
         let barsHtml = '';
         for (let i = 0; i < 3; i++) {
             barsHtml += `<span class="meta-tag-energy-bar ${i < bars ? 'active' : ''}${bars === 3 ? ' high' : ''}"></span>`;
         }
         tags.push(`<span class="meta-tag"><span class="meta-tag-energy">${barsHtml}</span> Energy</span>`);
     }
-    if (data.genre && data.genre.length > 0) {
-        tags.push(`<span class="meta-tag meta-tag-accent">${escapeHtml(data.genre[0])}</span>`);
+    if (data.loudness != null) {
+        tags.push(`<span class="meta-tag">${data.loudness.toFixed(1)} dB loudness</span>`);
     }
-    if (data.mood && data.mood.length > 0) {
-        tags.push(`<span class="meta-tag">${escapeHtml(data.mood[0])}</span>`);
-    }
-    if (data.voicePresenceProfile) {
-        const voiceLabel = data.voicePresenceProfile === 'vocal' ? 'Vocals - dominant'
-            : data.voicePresenceProfile === 'instrumental' ? 'Instrumental'
-            : 'Vocals - ' + data.voicePresenceProfile;
-        tags.push(`<span class="meta-tag">${voiceLabel}</span>`);
-    }
-    if (data.energyDynamics) {
-        const dynLabel = data.energyDynamics === 'high' ? 'Dynamic range - very dynamic'
-            : data.energyDynamics === 'low' ? 'Dynamic range - stable'
-            : 'Dynamic range - ' + data.energyDynamics;
+    if (data.dynamicComplexity != null) {
+        const dynLabel = data.dynamicComplexity > 5 ? 'Very dynamic'
+            : data.dynamicComplexity > 2 ? 'Moderate dynamics'
+            : 'Low dynamics';
         tags.push(`<span class="meta-tag">${dynLabel}</span>`);
-    }
-    if (data.instruments && data.instruments.length > 0) {
-        data.instruments.slice(0, 3).forEach(inst => {
-            tags.push(`<span class="meta-tag">${escapeHtml(inst)}</span>`);
-        });
     }
 
     container.innerHTML = tags.join('');

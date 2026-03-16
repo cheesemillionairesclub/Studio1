@@ -177,7 +177,7 @@
                         <span class="waveform-time" id="waveformTime">0:00</span>
                         <span class="waveform-duration" id="waveformDuration">0:00</span>
                     </div>
-                    <!-- Cyanite analysis tags (populated via webhook) -->
+                    <!-- Essentia analysis tags (computed client-side) -->
                     <div class="track-analysis-tags" id="trackAnalysisTags" style="display:none;">
                         <!-- BPM, Key, Energy, Danceability, Vocals, Dynamic range, True peak etc. -->
                     </div>
@@ -441,6 +441,8 @@ i
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js"></script>
     <script src="supabase.js"></script>
     <script src="auth.js"></script>
     <script src="script.js"></script>
