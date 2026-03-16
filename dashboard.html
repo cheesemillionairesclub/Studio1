@@ -531,7 +531,7 @@
         }
 
         // ===== Subscription Banner =====
-        async function renderSubscriptionBanner() {
+        async function renderSubscriptionBanner(overrideTracksUsed) {
             const banner = document.getElementById('subscriptionBanner');
             if (!banner) return;
 
@@ -539,7 +539,23 @@
             if (!profile) { banner.style.display = 'none'; return; }
 
             const status = profile.subscription_status || 'none';
-            const tracksUsed = profile.tracks_used_this_month || 0;
+
+            // Use override if provided, otherwise count actual orders this month, fallback to profile field
+            let tracksUsed;
+            if (typeof overrideTracksUsed === 'number') {
+                tracksUsed = overrideTracksUsed;
+            } else {
+                // Count orders created this billing cycle as source of truth
+                try {
+                    const orders = await BeatpushAuth.getMyOrders();
+                    const periodStart = profile.current_period_end
+                        ? new Date(new Date(profile.current_period_end).getTime() - 30 * 86400000)
+                        : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+                    tracksUsed = orders.filter(o => new Date(o.created_at) >= periodStart).length;
+                } catch (e) {
+                    tracksUsed = profile.tracks_used_this_month || 0;
+                }
+            }
 
             if (status === 'active') {
                 const tracksLeft = 5 - tracksUsed;
