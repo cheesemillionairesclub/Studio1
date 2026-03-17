@@ -891,51 +891,89 @@ function generateTrackArtwork(size = 400) {
     canvas.height = size;
     const ctx = canvas.getContext('2d');
 
-    // One random accent color
+    // 3 colors only: black, white, one random accent
     const hue = Math.random() * 360;
-    const accent = `hsl(${hue}, 60%, 45%)`;
-    const accentLight = `hsla(${hue}, 50%, 55%, 0.4)`;
-    const accentDim = `hsla(${hue}, 40%, 30%, 0.6)`;
+    const accent = `hsl(${hue}, 65%, 50%)`;
+    const accentSoft = `hsla(${hue}, 55%, 45%, 0.5)`;
 
-    // Base: black to dark grey diagonal gradient
-    const base = ctx.createLinearGradient(0, 0, size, size);
-    base.addColorStop(0, '#0a0a0a');
-    base.addColorStop(0.5, '#1a1a1a');
-    base.addColorStop(1, '#111111');
-    ctx.fillStyle = base;
+    // Base: black
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, size, size);
 
-    // Accent radial glow — subtle, off-center
-    const gx = size * (0.3 + Math.random() * 0.4);
-    const gy = size * (0.3 + Math.random() * 0.4);
-    const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, size * 0.6);
-    glow.addColorStop(0, accentDim);
-    glow.addColorStop(0.6, `hsla(${hue}, 30%, 15%, 0.3)`);
-    glow.addColorStop(1, 'transparent');
-    ctx.fillStyle = glow;
+    // Diagonal gradient: black -> accent -> white (3 color stops)
+    const angle = Math.random() * Math.PI;
+    const dx = Math.cos(angle) * size;
+    const dy = Math.sin(angle) * size;
+    const cx = size / 2, cy = size / 2;
+    const grad = ctx.createLinearGradient(cx - dx / 2, cy - dy / 2, cx + dx / 2, cy + dy / 2);
+    grad.addColorStop(0, '#000000');
+    grad.addColorStop(0.45 + Math.random() * 0.1, accentSoft);
+    grad.addColorStop(1, 'rgba(255,255,255,0.15)');
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
 
-    // Minimalist abstract lines
+    // Abstract minimalist shapes — pick one random pattern
+    const pattern = Math.floor(Math.random() * 3);
     ctx.globalCompositeOperation = 'screen';
-    const lineCount = 2 + Math.floor(Math.random() * 2);
-    for (let i = 0; i < lineCount; i++) {
+
+    if (pattern === 0) {
+        // Single arc sweep
         ctx.beginPath();
-        const y = size * (0.25 + i * 0.2) + (Math.random() - 0.5) * size * 0.08;
-        ctx.moveTo(-10, y);
-        const cp1x = size * 0.35 + Math.random() * size * 0.1;
-        const cp1y = y + (Math.random() - 0.5) * size * 0.25;
-        const cp2x = size * 0.65 + Math.random() * size * 0.1;
-        const cp2y = y + (Math.random() - 0.5) * size * 0.25;
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, size + 10, y + (Math.random() - 0.5) * size * 0.15);
-        ctx.lineWidth = size * (0.005 + Math.random() * 0.008);
-        ctx.strokeStyle = i === 0 ? accentLight : `rgba(255,255,255,${0.04 + Math.random() * 0.06})`;
+        const r = size * (0.25 + Math.random() * 0.2);
+        const arcX = size * (0.3 + Math.random() * 0.4);
+        const arcY = size * (0.3 + Math.random() * 0.4);
+        ctx.arc(arcX, arcY, r, 0, Math.PI * (1 + Math.random()));
+        ctx.lineWidth = size * 0.004;
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.stroke();
+        // Accent dot
+        ctx.beginPath();
+        ctx.arc(arcX, arcY, size * 0.015, 0, Math.PI * 2);
+        ctx.fillStyle = accent;
+        ctx.fill();
+    } else if (pattern === 1) {
+        // Minimal crossing lines
+        for (let i = 0; i < 2; i++) {
+            ctx.beginPath();
+            const y1 = size * (0.3 + Math.random() * 0.4);
+            const y2 = size * (0.3 + Math.random() * 0.4);
+            ctx.moveTo(0, y1);
+            ctx.lineTo(size, y2);
+            ctx.lineWidth = size * (0.002 + Math.random() * 0.003);
+            ctx.strokeStyle = i === 0 ? accent : 'rgba(255,255,255,0.2)';
+            ctx.stroke();
+        }
+    } else {
+        // Subtle bezier curve
+        ctx.beginPath();
+        const y = size * (0.3 + Math.random() * 0.4);
+        ctx.moveTo(0, y);
+        ctx.bezierCurveTo(
+            size * 0.3, y + (Math.random() - 0.5) * size * 0.4,
+            size * 0.7, y + (Math.random() - 0.5) * size * 0.4,
+            size, y + (Math.random() - 0.5) * size * 0.2
+        );
+        ctx.lineWidth = size * 0.003;
+        ctx.strokeStyle = accent;
+        ctx.stroke();
+        // White parallel
+        ctx.beginPath();
+        const y2 = y + size * 0.05;
+        ctx.moveTo(0, y2);
+        ctx.bezierCurveTo(
+            size * 0.3, y2 + (Math.random() - 0.5) * size * 0.3,
+            size * 0.7, y2 + (Math.random() - 0.5) * size * 0.3,
+            size, y2 + (Math.random() - 0.5) * size * 0.15
+        );
+        ctx.lineWidth = size * 0.002;
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
         ctx.stroke();
     }
 
-    // Subtle top-to-bottom vignette
+    // Corner vignette
     ctx.globalCompositeOperation = 'multiply';
-    const vig = ctx.createRadialGradient(size / 2, size / 2, size * 0.2, size / 2, size / 2, size * 0.7);
-    vig.addColorStop(0, 'rgba(60,60,60,1)');
+    const vig = ctx.createRadialGradient(size / 2, size / 2, size * 0.15, size / 2, size / 2, size * 0.72);
+    vig.addColorStop(0, 'rgba(50,50,50,1)');
     vig.addColorStop(1, 'rgba(0,0,0,1)');
     ctx.fillStyle = vig;
     ctx.fillRect(0, 0, size, size);
