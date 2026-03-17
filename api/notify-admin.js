@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const SUPABASE_URL = 'https://mbruoxxqpnxcybwureku.supabase.co';
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const ADMIN_EMAIL = 'support@alphastudios.app';
+    const ADMIN_EMAIL = 'cheesemillionairesclub@gmail.com';
 
     if (!RESEND_API_KEY) {
         return res.status(500).json({ error: 'Email service not configured' });
