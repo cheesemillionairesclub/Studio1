@@ -2356,9 +2356,95 @@ body {
 }
 
 /* ===== Why Choose Section ===== */
-.why-choose-section {
+/* ===== What We Do Section ===== */
+.whatwedo-section {
     padding: 100px 0;
     background: var(--bg-secondary);
+}
+.whatwedo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.whatwedo-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--white-10);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+}
+.whatwedo-card:hover {
+    border-color: var(--green-primary);
+    transform: translateY(-4px);
+}
+.whatwedo-card-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(76, 175, 80, 0.15);
+    color: var(--green-primary);
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.whatwedo-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+.whatwedo-card-desc {
+    font-size: 0.9rem;
+    color: var(--white-70);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+.whatwedo-card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+}
+.whatwedo-card-list li {
+    font-size: 0.85rem;
+    color: var(--white-70);
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.whatwedo-card-list li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green-primary);
+    flex-shrink: 0;
+}
+.whatwedo-card-footer {
+    font-size: 0.8rem;
+    color: var(--white-50);
+    line-height: 1.6;
+    border-top: 1px solid var(--white-10);
+    padding-top: 14px;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .whatwedo-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.why-choose-section {
+    padding: 100px 0;
+    background: var(--bg-primary);
 }
 
 .why-choose-grid {
