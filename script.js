@@ -891,60 +891,53 @@ function generateTrackArtwork(size = 400) {
     canvas.height = size;
     const ctx = canvas.getContext('2d');
 
-    // Generate 3 random vibrant colors
-    const hue1 = Math.random() * 360;
-    const hue2 = (hue1 + 60 + Math.random() * 120) % 360;
-    const hue3 = (hue2 + 60 + Math.random() * 120) % 360;
-    const c1 = `hsl(${hue1}, 80%, 55%)`;
-    const c2 = `hsl(${hue2}, 75%, 45%)`;
-    const c3 = `hsl(${hue3}, 85%, 50%)`;
+    // One random accent color
+    const hue = Math.random() * 360;
+    const accent = `hsl(${hue}, 60%, 45%)`;
+    const accentLight = `hsla(${hue}, 50%, 55%, 0.4)`;
+    const accentDim = `hsla(${hue}, 40%, 30%, 0.6)`;
 
-    // Base: diagonal gradient
-    const grad1 = ctx.createLinearGradient(0, 0, size, size);
-    grad1.addColorStop(0, c1);
-    grad1.addColorStop(0.5, c2);
-    grad1.addColorStop(1, c3);
-    ctx.fillStyle = grad1;
+    // Base: black to dark grey diagonal gradient
+    const base = ctx.createLinearGradient(0, 0, size, size);
+    base.addColorStop(0, '#0a0a0a');
+    base.addColorStop(0.5, '#1a1a1a');
+    base.addColorStop(1, '#111111');
+    ctx.fillStyle = base;
     ctx.fillRect(0, 0, size, size);
 
-    // Layer: large radial glow (top-right)
-    const grad2 = ctx.createRadialGradient(size * 0.75, size * 0.2, 0, size * 0.75, size * 0.2, size * 0.7);
-    grad2.addColorStop(0, c1.replace('55%)', '65%)').replace('rgb', 'rgb') );
-    grad2.addColorStop(0, `hsla(${hue1}, 80%, 65%, 0.6)`);
-    grad2.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad2;
+    // Accent radial glow — subtle, off-center
+    const gx = size * (0.3 + Math.random() * 0.4);
+    const gy = size * (0.3 + Math.random() * 0.4);
+    const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, size * 0.6);
+    glow.addColorStop(0, accentDim);
+    glow.addColorStop(0.6, `hsla(${hue}, 30%, 15%, 0.3)`);
+    glow.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow;
     ctx.fillRect(0, 0, size, size);
 
-    // Layer: second radial glow (bottom-left)
-    const grad3 = ctx.createRadialGradient(size * 0.2, size * 0.8, 0, size * 0.2, size * 0.8, size * 0.65);
-    grad3.addColorStop(0, `hsla(${hue3}, 85%, 60%, 0.5)`);
-    grad3.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad3;
-    ctx.fillRect(0, 0, size, size);
-
-    // Abstract geometric: flowing curves
-    ctx.globalCompositeOperation = 'soft-light';
-    for (let i = 0; i < 4; i++) {
+    // Minimalist abstract lines
+    ctx.globalCompositeOperation = 'screen';
+    const lineCount = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < lineCount; i++) {
         ctx.beginPath();
-        const yOff = size * (0.15 + i * 0.2) + (Math.random() - 0.5) * size * 0.1;
-        ctx.moveTo(-10, yOff);
-        const cp1x = size * 0.3 + Math.random() * size * 0.1;
-        const cp1y = yOff - size * 0.15 + Math.random() * size * 0.3;
-        const cp2x = size * 0.7 + Math.random() * size * 0.1;
-        const cp2y = yOff + size * 0.15 - Math.random() * size * 0.3;
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, size + 10, yOff + (Math.random() - 0.5) * size * 0.2);
-        ctx.lineWidth = size * (0.03 + Math.random() * 0.04);
-        ctx.strokeStyle = [c1, c2, c3][i % 3];
+        const y = size * (0.25 + i * 0.2) + (Math.random() - 0.5) * size * 0.08;
+        ctx.moveTo(-10, y);
+        const cp1x = size * 0.35 + Math.random() * size * 0.1;
+        const cp1y = y + (Math.random() - 0.5) * size * 0.25;
+        const cp2x = size * 0.65 + Math.random() * size * 0.1;
+        const cp2y = y + (Math.random() - 0.5) * size * 0.25;
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, size + 10, y + (Math.random() - 0.5) * size * 0.15);
+        ctx.lineWidth = size * (0.005 + Math.random() * 0.008);
+        ctx.strokeStyle = i === 0 ? accentLight : `rgba(255,255,255,${0.04 + Math.random() * 0.06})`;
         ctx.stroke();
     }
 
-    // Subtle grain overlay
-    ctx.globalCompositeOperation = 'overlay';
-    const grad4 = ctx.createLinearGradient(0, 0, 0, size);
-    grad4.addColorStop(0, 'rgba(255,255,255,0.08)');
-    grad4.addColorStop(0.5, 'transparent');
-    grad4.addColorStop(1, 'rgba(0,0,0,0.12)');
-    ctx.fillStyle = grad4;
+    // Subtle top-to-bottom vignette
+    ctx.globalCompositeOperation = 'multiply';
+    const vig = ctx.createRadialGradient(size / 2, size / 2, size * 0.2, size / 2, size / 2, size * 0.7);
+    vig.addColorStop(0, 'rgba(60,60,60,1)');
+    vig.addColorStop(1, 'rgba(0,0,0,1)');
+    ctx.fillStyle = vig;
     ctx.fillRect(0, 0, size, size);
 
     ctx.globalCompositeOperation = 'source-over';
@@ -1627,7 +1620,7 @@ function renderAnalysisTags(data) {
     const tags = [];
 
     if (data.bpm && data.bpm > 0) {
-        tags.push(`<span class="meta-tag meta-tag-accent">${Math.round(data.bpm) + 10} BPM</span>`);
+        tags.push(`<span class="meta-tag meta-tag-accent">${Math.round(data.bpm)} BPM</span>`);
     }
     if (data.key) {
         const keyLabel = data.scale ? `${data.key} ${data.scale}` : data.key;
