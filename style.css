@@ -3981,10 +3981,10 @@ body {
 /* Pipeline stepper */
 .dash-pipeline {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0;
     margin-bottom: 16px;
-    padding: 0;
+    padding: 0 8px;
     position: relative;
 }
 
@@ -3993,48 +3993,49 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     position: relative;
     z-index: 1;
 }
 
 .dash-pipeline-dot {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 700;
     border: 2px solid var(--white-15);
     background: var(--bg-card);
     color: var(--white-30);
     transition: all 0.3s ease;
+    box-shadow: 0 0 0 4px var(--bg-card);
 }
 
 .dash-pipeline-step.active .dash-pipeline-dot {
-    border-color: var(--green-primary);
-    background: var(--green-10);
-    color: var(--green-primary);
+    border-color: #1a1a2e;
+    background: rgba(26,26,46,0.08);
+    color: #1a1a2e;
 }
 
 .dash-pipeline-step.done .dash-pipeline-dot {
-    border-color: var(--green-primary);
-    background: var(--green-primary);
+    border-color: #1a1a2e;
+    background: #1a1a2e;
     color: #fff;
 }
 
 .dash-pipeline-label {
-    font-size: 0.68rem;
-    font-weight: 600;
+    font-size: 0.65rem;
+    font-weight: 700;
     color: var(--white-30);
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
 .dash-pipeline-step.active .dash-pipeline-label {
-    color: var(--green-primary);
+    color: #1a1a2e;
 }
 
 .dash-pipeline-step.done .dash-pipeline-label {
@@ -4043,9 +4044,9 @@ body {
 
 .dash-pipeline-line {
     position: absolute;
-    top: 14px;
-    left: calc(50% / 3 + 14px);
-    right: calc(50% / 3 + 14px);
+    top: 16px;
+    left: calc(100% / 6 + 20px);
+    right: calc(100% / 6 + 20px);
     height: 2px;
     background: var(--white-10);
     z-index: 0;
@@ -4053,7 +4054,7 @@ body {
 
 .dash-pipeline-line-fill {
     height: 100%;
-    background: var(--green-primary);
+    background: #1a1a2e;
     transition: width 0.4s ease;
     border-radius: 1px;
 }
