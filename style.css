@@ -2717,10 +2717,26 @@ body {
 }
 
 .faq-answer p {
-    padding: 0 24px 20px;
+    padding: 0 24px 8px;
     font-size: 0.9rem;
     color: var(--white-50);
     line-height: 1.7;
+}
+.faq-answer p:last-child {
+    padding-bottom: 20px;
+}
+.faq-answer ul,
+.faq-answer ol {
+    padding: 0 24px 8px 40px;
+    font-size: 0.9rem;
+    color: var(--white-50);
+    line-height: 1.8;
+}
+.faq-answer ul {
+    list-style: disc;
+}
+.faq-answer ol {
+    list-style: decimal;
 }
 
 .faq-tips-list {
