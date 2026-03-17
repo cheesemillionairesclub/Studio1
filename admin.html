@@ -586,46 +586,77 @@
 
             const token = BeatpushAuth.getToken();
             try {
-                const res = await fetch('/api/admin/upload-receipt', {
+                // Step 1: Get signed upload URL from our API
+                const urlRes = await fetch('/api/admin/upload-receipt', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
-                        'X-Order-Id': orderId,
-                        'X-File-Name': file.name,
-                        'Content-Type': file.type || 'audio/wav',
                     },
+                    body: JSON.stringify({ action: 'get-upload-url', order_id: orderId, file_name: file.name }),
+                });
+                if (!urlRes.ok) {
+                    const err = await urlRes.json();
+                    alert('Upload failed: ' + (err.details || err.error));
+                    input.value = '';
+                    return;
+                }
+                const { uploadUrl, publicUrl } = await urlRes.json();
+
+                // Step 2: Upload file directly to Supabase Storage via signed URL
+                const putRes = await fetch(uploadUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': file.type || 'audio/wav' },
                     body: file,
                 });
-                if (res.ok) {
-                    // Auto-send email notification to customer
-                    try {
-                        const emailRes = await fetch('/api/admin/send-receipt-email', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`,
-                            },
-                            body: JSON.stringify({ order_id: orderId }),
-                        });
-                        const emailData = await emailRes.json();
-                        if (emailRes.ok) {
-                            showNotification(`Audio uploaded & email sent to ${emailData.sent_to}`, 'success');
-                        } else {
-                            showNotification(`Audio uploaded but email failed: ${emailData.error}`, 'warning');
-                        }
-                    } catch (emailErr) {
-                        showNotification('Audio uploaded but email notification failed', 'warning');
-                    }
-
-                    // Reload orders
-                    const listRes = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } });
-                    const orders = await listRes.json();
-                    renderStats(orders);
-                    renderOrders(orders);
-                } else {
-                    const err = await res.json();
-                    alert('Upload failed: ' + (err.details || err.error));
+                if (!putRes.ok) {
+                    const errText = await putRes.text();
+                    alert('Upload to storage failed: ' + errText);
+                    input.value = '';
+                    return;
                 }
+
+                // Step 3: Confirm upload - update order with receipt URL
+                const confirmRes = await fetch('/api/admin/upload-receipt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ action: 'confirm-upload', order_id: orderId, receipt_url: publicUrl }),
+                });
+                if (!confirmRes.ok) {
+                    const err = await confirmRes.json();
+                    alert('Failed to update order: ' + (err.details || err.error));
+                    input.value = '';
+                    return;
+                }
+
+                // Step 4: Auto-send email notification to customer
+                try {
+                    const emailRes = await fetch('/api/admin/send-receipt-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ order_id: orderId }),
+                    });
+                    const emailData = await emailRes.json();
+                    if (emailRes.ok) {
+                        showNotification(`Audio uploaded & email sent to ${emailData.sent_to}`, 'success');
+                    } else {
+                        showNotification(`Audio uploaded but email failed: ${emailData.error}`, 'warning');
+                    }
+                } catch (emailErr) {
+                    showNotification('Audio uploaded but email notification failed', 'warning');
+                }
+
+                // Reload orders
+                const listRes = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } });
+                const orders = await listRes.json();
+                renderStats(orders);
+                renderOrders(orders);
             } catch (e) {
                 alert('Upload failed: ' + e.message);
             }
