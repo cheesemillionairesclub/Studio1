@@ -2171,7 +2171,7 @@ function showPaymentConfirmation(campaign, paymentData) {
         <div class="confirm-box">
             <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="AlphaStudios" class="confirm-logo">
             <h2 class="confirm-title">Payment Successful 🎉</h2>
-            <p class="confirm-subtitle">Your order has been confirmed. Our team will begin processing your campaign shortly. The average delivery time is 24–48 hours. You can track your order status anytime from your dashboard, where you will also receive the receipt and proof of delivery once the campaign is completed. Thank you for your trust. 🚀</p>
+            <p class="confirm-subtitle">Your order has been confirmed. Our team will begin processing your track shortly. The average delivery time is 24–48 hours. You can track your order status anytime from your dashboard, where you will also receive the receipt and proof of delivery once the track is completed. Thank you for your trust.</p>
 
             <div class="confirm-divider"></div>
 

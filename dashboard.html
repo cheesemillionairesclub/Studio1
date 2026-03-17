@@ -120,11 +120,11 @@
             transition: border-color 0.2s;
         }
         .reupload-dropzone:hover, .reupload-dropzone.drag-over {
-            border-color: #4CAF50;
+            border-color: #333;
         }
         .reupload-dropzone p { font-size: 0.85rem; color: var(--white-50); margin: 8px 0 4px; }
         .reupload-dropzone span { font-size: 0.75rem; color: var(--white-30); }
-        .reupload-browse { color: #4CAF50; cursor: pointer; text-decoration: underline; }
+        .reupload-browse { color: #1a1a2e; cursor: pointer; text-decoration: underline; font-weight: 600; }
         .reupload-file-info {
             display: flex; align-items: center; justify-content: space-between;
             padding: 12px 16px; background: var(--white-05); border-radius: 8px;
@@ -136,11 +136,15 @@
         }
         .reupload-submit {
             width: 100%; margin-top: 16px; padding: 12px;
-            background: #4CAF50; color: #fff; border: none; border-radius: 8px;
+            background: #1a1a2e; color: #fff; border: none; border-radius: 8px;
             font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
         }
         .reupload-submit:disabled { opacity: 0.4; cursor: not-allowed; }
-        .reupload-submit:not(:disabled):hover { background: #43a047; }
+        .reupload-submit:not(:disabled):hover { background: #0f0f1a; }
+        .reupload-progress { margin-top: 16px; }
+        .reupload-progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--white-50); margin-bottom: 6px; }
+        .reupload-progress-track { width: 100%; height: 6px; background: var(--white-10); border-radius: 3px; overflow: hidden; }
+        .reupload-progress-bar { height: 100%; width: 0%; background: #1a1a2e; border-radius: 3px; transition: width 0.3s ease; }
     </style>
 </head>
 <body>
@@ -722,10 +726,10 @@
                     <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="" class="dash-success-logo">
                     <h3 class="dash-success-title">${hasTrack ? 'Track Submitted!' : 'Welcome to Pro!'}</h3>
                     <p class="dash-success-text">${hasTrack
-                        ? `<strong>${campaign.track_title}</strong> has been submitted. Our team will begin processing your campaign shortly. Average delivery: 24–48h.`
+                        ? `<strong>${campaign.track_title}</strong> has been submitted. Our team will begin processing your track shortly. Average delivery: 24–48h. You can follow the progress of your order from your dashboard.`
                         : 'Your free trial is now active. Upload a track to get started!'
                     }</p>
-                    <button class="dash-success-btn">Got it</button>
+                    <button class="dash-success-btn">Dashboard</button>
                 </div>
             `;
             document.body.appendChild(overlay);
@@ -839,6 +843,15 @@
                         <span id="reuploadFileName"></span>
                         <button class="reupload-file-remove" onclick="clearReuploadFile()">&times;</button>
                     </div>
+                    <div class="reupload-progress" id="reuploadProgress" style="display:none;">
+                        <div class="reupload-progress-info">
+                            <span id="reuploadProgressLabel">Uploading...</span>
+                            <span id="reuploadProgressPercent">0%</span>
+                        </div>
+                        <div class="reupload-progress-track">
+                            <div class="reupload-progress-bar" id="reuploadProgressBar"></div>
+                        </div>
+                    </div>
                     <button class="reupload-submit" id="reuploadSubmitBtn" disabled onclick="submitReupload('${orderId}')">
                         Upload & Reset
                     </button>
@@ -894,11 +907,35 @@
             _reuploadFile = null;
         }
 
+        function uploadWithProgress(url, file, contentType) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('PUT', url);
+                xhr.setRequestHeader('Content-Type', contentType);
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        const bar = document.getElementById('reuploadProgressBar');
+                        const percent = document.getElementById('reuploadProgressPercent');
+                        if (bar) bar.style.width = pct + '%';
+                        if (percent) percent.textContent = pct + '%';
+                    }
+                });
+                xhr.onload = () => resolve(xhr);
+                xhr.onerror = () => reject(new Error('Upload failed'));
+                xhr.send(file);
+            });
+        }
+
         async function submitReupload(orderId) {
             if (!_reuploadFile) return;
             const btn = document.getElementById('reuploadSubmitBtn');
             btn.disabled = true;
-            btn.textContent = 'Uploading...';
+            btn.style.display = 'none';
+
+            // Show progress bar, hide dropzone/file info
+            const progressEl = document.getElementById('reuploadProgress');
+            if (progressEl) progressEl.style.display = '';
 
             const token = BeatpushAuth.getToken();
             let trackUrl = '';
@@ -913,12 +950,8 @@
                 });
                 const signData = await signRes.json();
                 if (signRes.ok && signData.uploadUrl) {
-                    const upRes = await fetch(signData.uploadUrl, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': _reuploadFile.type || 'audio/wav' },
-                        body: _reuploadFile,
-                    });
-                    if (upRes.ok) trackUrl = signData.publicUrl;
+                    const xhr = await uploadWithProgress(signData.uploadUrl, _reuploadFile, _reuploadFile.type || 'audio/wav');
+                    if (xhr.status >= 200 && xhr.status < 300) trackUrl = signData.publicUrl;
                 }
 
                 // 2. Generate & upload artwork
@@ -965,12 +998,14 @@
                     const err = await res.json();
                     alert(err.error || 'Re-upload failed');
                     btn.disabled = false;
-                    btn.textContent = 'Upload & Reset';
+                    btn.style.display = '';
+                    if (progressEl) progressEl.style.display = 'none';
                 }
             } catch (e) {
                 alert('Re-upload failed: ' + e.message);
                 btn.disabled = false;
-                btn.textContent = 'Upload & Reset';
+                btn.style.display = '';
+                if (progressEl) progressEl.style.display = 'none';
             }
         }
 
