@@ -891,53 +891,44 @@ function generateTrackArtwork(size = 400) {
     canvas.height = size;
     const ctx = canvas.getContext('2d');
 
-    // 3 colors: black, white, one random accent
+    // 3 colors only: black, white, one random accent
     const hue = Math.random() * 360;
-    const accent = `hsl(${hue}, 70%, 55%)`;
 
-    // Fill entire canvas with mid-grey so nothing is pure black
-    ctx.fillStyle = '#333333';
+    // Base: solid black
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, size, size);
 
-    // Large accent color block — covers most of the canvas
-    const grad1 = ctx.createLinearGradient(0, 0, size, size);
-    grad1.addColorStop(0, accent);
-    grad1.addColorStop(0.6, '#222222');
-    grad1.addColorStop(1, '#dddddd');
-    ctx.fillStyle = grad1;
+    // Main color glow — large radial, random position
+    const gx = size * (0.25 + Math.random() * 0.5);
+    const gy = size * (0.25 + Math.random() * 0.5);
+    const glow1 = ctx.createRadialGradient(gx, gy, 0, gx, gy, size * 0.7);
+    glow1.addColorStop(0, `hsl(${hue}, 70%, 55%)`);
+    glow1.addColorStop(0.4, `hsla(${hue}, 65%, 40%, 0.7)`);
+    glow1.addColorStop(0.7, `hsla(${hue}, 60%, 20%, 0.3)`);
+    glow1.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow1;
     ctx.fillRect(0, 0, size, size);
 
-    // Second gradient layer for depth (perpendicular)
-    const grad2 = ctx.createLinearGradient(size, 0, 0, size);
-    grad2.addColorStop(0, 'rgba(255,255,255,0.3)');
-    grad2.addColorStop(0.5, 'transparent');
-    grad2.addColorStop(1, 'rgba(0,0,0,0.4)');
-    ctx.fillStyle = grad2;
+    // White glow — opposite corner
+    const wx = size - gx + (Math.random() - 0.5) * size * 0.2;
+    const wy = size - gy + (Math.random() - 0.5) * size * 0.2;
+    const glow2 = ctx.createRadialGradient(wx, wy, 0, wx, wy, size * 0.55);
+    glow2.addColorStop(0, 'rgba(255,255,255,0.7)');
+    glow2.addColorStop(0.3, 'rgba(255,255,255,0.3)');
+    glow2.addColorStop(0.6, 'rgba(255,255,255,0.05)');
+    glow2.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow2;
     ctx.fillRect(0, 0, size, size);
 
-    // Minimalist abstract element
-    const pattern = Math.floor(Math.random() * 3);
-
-    if (pattern === 0) {
-        // Circle outline
-        ctx.beginPath();
-        ctx.arc(size * 0.5, size * 0.5, size * 0.2, 0, Math.PI * 2);
-        ctx.lineWidth = size * 0.008;
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.stroke();
-    } else if (pattern === 1) {
-        // Diagonal line
-        ctx.beginPath();
-        ctx.moveTo(size * 0.2, size * 0.8);
-        ctx.lineTo(size * 0.8, size * 0.2);
-        ctx.lineWidth = size * 0.006;
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-        ctx.stroke();
-    } else {
-        // Horizontal bar
-        ctx.fillStyle = 'rgba(255,255,255,0.2)';
-        ctx.fillRect(0, size * 0.45, size, size * 0.1);
-    }
+    // Subtle secondary color glow for richness
+    const g2x = size * (0.1 + Math.random() * 0.8);
+    const g2y = size * (0.1 + Math.random() * 0.8);
+    const glow3 = ctx.createRadialGradient(g2x, g2y, 0, g2x, g2y, size * 0.4);
+    glow3.addColorStop(0, `hsla(${hue}, 80%, 60%, 0.4)`);
+    glow3.addColorStop(0.5, `hsla(${hue}, 60%, 35%, 0.15)`);
+    glow3.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow3;
+    ctx.fillRect(0, 0, size, size);
 
     return canvas.toDataURL('image/jpeg', 0.85);
 }
