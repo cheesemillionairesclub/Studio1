@@ -2442,95 +2442,79 @@ body {
     }
 }
 
-.why-choose-section {
+/* ===== Why High-End Mastering Matters ===== */
+.mastering-matters-section {
     padding: 100px 0;
     background: var(--bg-primary);
 }
-
-.why-choose-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
-    position: relative;
+.mastering-matters-content {
+    max-width: 700px;
+    margin: 0 auto;
 }
-
-.why-choose-card {
-    padding: 40px 32px;
-    background: var(--bg-card);
-    border: 1px solid var(--white-05);
-    border-radius: var(--radius-lg);
-    transition: all var(--transition);
-    position: relative;
+.mastering-matters-intro {
+    font-size: 1.05rem;
+    color: var(--white-70);
+    margin-bottom: 24px;
     text-align: center;
 }
-
-/* Connector lines between cards (desktop only) */
-@media (min-width: 1025px) {
-    .why-choose-card:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        right: -32px;
-        width: calc(32px);
-        height: 2px;
-        background: linear-gradient(90deg, var(--green-primary), var(--green-20), var(--green-primary));
-        opacity: 0.5;
-        z-index: 3;
-    }
-
-    .why-choose-card:not(:last-child)::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        right: -36px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: var(--green-primary);
-        transform: translateY(-50%);
-        box-shadow: 0 0 12px var(--green-glow), 0 0 4px var(--green-primary);
-        opacity: 0.6;
-        z-index: 4;
-    }
-
+.mastering-matters-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 40px;
 }
-
-.why-choose-card:hover {
-    border-color: var(--green-20);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(26, 26, 46, 0.08);
-}
-
-.why-choose-icon {
+.mastering-matters-list li {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: none;
-    border: none;
-    color: var(--green-primary);
-    margin: 0 auto 24px;
-}
-
-.why-choose-icon img {
-    width: 56px;
-    height: 56px;
-    filter: drop-shadow(0 0 16px var(--green-glow));
-}
-
-.why-choose-card-title {
-    font-size: 1.35rem;
-    font-weight: 700;
-    margin-bottom: 16px;
+    gap: 14px;
+    font-size: 1rem;
     color: var(--white);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--white-05);
 }
-
-.why-choose-card-text {
-    font-size: 0.9rem;
+.mastering-matters-list li svg {
+    flex-shrink: 0;
+}
+.mastering-matters-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.mastering-compare-item {
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+}
+.mastering-compare-standard {
+    background: var(--bg-secondary);
+    border: 1px solid var(--white-10);
+}
+.mastering-compare-highend {
+    background: rgba(76, 175, 80, 0.08);
+    border: 1px solid var(--green-primary);
+}
+.mastering-compare-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     color: var(--white-50);
-    line-height: 1.8;
+    display: block;
+    margin-bottom: 8px;
+}
+.mastering-compare-highend .mastering-compare-label {
+    color: var(--green-primary);
+}
+.mastering-compare-item p {
+    font-size: 1rem;
+    color: var(--white);
+    margin: 0;
+}
+.mastering-compare-item strong {
+    color: var(--green-primary);
+}
+@media (max-width: 768px) {
+    .mastering-matters-comparison {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ===== FAQ ===== */
@@ -3244,11 +3228,6 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .why-choose-grid {
-        grid-template-columns: 1fr;
-        max-width: 600px;
-        margin: 0 auto;
-    }
 }
 
 @media (max-width: 768px) {
@@ -3334,10 +3313,6 @@ body {
 
     .step-content {
         padding-bottom: 36px;
-    }
-
-    .why-choose-grid {
-        grid-template-columns: 1fr;
     }
 
     .pricing-grid {
