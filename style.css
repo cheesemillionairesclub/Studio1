@@ -2426,6 +2426,22 @@ body {
     background: var(--green-primary);
     flex-shrink: 0;
 }
+.whatwedo-card-highlight {
+    background: rgba(76, 175, 80, 0.08);
+    border-left: 3px solid var(--green-primary);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+.whatwedo-card-highlight p {
+    font-size: 0.85rem;
+    color: var(--white-70);
+    margin: 0;
+    line-height: 1.6;
+}
+.whatwedo-card-highlight strong {
+    color: var(--green-primary);
+}
 .whatwedo-card-footer {
     font-size: 0.8rem;
     color: var(--white-50);
