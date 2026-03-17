@@ -1626,7 +1626,8 @@ function renderAnalysisTags(data) {
         tags.push(`<span class="meta-tag"><span class="meta-tag-energy">${barsHtml}</span> Energy</span>`);
     }
     if (data.loudness != null) {
-        tags.push(`<span class="meta-tag">${data.loudness.toFixed(1)} dB loudness</span>`);
+        const adjustedLoudness = data.loudness + 10;
+        tags.push(`<span class="meta-tag">${adjustedLoudness.toFixed(1)} dB loudness</span>`);
     }
 
     // Append analysis tags to meta tags line (same row above track)
