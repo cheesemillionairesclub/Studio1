@@ -1864,6 +1864,15 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Close requirements tooltips when clicking outside
+document.addEventListener('click', function(e) {
+    document.querySelectorAll('.requirements-tooltip-wrapper.active').forEach(wrapper => {
+        if (!wrapper.contains(e.target)) {
+            wrapper.classList.remove('active');
+        }
+    });
+});
+
 // Tips toggle
 const tipsToggleEl = document.getElementById('tipsToggle');
 if (tipsToggleEl) {

@@ -2534,6 +2534,115 @@ body {
     pointer-events: none;
 }
 
+/* ===== Requirements Tooltip ===== */
+.requirements-tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.requirements-tooltip-btn {
+    background: none;
+    border: 1px solid var(--white-10);
+    color: var(--white-50);
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+.requirements-tooltip-btn:hover {
+    color: var(--green-primary);
+    border-color: var(--green-primary);
+}
+.requirements-tooltip-btn-sm {
+    font-size: 0.75rem;
+    padding: 5px 12px;
+}
+.requirements-tooltip-content {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+    max-height: 420px;
+    overflow-y: auto;
+    background: var(--bg-primary);
+    border: 1px solid var(--white-10);
+    border-radius: 12px;
+    padding: 24px;
+    z-index: 100;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    text-align: left;
+}
+.requirements-tooltip-wrapper.active .requirements-tooltip-content {
+    display: block;
+}
+.requirements-tooltip-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-size: 1.3rem;
+    color: var(--white-50);
+    cursor: pointer;
+    line-height: 1;
+}
+.requirements-tooltip-close:hover {
+    color: var(--white);
+}
+.requirements-tooltip-content h4 {
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    color: var(--green-primary);
+    margin-bottom: 8px;
+}
+.requirements-tooltip-content .req-intro {
+    font-size: 0.8rem;
+    color: var(--white-50);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+.requirements-tooltip-content .req-group {
+    margin-bottom: 12px;
+}
+.requirements-tooltip-content .req-group h5 {
+    font-size: 0.8rem;
+    color: var(--white);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.requirements-tooltip-content .req-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.requirements-tooltip-content .req-group ul li {
+    font-size: 0.75rem;
+    color: var(--white-50);
+    padding: 2px 0;
+    padding-left: 14px;
+    position: relative;
+}
+.requirements-tooltip-content .req-group ul li::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--green-primary);
+    position: absolute;
+    left: 0;
+    top: 9px;
+}
+@media (max-width: 768px) {
+    .requirements-tooltip-content {
+        width: 300px;
+        left: 0;
+        transform: none;
+    }
+}
+
 .faq-list {
     max-width: 700px;
     margin: 0 auto;

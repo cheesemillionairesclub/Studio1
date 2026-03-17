@@ -146,6 +146,24 @@
                 <h2 class="section-title" data-i18n-html="upload_title">Upload your track for <span class="text-green">mastering</span></h2>
                 <p class="section-desc-highlight" data-i18n="upload_tagline">Professional quality. Fast delivery.</p>
                 <p class="section-desc" data-i18n="upload_desc">Drag & drop or click to upload your audio file.</p>
+                <div class="requirements-tooltip-wrapper">
+                    <button class="requirements-tooltip-btn" onclick="this.parentElement.classList.toggle('active')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        Requirements
+                    </button>
+                    <div class="requirements-tooltip-content">
+                        <div class="requirements-tooltip-close" onclick="this.closest('.requirements-tooltip-wrapper').classList.remove('active')">&times;</div>
+                        <h4>REQUIREMENTS</h4>
+                        <p class="req-intro">To ensure the highest quality results, please follow these guidelines before submitting your track.</p>
+                        <div class="req-group"><h5>Audio Format</h5><ul><li>WAV or AIFF only</li><li>24-bit preferred (16-bit minimum)</li><li>Sample rate: 44.1 kHz or higher</li></ul></div>
+                        <div class="req-group"><h5>Headroom</h5><ul><li>Leave -6 dB headroom on your master</li><li>No clipping</li></ul></div>
+                        <div class="req-group"><h5>No Limiting</h5><ul><li>Remove any limiter from the master channel</li><li>Avoid heavy compression on the master</li></ul></div>
+                        <div class="req-group"><h5>Export Quality</h5><ul><li>Export your final mixdown</li><li>No MP3 or compressed formats</li></ul></div>
+                        <div class="req-group"><h5>Mix Balance</h5><ul><li>Proper balance between elements</li><li>No distorted or over-saturated signals</li><li>Clean low-end (kick / bass separation)</li></ul></div>
+                        <div class="req-group"><h5>Version</h5><ul><li>Submit the final version only</li><li>No drafts or unfinished ideas</li></ul></div>
+                        <div class="req-group"><h5>Optional (Recommended)</h5><ul><li>Reference track (if you have one)</li><li>Notes or artistic direction</li></ul></div>
+                    </div>
+                </div>
             </div>
             <div class="upload-box" id="uploadBox">
                 <!-- Drop zone -->
@@ -265,6 +283,24 @@
                         <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Trackstack submission</li>
                     </ul>
                     <button class="product-card-btn pack-select-btn" id="inlinePricingBtn" data-pack="mastering" disabled style="opacity: 0.5; cursor: not-allowed;">Upload a track first</button>
+                    <div class="requirements-tooltip-wrapper" style="margin-top: 12px;">
+                        <button class="requirements-tooltip-btn requirements-tooltip-btn-sm" onclick="this.parentElement.classList.toggle('active')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            Submission requirements
+                        </button>
+                        <div class="requirements-tooltip-content">
+                            <div class="requirements-tooltip-close" onclick="this.closest('.requirements-tooltip-wrapper').classList.remove('active')">&times;</div>
+                            <h4>REQUIREMENTS</h4>
+                            <p class="req-intro">To ensure the highest quality results, please follow these guidelines before submitting your track.</p>
+                            <div class="req-group"><h5>Audio Format</h5><ul><li>WAV or AIFF only</li><li>24-bit preferred (16-bit minimum)</li><li>Sample rate: 44.1 kHz or higher</li></ul></div>
+                            <div class="req-group"><h5>Headroom</h5><ul><li>Leave -6 dB headroom on your master</li><li>No clipping</li></ul></div>
+                            <div class="req-group"><h5>No Limiting</h5><ul><li>Remove any limiter from the master channel</li><li>Avoid heavy compression on the master</li></ul></div>
+                            <div class="req-group"><h5>Export Quality</h5><ul><li>Export your final mixdown</li><li>No MP3 or compressed formats</li></ul></div>
+                            <div class="req-group"><h5>Mix Balance</h5><ul><li>Proper balance between elements</li><li>No distorted or over-saturated signals</li><li>Clean low-end (kick / bass separation)</li></ul></div>
+                            <div class="req-group"><h5>Version</h5><ul><li>Submit the final version only</li><li>No drafts or unfinished ideas</li></ul></div>
+                            <div class="req-group"><h5>Optional (Recommended)</h5><ul><li>Reference track (if you have one)</li><li>Notes or artistic direction</li></ul></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
