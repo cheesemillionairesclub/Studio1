@@ -340,11 +340,11 @@
                     ${!order.mastering_approved ? `
                     <div class="dash-feedback-actions">
                         ${(order.reupload_count || 0) < 3 ? `
-                        <button class="dash-action-btn dash-reupload-btn" onclick="openReuploadModal('${order.id}', ${order.reupload_count || 0})">
+                        <button class="dash-action-btn dash-reupload-btn" onclick="openReuploadModal('${order.id}', ${order.reupload_count || 0}, '${escapeHtmlAttr(order.track_title || '')}', '${escapeHtmlAttr(order.track_artist || '')}')">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
                             Re-upload Track <span class="reupload-count">${order.reupload_count || 0}/3</span>
                         </button>` : `<span class="dash-reupload-maxed">Re-uploads used (3/3)</span>`}
-                        <button class="dash-action-btn dash-master-btn" onclick="approveMastering('${order.id}')">
+                        <button class="dash-action-btn dash-master-btn" onclick="approveMastering('${order.id}', '${escapeHtmlAttr(order.track_title || '')}', '${escapeHtmlAttr(order.track_artist || '')}')">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                             Approve Mastering
                         </button>
@@ -809,7 +809,12 @@
         }
 
         // ===== Re-upload Modal =====
-        function openReuploadModal(orderId, currentCount) {
+        let _reuploadTrackTitle = '';
+        let _reuploadTrackArtist = '';
+
+        function openReuploadModal(orderId, currentCount, trackTitle, trackArtist) {
+            _reuploadTrackTitle = trackTitle || '';
+            _reuploadTrackArtist = trackArtist || '';
             // Remove existing modal
             const existing = document.getElementById('reuploadModal');
             if (existing) existing.remove();
@@ -944,6 +949,14 @@
                 });
 
                 if (res.ok) {
+                    // Notify admin via email
+                    try {
+                        await fetch('/api/notify-admin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ action: 'reupload', order_id: orderId, track_title: _reuploadTrackTitle, track_artist: _reuploadTrackArtist }),
+                        });
+                    } catch (e) { /* silent */ }
                     closeReuploadModal();
                     loadDashboard();
                 } else {
@@ -960,7 +973,7 @@
         }
 
         // ===== Approve Mastering =====
-        async function approveMastering(orderId) {
+        async function approveMastering(orderId, trackTitle, trackArtist) {
             const token = BeatpushAuth.getToken();
             try {
                 const res = await fetch('/api/reupload-track?action=approve', {
@@ -972,6 +985,14 @@
                     body: JSON.stringify({ order_id: orderId }),
                 });
                 if (res.ok) {
+                    // Notify admin via email
+                    try {
+                        await fetch('/api/notify-admin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ action: 'approve_mastering', order_id: orderId, track_title: trackTitle || '', track_artist: trackArtist || '' }),
+                        });
+                    } catch (e) { /* silent */ }
                     loadDashboard();
                 } else {
                     const err = await res.json();
