@@ -103,13 +103,13 @@
                     <div class="hero-feature-icon">
                         <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" width="20" height="20">
                     </div>
-                    <span>Professional Feedback</span>
+                    <span data-i18n="hero_feature_feedback">Professional Feedback</span>
                 </div>
                 <div class="hero-feature-item">
                     <div class="hero-feature-icon">
                         <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" width="20" height="20">
                     </div>
-                    <span>Studio Mastering</span>
+                    <span data-i18n="hero_feature_mastering">Studio Mastering</span>
                 </div>
             </div>
 
@@ -217,15 +217,15 @@
                         <div class="inline-campaign-row">
                             <!-- Genre selection -->
                             <div class="campaign-field-compact">
-                                <label class="campaign-label-compact">Genre</label>
+                                <label class="campaign-label-compact" data-i18n="campaign_genre_label">Genre</label>
                                 <div class="genre-select-wrapper" id="genreSelectWrapper">
                                     <div class="genre-selected-tags" id="genreSelectedTags"></div>
                                     <div class="genre-dropdown-trigger" id="genreDropdownTrigger">
-                                        <span class="genre-dropdown-placeholder" id="genreDropdownPlaceholder">Select your genre</span>
+                                        <span class="genre-dropdown-placeholder" id="genreDropdownPlaceholder" data-i18n="genre_placeholder">Select your genre</span>
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                                     </div>
                                     <div class="genre-dropdown" id="genreDropdown" style="display:none;">
-                                        <input type="text" class="genre-search-input" id="genreSearchInput" placeholder="Search..." autocomplete="off">
+                                        <input type="text" class="genre-search-input" id="genreSearchInput" placeholder="Search..." data-i18n-placeholder="genre_search_placeholder" autocomplete="off">
                                         <div class="genre-dropdown-list" id="genreDropdownList"></div>
                                     </div>
                                 </div>
@@ -243,7 +243,7 @@
                         </div>
 
                         <input type="hidden" name="releaseStatus" value="released">
-                        <button class="btn-primary campaign-launch-btn" id="launchCampaignBtn" style="width: auto; margin: 16px auto 20px; padding: 10px 40px; font-size: 0.85rem; display: block;">Run my campaign</button>
+                        <button class="btn-primary campaign-launch-btn" id="launchCampaignBtn" style="width: auto; margin: 16px auto 20px; padding: 10px 40px; font-size: 0.85rem; display: block;" data-i18n="campaign_launch_btn">Run my campaign</button>
                     </div>
 
                 </div>
@@ -255,44 +255,41 @@
     <section class="pricing-section" id="pricing">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge">PRICING</span>
-                <h2 class="section-title">Choose your <span class="text-gradient">Plan</span></h2>
-                <p class="section-desc">Start with a free trial. Cancel anytime.</p>
+                <span class="section-badge" data-i18n="pricing_badge">PRICING</span>
+                <h2 class="section-title" data-i18n-html="pricing_title_v2">Choose your <span class="text-gradient">Plan</span></h2>
+                <p class="section-desc" data-i18n="pricing_desc_v2">Start with a free trial. Cancel anytime.</p>
             </div>
             <div id="inlinePricingCard" style="max-width: 420px; margin: 0 auto;">
                 <div class="product-card popular" data-pack="mastering" style="margin: 0 auto; max-width: 100%;">
-                    <div class="popular-badge">PRO PLAN</div>
+                    <div class="popular-badge" data-i18n="pricing_pro_badge">PRO PLAN</div>
                     <div style="padding: 20px 0 10px; text-align: center;">
-                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 8px;">Pro Plan</h3>
-                        <p style="font-size: 0.85rem; color: var(--white-50); line-height: 1.6;">Everything you need to release your music professionally.</p>
+                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 8px;" data-i18n="pricing_pro_title">Pro Plan</h3>
+                        <p style="font-size: 0.85rem; color: var(--white-50); line-height: 1.6;" data-i18n="pricing_pro_desc">Everything you need to release your music professionally.</p>
                     </div>
                     <div class="product-card-price">1<span style="font-size: 0.5em; font-weight: 400; color: var(--white-50);">EUR/month</span></div>
-                    <p style="font-size: 0.75rem; color: var(--green-primary); text-align: center; margin: -8px 0 12px; font-weight: 500;">3-day free trial</p>
+                    <p style="font-size: 0.75rem; color: var(--green-primary); text-align: center; margin: -8px 0 12px; font-weight: 500;" data-i18n="pricing_free_trial">3-day free trial</p>
                     <ul style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 0.85rem; color: var(--white-70); line-height: 2;">
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Up to 5 tracks per month</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Professional feedback</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Professional mastering</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Label recommendations</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Demo message generation</li>
-                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Trackstack submission</li>
+                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="pricing_feat_1">Up to 5 tracks per month</span></li>
+                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="pricing_feat_2">Expert-level feedback that improves your track instantly</span></li>
+                        <li style="display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="pricing_feat_3">Release-ready mastering</span></li>
                     </ul>
-                    <button class="product-card-btn pack-select-btn" id="inlinePricingBtn" data-pack="mastering">Start 3-Day Trial</button>
+                    <button class="product-card-btn pack-select-btn" id="inlinePricingBtn" data-pack="mastering" data-i18n="pricing_cta">Start 3-Day Trial</button>
                     <div class="requirements-tooltip-wrapper" style="margin-top: 12px;">
                         <button class="requirements-tooltip-btn requirements-tooltip-btn-sm" onclick="this.parentElement.classList.toggle('active')">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            Submission requirements
+                            <span data-i18n="pricing_requirements_btn">Submission requirements</span>
                         </button>
                         <div class="requirements-tooltip-content">
                             <div class="requirements-tooltip-close" onclick="this.closest('.requirements-tooltip-wrapper').classList.remove('active')">&times;</div>
-                            <h4>REQUIREMENTS</h4>
-                            <p class="req-intro">To ensure the highest quality results, please follow these guidelines before submitting your track.</p>
-                            <div class="req-group"><h5>Audio Format</h5><ul><li>WAV or AIFF only</li><li>24-bit preferred (16-bit minimum)</li><li>Sample rate: 44.1 kHz or higher</li></ul></div>
-                            <div class="req-group"><h5>Headroom</h5><ul><li>Leave -6 dB headroom on your master</li><li>No clipping</li></ul></div>
-                            <div class="req-group"><h5>No Limiting</h5><ul><li>Remove any limiter from the master channel</li><li>Avoid heavy compression on the master</li></ul></div>
-                            <div class="req-group"><h5>Export Quality</h5><ul><li>Export your final mixdown</li><li>No MP3 or compressed formats</li></ul></div>
-                            <div class="req-group"><h5>Mix Balance</h5><ul><li>Proper balance between elements</li><li>No distorted or over-saturated signals</li><li>Clean low-end (kick / bass separation)</li></ul></div>
-                            <div class="req-group"><h5>Version</h5><ul><li>Submit the final version only</li><li>No drafts or unfinished ideas</li></ul></div>
-                            <div class="req-group"><h5>Optional (Recommended)</h5><ul><li>Reference track (if you have one)</li><li>Notes or artistic direction</li></ul></div>
+                            <h4 data-i18n="req_title">REQUIREMENTS</h4>
+                            <p class="req-intro" data-i18n="req_intro">To ensure the highest quality results, please follow these guidelines before submitting your track.</p>
+                            <div class="req-group"><h5 data-i18n="req_format_title">Audio Format</h5><ul><li data-i18n="req_format_1">WAV or AIFF only</li><li data-i18n="req_format_2">24-bit preferred (16-bit minimum)</li><li data-i18n="req_format_3">Sample rate: 44.1 kHz or higher</li></ul></div>
+                            <div class="req-group"><h5 data-i18n="req_headroom_title">Headroom</h5><ul><li data-i18n="req_headroom_1">Leave -6 dB headroom on your master</li><li data-i18n="req_headroom_2">No clipping</li></ul></div>
+                            <div class="req-group"><h5 data-i18n="req_nolimit_title">No Limiting</h5><ul><li data-i18n="req_nolimit_1">Remove any limiter from the master channel</li><li data-i18n="req_nolimit_2">Avoid heavy compression on the master</li></ul></div>
+                            <div class="req-group"><h5 data-i18n="req_export_title">Export Quality</h5><ul><li data-i18n="req_export_1">Export your final mixdown</li><li data-i18n="req_export_2">No MP3 or compressed formats</li></ul></div>
+                            <div class="req-group"><h5 data-i18n="req_mix_title">Mix Balance</h5><ul><li data-i18n="req_mix_1">Proper balance between elements</li><li data-i18n="req_mix_2">No distorted or over-saturated signals</li><li data-i18n="req_mix_3">Clean low-end (kick / bass separation)</li></ul></div>
+                            <div class="req-group"><h5 data-i18n="req_version_title">Version</h5><ul><li data-i18n="req_version_1">Submit the final version only</li><li data-i18n="req_version_2">No drafts or unfinished ideas</li></ul></div>
+                            <div class="req-group"><h5 data-i18n="req_optional_title">Optional (Recommended)</h5><ul><li data-i18n="req_optional_1">Reference track (if you have one)</li><li data-i18n="req_optional_2">Notes or artistic direction</li></ul></div>
                         </div>
                     </div>
                 </div>
@@ -304,9 +301,9 @@
     <section class="how-section" id="how-it-works">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge">OUR PROCESS</span>
-                <h2 class="section-title">How AlphaStudios <span class="text-gradient">Works</span></h2>
-                <p class="section-desc">Simple. Clear. Effective.</p>
+                <span class="section-badge" data-i18n="how_badge">OUR PROCESS</span>
+                <h2 class="section-title" data-i18n-html="how_title">How AlphaStudios <span class="text-gradient">Works</span></h2>
+                <p class="section-desc" data-i18n="how_desc">Simple. Clear. Effective.</p>
             </div>
             <div class="steps-timeline">
                 <div class="step-card-v2">
@@ -315,7 +312,7 @@
                         <div class="step-line"></div>
                     </div>
                     <div class="step-content">
-                        <h3 class="step-title-v2">Upload your track</h3>
+                        <h3 class="step-title-v2" data-i18n="how_step1_v2">Upload your track</h3>
                     </div>
                 </div>
                 <div class="step-card-v2">
@@ -324,7 +321,7 @@
                         <div class="step-line"></div>
                     </div>
                     <div class="step-content">
-                        <h3 class="step-title-v2">Receive detailed professional feedback</h3>
+                        <h3 class="step-title-v2" data-i18n="how_step2_v2">Receive detailed professional feedback</h3>
                     </div>
                 </div>
                 <div class="step-card-v2">
@@ -333,7 +330,7 @@
                         <div class="step-line"></div>
                     </div>
                     <div class="step-content">
-                        <h3 class="step-title-v2">Apply improvements</h3>
+                        <h3 class="step-title-v2" data-i18n="how_step3_v2">Apply improvements</h3>
                     </div>
                 </div>
                 <div class="step-card-v2">
@@ -341,7 +338,7 @@
                         <div class="step-dot">4</div>
                     </div>
                     <div class="step-content">
-                        <h3 class="step-title-v2">We master your final version</h3>
+                        <h3 class="step-title-v2" data-i18n="how_step4_v2">We master your final version</h3>
                     </div>
                 </div>
             </div>
@@ -352,36 +349,36 @@
     <section class="whatwedo-section" id="what-we-do">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge">WHAT WE DO</span>
-                <h2 class="section-title">Our <span class="text-gradient">Services</span></h2>
-                <p class="services-tagline">Every track is treated with time, attention and precision.<br><strong>No automation. No shortcuts.</strong></p>
+                <span class="section-badge" data-i18n="whatwedo_badge">WHAT WE DO</span>
+                <h2 class="section-title" data-i18n-html="whatwedo_title">Our <span class="text-gradient">Services</span></h2>
+                <p class="services-tagline" data-i18n-html="whatwedo_tagline">Every track is treated with time, attention and precision.<br><strong>No automation. No shortcuts.</strong></p>
             </div>
             <div class="whatwedo-grid">
                 <!-- Professional Feedback -->
                 <div class="whatwedo-card">
                     <div class="whatwedo-card-icon"><img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="AlphaStudios"></div>
-                    <h3 class="whatwedo-card-title">Professional Feedback</h3>
-                    <p class="whatwedo-card-desc">Your music is reviewed by a committee of industry professionals.</p>
+                    <h3 class="whatwedo-card-title" data-i18n="whatwedo_feedback_title">Professional Feedback</h3>
+                    <p class="whatwedo-card-desc" data-i18n="whatwedo_feedback_desc">Your music is reviewed by a committee of industry professionals.</p>
                     <ul class="whatwedo-card-list">
-                        <li>Multiple listening sessions</li>
-                        <li>Technical + artistic analysis</li>
-                        <li>Clear, actionable improvements</li>
-                        <li>Honest, precise feedback</li>
+                        <li data-i18n="whatwedo_feedback_li1">Multiple listening sessions</li>
+                        <li data-i18n="whatwedo_feedback_li2">Technical + artistic analysis</li>
+                        <li data-i18n="whatwedo_feedback_li3">Clear, actionable improvements</li>
+                        <li data-i18n="whatwedo_feedback_li4">Honest, precise feedback</li>
                     </ul>
-                    <p class="whatwedo-card-footer">Our committee is composed of engineers, producers and industry leaders who work — or have worked — with top-tier labels and artists.</p>
+                    <p class="whatwedo-card-footer" data-i18n="whatwedo_feedback_footer">Our committee is composed of engineers, producers and industry leaders who work — or have worked — with top-tier labels and artists.</p>
                 </div>
                 <!-- Studio Mastering -->
                 <div class="whatwedo-card">
                     <div class="whatwedo-card-icon"><img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="AlphaStudios"></div>
-                    <h3 class="whatwedo-card-title">Studio Mastering</h3>
-                    <p class="whatwedo-card-desc">Once your track is ready, we handle the final mastering.</p>
+                    <h3 class="whatwedo-card-title" data-i18n="whatwedo_mastering_title">Studio Mastering</h3>
+                    <p class="whatwedo-card-desc" data-i18n="whatwedo_mastering_desc">Once your track is ready, we handle the final mastering.</p>
                     <ul class="whatwedo-card-list">
-                        <li>Industry-standard sound</li>
-                        <li>Club-ready output</li>
-                        <li>Streaming optimized</li>
-                        <li>High-end audio quality</li>
+                        <li data-i18n="whatwedo_mastering_li1">Industry-standard sound</li>
+                        <li data-i18n="whatwedo_mastering_li2">Club-ready output</li>
+                        <li data-i18n="whatwedo_mastering_li3">Streaming optimized</li>
+                        <li data-i18n="whatwedo_mastering_li4">High-end audio quality</li>
                     </ul>
-                    <p class="whatwedo-card-footer">Your music is mastered by our team, with experience across major labels and international artists.</p>
+                    <p class="whatwedo-card-footer" data-i18n="whatwedo_mastering_footer">Your music is mastered by our team, with experience across major labels and international artists.</p>
                 </div>
             </div>
         </div>
@@ -392,16 +389,16 @@
     <section class="faq-section" id="faq">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge">FAQ</span>
+                <span class="section-badge" data-i18n="faq_badge">FAQ</span>
                 <h2 class="section-title" data-i18n="faq_title">Frequently asked questions</h2>
             </div>
             <div class="faq-list">
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>What exactly do you offer?</span>
+                        <span data-i18n="faq1_q_v2">What exactly do you offer?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq1_a_v2">
                         <p>We provide two core services:</p>
                         <ul><li>Professional feedback from a committee of industry experts</li><li>High-end mastering handled by our team</li></ul>
                         <p>Our goal is simple: elevate your track to a professional, release-ready standard.</p>
@@ -409,10 +406,10 @@
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>Who reviews my music?</span>
+                        <span data-i18n="faq2_q_v2">Who reviews my music?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq2_a_v2">
                         <p>Your track is reviewed by a committee of professionals including:</p>
                         <ul><li>Sound engineers</li><li>Producers</li><li>Industry decision-makers</li></ul>
                         <p>All members have experience working with top-tier labels and artists.</p>
@@ -420,10 +417,10 @@
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>How detailed is the feedback?</span>
+                        <span data-i18n="faq3_q_v2">How detailed is the feedback?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq3_a_v2">
                         <p>We provide structured, actionable feedback, not generic comments. You will receive:</p>
                         <ul><li>Technical analysis (mix, balance, structure)</li><li>Artistic direction</li><li>Precise improvement suggestions</li></ul>
                         <p>Every track is listened to multiple times before feedback is delivered.</p>
@@ -431,49 +428,49 @@
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>How long does it take?</span>
+                        <span data-i18n="faq4_q_v2">How long does it take?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq4_a_v2">
                         <p>Turnaround time typically ranges between 24 to 72 hours per track.</p>
                         <p>Priority is given to monthly Pro users.</p>
                     </div>
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>Do I need to send a finished track?</span>
+                        <span data-i18n="faq5_q_v2">Do I need to send a finished track?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq5_a_v2">
                         <p>Yes. We only work with final or near-final versions.</p>
                         <p>The feedback is designed to refine and elevate — not to build a track from scratch.</p>
                     </div>
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>What happens after I receive the feedback?</span>
+                        <span data-i18n="faq6_q_v2">What happens after I receive the feedback?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq6_a_v2">
                         <p>You can:</p>
                         <ol><li>Apply the suggested improvements</li><li>Send us your updated version</li><li>We proceed with the final mastering</li></ol>
                     </div>
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>Can I send a revised version?</span>
+                        <span data-i18n="faq7_q_v2">Can I send a revised version?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq7_a_v2">
                         <p>Yes. The process is designed to allow one improvement cycle before mastering.</p>
                     </div>
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>What makes your mastering different?</span>
+                        <span data-i18n="faq8_q_v2">What makes your mastering different?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq8_a_v2">
                         <p>Our mastering is designed to meet professional release standards. Your track will be:</p>
                         <ul><li>Balanced across all listening systems</li><li>Competitive on streaming platforms</li><li>Optimized for clubs and high-volume environments</li></ul>
                         <p>We focus on clarity, impact and consistency.</p>
@@ -481,10 +478,10 @@
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>What file format should I send?</span>
+                        <span data-i18n="faq9_q_v2">What file format should I send?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq9_a_v2">
                         <p>Please send:</p>
                         <ul><li>WAV or AIFF</li><li>24-bit preferred</li><li>No limiter on the master</li><li>Minimum -6 dB headroom</li></ul>
                         <p>Full requirements are listed above.</p>
@@ -492,19 +489,19 @@
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>Do you use AI tools?</span>
+                        <span data-i18n="faq10_q_v2">Do you use AI tools?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq10_a_v2">
                         <p>No. All feedback and mastering are handled by real professionals.</p>
                     </div>
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>Can beginners use your service?</span>
+                        <span data-i18n="faq11_q_v2">Can beginners use your service?</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">
+                    <div class="faq-answer" data-i18n-html="faq11_a_v2">
                         <p>Yes — but your track must be structured and properly produced.</p>
                         <p>We work best with producers who already have a solid foundation.</p>
                     </div>
@@ -533,12 +530,12 @@
                 </div>
                 <div class="footer-col">
                     <h4 data-i18n="footer_nav">Navigation</h4>
-                    <a href="#search">Get Started</a>
+                    <a href="#search" data-i18n="footer_boost">Get Started</a>
                     <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
                     <a href="#how-it-works" data-i18n="footer_how">How it works</a>
                 </div>
                 <div class="footer-col">
-                    <h4>Support</h4>
+                    <h4 data-i18n="footer_support">Support</h4>
                     <a href="#faq">FAQ</a>
                     <a href="mailto:contact@alphastudios.app">contact@alphastudios.app</a>
                     <a href="termsofuse" data-i18n="footer_terms">Terms of Use</a>
