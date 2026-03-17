@@ -325,8 +325,6 @@
                             <th>Track</th>
                             <th>Original File</th>
                             <th>Customer</th>
-                            <th>Pack</th>
-                            <th>Genre</th>
                             <th>Status</th>
                             <th>Mastered File</th>
                             <th>Feedback</th>
@@ -334,7 +332,7 @@
                         </tr>
                     </thead>
                     <tbody id="adminOrdersBody">
-                        <tr><td colspan="10" class="admin-loading">Loading orders...</td></tr>
+                        <tr><td colspan="8" class="admin-loading">Loading orders...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -470,11 +468,9 @@
                         ).join('') + '</div>';
                     })()}</td>
                     <td>${esc(order.customer_email || '-')}</td>
-                    <td>${esc(packLabel)}</td>
-                    <td>${esc(order.genre || '-')}</td>
                     <td>
                         <span class="status-badge ${statusClass}">${statusText}</span>
-                        ${order.mastering_approved ? '<div class="badge-mastering"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Bon pour mastering</div>' : ''}
+                        ${order.mastering_approved ? '<div class="badge-mastering"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Approved for mastering</div>' : ''}
                         ${(() => {
                             let step = 1;
                             if (order.order_status === 'completed') step = 3;
