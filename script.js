@@ -1164,11 +1164,18 @@ function removeUploadedTrack() {
     if (waveformProgress) waveformProgress.style.width = '0%';
     if (waveformTimeEl) waveformTimeEl.textContent = '0:00';
 
-    // Hide inline campaign form & pricing card
+    // Hide inline campaign form
     const inlineForm = document.getElementById('inlineCampaignForm');
     if (inlineForm) inlineForm.style.display = 'none';
-    const inlinePricing = document.getElementById('inlinePricingCard');
-    if (inlinePricing) inlinePricing.style.display = 'none';
+
+    // Disable pricing button (no track uploaded)
+    const pricingBtn = document.getElementById('inlinePricingBtn');
+    if (pricingBtn) {
+        pricingBtn.disabled = true;
+        pricingBtn.style.opacity = '0.5';
+        pricingBtn.style.cursor = 'not-allowed';
+        pricingBtn.textContent = 'Upload a track first';
+    }
     const banner = document.getElementById('selectedTrackBanner');
     if (banner) banner.remove();
 }
@@ -1303,6 +1310,15 @@ async function handleAudioUpload(file) {
         // Show track preview
         if (uploadDropzone) uploadDropzone.style.display = 'none';
         if (trackPreview) trackPreview.style.display = '';
+
+        // Enable pricing button now that a track is uploaded
+        const pricingBtn = document.getElementById('inlinePricingBtn');
+        if (pricingBtn) {
+            pricingBtn.disabled = false;
+            pricingBtn.style.opacity = '';
+            pricingBtn.style.cursor = '';
+            pricingBtn.textContent = 'Start Free Trial';
+        }
 
         const titleEl = document.getElementById('trackPreviewTitle');
         if (titleEl) titleEl.textContent = trackTitle;
@@ -2055,14 +2071,13 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
             resetBtn();
         }
     } else {
-        // No subscription — show pricing card inline, user clicks "Start Free Trial" to go to Stripe
+        // No subscription — save campaign data, scroll to pricing section
         localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
         resetBtn();
 
-        const inlinePricing = document.getElementById('inlinePricingCard');
-        if (inlinePricing) {
-            inlinePricing.style.display = '';
-            inlinePricing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const pricingSection = document.getElementById('pricing');
+        if (pricingSection) {
+            pricingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 });

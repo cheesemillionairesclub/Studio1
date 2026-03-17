@@ -2198,6 +2198,12 @@ body {
     padding: 10px 40px;
 }
 
+/* ===== Pricing Section ===== */
+.pricing-section {
+    padding: 80px 0;
+    background: var(--bg-primary);
+}
+
 /* ===== How It Works ===== */
 .how-section {
     padding: 100px 0;
