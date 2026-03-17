@@ -4263,3 +4263,33 @@ body {
         min-width: 200px;
     }
 }
+
+/* ===== WhatsApp Sticky Button ===== */
+.whatsapp-sticky {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: #1a1a2e;
+    color: #fff;
+    border-radius: 50px;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.whatsapp-sticky:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(0,0,0,0.35);
+}
+.whatsapp-sticky img {
+    width: 24px;
+    height: 24px;
+    filter: invert(1);
+}
