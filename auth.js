@@ -50,7 +50,28 @@
             if (profile && profile.is_admin) {
                 adminBtn.style.display = '';
             }
+            // Update plan badge in dropdown
+            updatePlanBadge(profile);
         } catch (e) { /* not admin */ }
+    }
+
+    function updatePlanBadge(profile) {
+        const planEl = document.getElementById('authDropdownPlan');
+        if (!planEl) return;
+
+        const status = profile?.subscription_status;
+        let label = 'Free Plan';
+        let cls = 'plan-free';
+
+        if (status === 'active') {
+            label = 'Pro Plan';
+            cls = 'plan-pro';
+        } else if (status === 'trialing') {
+            label = 'Trial';
+            cls = 'plan-trial';
+        }
+
+        planEl.innerHTML = `<span class="auth-plan-badge ${cls}">${label}</span>`;
     }
 
     // ===== Avatar dropdown toggle =====

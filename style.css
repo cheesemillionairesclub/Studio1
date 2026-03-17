@@ -3496,6 +3496,31 @@ body {
     text-overflow: ellipsis;
 }
 
+.auth-dropdown-plan {
+    margin-top: 4px;
+}
+.auth-plan-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+.auth-plan-badge.plan-pro {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+}
+.auth-plan-badge.plan-trial {
+    background: rgba(33, 150, 243, 0.15);
+    color: #2196F3;
+}
+.auth-plan-badge.plan-free {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--white-50);
+}
+
 .auth-dropdown-divider {
     height: 1px;
     background: var(--white-10);
