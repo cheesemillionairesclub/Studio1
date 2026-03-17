@@ -4148,7 +4148,7 @@ body {
 /* Order footer */
 .dash-order-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 .dash-download-btn {

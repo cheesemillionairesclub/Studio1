@@ -1214,14 +1214,14 @@ function showUploadCountdown() {
         const s = document.createElement('style');
         s.id = 'cd-styles';
         s.textContent = `
-            .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 0;animation:cd-in .35s ease}
+            .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px 0;animation:cd-in .35s ease;width:100%}
             .cd-icon{width:40px;height:40px;border-radius:50%;object-fit:cover;animation:cd-spin 3s linear infinite}
 
             .cd-nums{position:relative;height:1.8rem;width:3rem;text-align:center}
             .cd-n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:var(--green-primary,#1a1a2e);font-variant-numeric:tabular-nums;opacity:0;animation:cd-show 1s steps(1) forwards}
             .cd-n:first-child{opacity:1}
 
-            .cd-msgs{position:relative;height:1.2em;min-width:200px;text-align:center;white-space:nowrap}
+            .cd-msgs{position:relative;height:1.4em;width:100%;text-align:center;white-space:nowrap}
             .cd-m{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:500;color:var(--text-secondary,#888);letter-spacing:.3px;opacity:0;animation:cd-msg-show 2s ease forwards}
             .cd-m:first-child{opacity:1}
             .cd-m:last-child{animation:cd-msg-show-last 2s ease forwards}
