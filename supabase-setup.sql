@@ -159,7 +159,64 @@ CREATE TRIGGER profiles_updated_at
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 -- =============================================
--- 6. SET YOUR ADMIN USER
+-- 6. LABELS TABLE (Trackstack Integration)
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.labels (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    genre TEXT NOT NULL DEFAULT '',
+    trackstack_url TEXT NOT NULL DEFAULT '',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS on labels
+ALTER TABLE public.labels ENABLE ROW LEVEL SECURITY;
+
+-- Anyone authenticated can view active labels
+CREATE POLICY "Anyone can view active labels"
+    ON public.labels FOR SELECT
+    USING (is_active = true);
+
+-- Service role can manage all labels
+CREATE POLICY "Service role can manage all labels"
+    ON public.labels FOR ALL
+    USING (auth.role() = 'service_role');
+
+-- Index for genre filtering
+CREATE INDEX IF NOT EXISTS idx_labels_genre ON public.labels(genre);
+CREATE INDEX IF NOT EXISTS idx_labels_is_active ON public.labels(is_active) WHERE is_active = true;
+
+-- Seed some example labels (replace with real data)
+INSERT INTO public.labels (name, genre, trackstack_url) VALUES
+    ('Spinnin'' Records', 'Electronic', 'https://www.trackstack.app/spinnin-records'),
+    ('Anjunadeep', 'Electronic', 'https://www.trackstack.app/anjunadeep'),
+    ('OWSLA', 'Electronic', 'https://www.trackstack.app/owsla'),
+    ('Mad Decent', 'Electronic', 'https://www.trackstack.app/mad-decent'),
+    ('Def Jam Recordings', 'Hip-Hop', 'https://www.trackstack.app/def-jam'),
+    ('Top Dawg Entertainment', 'Hip-Hop', 'https://www.trackstack.app/tde'),
+    ('Quality Control Music', 'Hip-Hop', 'https://www.trackstack.app/quality-control'),
+    ('Mass Appeal Records', 'Hip-Hop', 'https://www.trackstack.app/mass-appeal'),
+    ('XL Recordings', 'Pop', 'https://www.trackstack.app/xl-recordings'),
+    ('Interscope Records', 'Pop', 'https://www.trackstack.app/interscope'),
+    ('Republic Records', 'Pop', 'https://www.trackstack.app/republic-records'),
+    ('Atlantic Records', 'Pop', 'https://www.trackstack.app/atlantic-records'),
+    ('Stones Throw Records', 'R&B', 'https://www.trackstack.app/stones-throw'),
+    ('Soulection', 'R&B', 'https://www.trackstack.app/soulection'),
+    ('Brainfeeder', 'R&B', 'https://www.trackstack.app/brainfeeder'),
+    ('Ninja Tune', 'Electronic', 'https://www.trackstack.app/ninja-tune'),
+    ('Armada Music', 'Electronic', 'https://www.trackstack.app/armada-music'),
+    ('Monstercat', 'Electronic', 'https://www.trackstack.app/monstercat'),
+    ('300 Entertainment', 'Hip-Hop', 'https://www.trackstack.app/300-entertainment'),
+    ('Dreamville Records', 'Hip-Hop', 'https://www.trackstack.app/dreamville'),
+    ('Sub Pop', 'Rock', 'https://www.trackstack.app/sub-pop'),
+    ('Epitaph Records', 'Rock', 'https://www.trackstack.app/epitaph'),
+    ('Merge Records', 'Rock', 'https://www.trackstack.app/merge-records'),
+    ('4AD', 'Rock', 'https://www.trackstack.app/4ad')
+ON CONFLICT DO NOTHING;
+
+-- =============================================
+-- 7. SET YOUR ADMIN USER
 -- =============================================
 -- After you sign in for the first time with Google,
 -- run this query replacing YOUR_EMAIL with your email:

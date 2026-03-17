@@ -381,6 +381,11 @@
                         ${t.dashboard_pending_mastered || 'Your mastered track will be available here once ready.'}
                     </div>`}
                 </div>
+                ${isCompleted ? `
+                <button class="dash-trackstack-cta" onclick="openTrackstackPanel('${escapeHtmlAttr(order.genre || '')}', '${escapeHtmlAttr(order.track_title || '')}')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    <span>Submit to Labels</span>
+                </button>` : ''}
             `;
             return card;
         }
@@ -1021,12 +1026,119 @@
             return canvas.toDataURL('image/jpeg', 0.85);
         }
 
+        // ===== Trackstack: Submit to Labels =====
+        let _trackstackLabelsCache = null;
+
+        async function fetchLabels() {
+            if (_trackstackLabelsCache) return _trackstackLabelsCache;
+            const token = BeatpushAuth.getToken();
+            if (!token) return [];
+            try {
+                const res = await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/labels?is_active=eq.true&order=name.asc`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'apikey': BeatpushAuth.supabaseKey,
+                    },
+                });
+                if (!res.ok) return [];
+                _trackstackLabelsCache = await res.json();
+                return _trackstackLabelsCache;
+            } catch (e) {
+                console.warn('[Trackstack] Failed to fetch labels:', e);
+                return [];
+            }
+        }
+
+        function openTrackstackPanel(genre, trackTitle) {
+            // Remove existing
+            const existing = document.querySelector('.trackstack-overlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'trackstack-overlay';
+            overlay.innerHTML = `
+                <div class="trackstack-panel">
+                    <div class="trackstack-header">
+                        <div class="trackstack-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Final Step
+                        </div>
+                        <h3 class="trackstack-title">Your track is ready. Now send it to the right labels.</h3>
+                        <p class="trackstack-subtitle">Recommended labels for <strong>${escapeHtmlAttr(trackTitle || 'your track')}</strong></p>
+                        ${genre ? `<div class="trackstack-genre-tag">${escapeHtmlAttr(genre)}</div>` : ''}
+                    </div>
+                    <div class="trackstack-divider"></div>
+                    <div class="trackstack-labels-wrap" id="trackstackLabelsWrap">
+                        <div class="trackstack-loading">Loading labels...</div>
+                    </div>
+                    <div class="trackstack-footer">
+                        <p class="trackstack-helper">You will be redirected to Trackstack to complete your submission.</p>
+                        <button class="trackstack-close-btn" id="trackstackCloseBtn">Close</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+
+            // Close handlers
+            const close = () => {
+                overlay.classList.remove('visible');
+                setTimeout(() => overlay.remove(), 300);
+            };
+            overlay.querySelector('#trackstackCloseBtn').addEventListener('click', close);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+            // Load labels
+            loadTrackstackLabels(genre);
+        }
+
+        async function loadTrackstackLabels(genre) {
+            const wrap = document.getElementById('trackstackLabelsWrap');
+            if (!wrap) return;
+
+            const allLabels = await fetchLabels();
+
+            // Filter: prioritize matching genre, then show others
+            const matchingLabels = allLabels.filter(l => l.genre && genre && l.genre.toLowerCase() === genre.toLowerCase());
+            const otherLabels = allLabels.filter(l => !genre || !l.genre || l.genre.toLowerCase() !== genre.toLowerCase());
+
+            // Show matching first, then a few extras
+            const displayLabels = [...matchingLabels, ...otherLabels.slice(0, Math.max(0, 6 - matchingLabels.length))];
+
+            if (!displayLabels.length) {
+                wrap.innerHTML = `
+                    <div class="trackstack-empty">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <p>No labels available at the moment.</p>
+                    </div>`;
+                return;
+            }
+
+            wrap.innerHTML = displayLabels.map(label => `
+                <div class="trackstack-label-card">
+                    <div class="trackstack-label-info">
+                        <div class="trackstack-label-icon">${escapeHtmlAttr((label.name || '?')[0].toUpperCase())}</div>
+                        <div>
+                            <div class="trackstack-label-name">${escapeHtmlAttr(label.name)}</div>
+                            <div class="trackstack-label-genre">${escapeHtmlAttr(label.genre || 'Various')}</div>
+                        </div>
+                    </div>
+                    <button class="trackstack-submit-btn" onclick="window.open('${escapeHtmlAttr(label.trackstack_url)}', '_blank')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        Submit
+                    </button>
+                </div>
+            `).join('');
+        }
+
         // Expose functions to onclick handlers
         window.openReuploadModal = openReuploadModal;
         window.closeReuploadModal = closeReuploadModal;
         window.clearReuploadFile = clearReuploadFile;
         window.submitReupload = submitReupload;
         window.approveMastering = approveMastering;
+        window.openTrackstackPanel = openTrackstackPanel;
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
