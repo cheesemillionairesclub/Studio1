@@ -2380,6 +2380,17 @@ body {
     border-color: var(--green-primary);
     transform: translateY(-4px);
 }
+.services-tagline {
+    font-size: 0.95rem;
+    color: var(--white-50);
+    letter-spacing: 0.03em;
+    margin-top: 12px;
+    line-height: 1.7;
+}
+.services-tagline strong {
+    color: var(--white-70);
+    font-weight: 600;
+}
 @keyframes slowSpin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
