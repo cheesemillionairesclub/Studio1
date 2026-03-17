@@ -433,13 +433,17 @@ body {
     width: max-content;
 }
 .hero-logo-item {
-    width: 180px;
-    height: 180px;
+    width: 60px;
+    height: 60px;
     object-fit: contain;
     opacity: 0.4;
     flex-shrink: 0;
     filter: grayscale(100%);
     transition: opacity 0.3s;
+}
+.hero-logo-item-lg {
+    width: 180px;
+    height: 180px;
 }
 .hero-logo-item:hover {
     opacity: 0.7;
