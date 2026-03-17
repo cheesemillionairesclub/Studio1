@@ -1752,16 +1752,18 @@ document.addEventListener('click', async (e) => {
 
 // Genre dropdown selector
 const GENRE_LIST = [
-    '140 / Deep Dubstep / Grime', 'Afro House', 'Amapiano', 'Ambient / Experimental',
-    'Bass / Club', 'Bass House', 'Brazilian Funk', 'Breaks / Breakbeat / UK Bass',
-    'Dance / Pop', 'Deep House', 'DJ Tools / Acapellas', 'Downtempo',
-    'Drum & Bass', 'Dubstep', 'Electro (Classic / Detroit / Modern)', 'Electronica',
-    'Funky House', 'Hard Dance / Hardcore / Neo Rave', 'Hard Techno', 'House',
-    'Indie Dance', 'Jackin House', 'Mainstage', 'Melodic House & Techno',
-    'Minimal / Deep Tech', 'Nu Disco / Disco', 'Organic House', 'Progressive House',
-    'Psy-Trance', 'Tech House', 'Techno (Peak Time / Driving)',
-    'Techno (Raw / Deep / Hypnotic)', 'Trance (Main Floor)',
-    'Trance (Raw / Deep / Hypnotic)', 'Trap / Future Bass', 'UK Garage / Bassline'
+    'Acid', 'Acid House', 'Afro House', 'Amapiano',
+    'Bass Club', 'Bass House', 'Breaks Breakbeat Uk Bass',
+    'Dance Electro Pop', 'Deep House', 'Disco',
+    'Drum And Bass', 'Dubstep', 'Electro Classic Detroit Modern', 'Electronica',
+    'Funky House', 'Ghetto House', 'Hard Dance Hardcore', 'Hard Techno', 'House',
+    'Indie Dance', 'Jackin House', 'Latin House', 'Melodic House And Techno',
+    'Minimal', 'Minimal Deep Tech', 'Minimal Techno',
+    'Nu Disco', 'Organise House Downtempo', 'Progressive House',
+    'Tech House', 'Tech House Latin', 'Tech House Rolling', 'Tech House Trippy',
+    'Techno', 'Techno Peak Time Driving', 'Techno Raw Deep Hynotic',
+    'Trance', 'Trance Main Floor', 'Trance Raw Deep Hynotic',
+    'Uk Garage Bassline'
 ];
 let selectedGenres = [];
 
