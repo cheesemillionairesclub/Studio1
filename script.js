@@ -1174,7 +1174,7 @@ function removeUploadedTrack() {
         pricingBtn.disabled = false;
         pricingBtn.style.opacity = '';
         pricingBtn.style.cursor = '';
-        pricingBtn.textContent = 'Start 7-Day Trial';
+        pricingBtn.textContent = 'Start 3-Day Trial';
     }
     const banner = document.getElementById('selectedTrackBanner');
     if (banner) banner.remove();

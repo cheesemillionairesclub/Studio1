@@ -51,7 +51,7 @@ export default async function handler(req, res) {
 
         const subscriptionData = { metadata: { user_id } };
         if (!skip_trial) {
-            subscriptionData.trial_period_days = 7;
+            subscriptionData.trial_period_days = 3;
         }
 
         const sessionParams = {
