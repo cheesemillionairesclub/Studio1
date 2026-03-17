@@ -2430,20 +2430,57 @@ body {
     flex-shrink: 0;
 }
 .whatwedo-card-highlight {
-    background: rgba(76, 175, 80, 0.08);
-    border-left: 3px solid var(--green-primary);
-    border-radius: 0 8px 8px 0;
-    padding: 14px 16px;
+    position: relative;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.06) 0%, rgba(76, 175, 80, 0.14) 100%);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    border-radius: 12px;
+    padding: 20px 20px 20px 24px;
     margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.whatwedo-card-highlight p {
-    font-size: 0.85rem;
+.whatwedo-card-highlight:hover {
+    border-color: rgba(76, 175, 80, 0.45);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.1);
+}
+.highlight-accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--green-primary), rgba(76, 175, 80, 0.3));
+    border-radius: 4px 0 0 4px;
+}
+.highlight-main {
+    font-size: 0.88rem;
     color: var(--white-70);
-    margin: 0;
-    line-height: 1.6;
+    margin: 0 0 8px 0;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
 }
-.whatwedo-card-highlight strong {
+.highlight-keyword {
     color: var(--green-primary);
+    font-weight: 600;
+    position: relative;
+}
+.highlight-keyword::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--green-primary);
+    opacity: 0.4;
+}
+.highlight-bold {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white-90);
+    margin: 0;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 .whatwedo-card-footer {
     font-size: 0.8rem;
