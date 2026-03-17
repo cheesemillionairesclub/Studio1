@@ -891,78 +891,54 @@ function generateTrackArtwork(size = 400) {
     canvas.height = size;
     const ctx = canvas.getContext('2d');
 
-    // 3 colors only: black, white, one random accent
+    // 3 colors: black, white, one random accent
     const hue = Math.random() * 360;
     const accent = `hsl(${hue}, 70%, 55%)`;
 
-    // Base gradient: black -> accent -> white (diagonal)
-    const angle = Math.random() * Math.PI;
-    const dx = Math.cos(angle) * size;
-    const dy = Math.sin(angle) * size;
-    const mx = size / 2, my = size / 2;
-    const grad = ctx.createLinearGradient(mx - dx / 2, my - dy / 2, mx + dx / 2, my + dy / 2);
-    grad.addColorStop(0, '#0a0a0a');
-    grad.addColorStop(0.5, accent);
-    grad.addColorStop(1, '#e8e8e8');
-    ctx.fillStyle = grad;
+    // Fill entire canvas with mid-grey so nothing is pure black
+    ctx.fillStyle = '#333333';
     ctx.fillRect(0, 0, size, size);
 
-    // Abstract minimalist shapes — pick one random pattern
+    // Large accent color block — covers most of the canvas
+    const grad1 = ctx.createLinearGradient(0, 0, size, size);
+    grad1.addColorStop(0, accent);
+    grad1.addColorStop(0.6, '#222222');
+    grad1.addColorStop(1, '#dddddd');
+    ctx.fillStyle = grad1;
+    ctx.fillRect(0, 0, size, size);
+
+    // Second gradient layer for depth (perpendicular)
+    const grad2 = ctx.createLinearGradient(size, 0, 0, size);
+    grad2.addColorStop(0, 'rgba(255,255,255,0.3)');
+    grad2.addColorStop(0.5, 'transparent');
+    grad2.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = grad2;
+    ctx.fillRect(0, 0, size, size);
+
+    // Minimalist abstract element
     const pattern = Math.floor(Math.random() * 3);
 
     if (pattern === 0) {
-        // Arc with white stroke + accent dot
+        // Circle outline
         ctx.beginPath();
-        const r = size * (0.2 + Math.random() * 0.15);
-        const arcX = size * (0.3 + Math.random() * 0.4);
-        const arcY = size * (0.3 + Math.random() * 0.4);
-        ctx.arc(arcX, arcY, r, 0, Math.PI * (1.2 + Math.random() * 0.8));
-        ctx.lineWidth = size * 0.006;
-        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.arc(size * 0.5, size * 0.5, size * 0.2, 0, Math.PI * 2);
+        ctx.lineWidth = size * 0.008;
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
         ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(arcX, arcY, size * 0.02, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
     } else if (pattern === 1) {
-        // Two crossing lines
-        for (let i = 0; i < 2; i++) {
-            ctx.beginPath();
-            const y1 = size * (0.2 + Math.random() * 0.6);
-            const y2 = size * (0.2 + Math.random() * 0.6);
-            ctx.moveTo(0, y1);
-            ctx.lineTo(size, y2);
-            ctx.lineWidth = size * 0.005;
-            ctx.strokeStyle = i === 0 ? '#ffffff' : 'rgba(0,0,0,0.5)';
-            ctx.stroke();
-        }
+        // Diagonal line
+        ctx.beginPath();
+        ctx.moveTo(size * 0.2, size * 0.8);
+        ctx.lineTo(size * 0.8, size * 0.2);
+        ctx.lineWidth = size * 0.006;
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.stroke();
     } else {
-        // Bezier curves
-        ctx.beginPath();
-        const y = size * (0.3 + Math.random() * 0.4);
-        ctx.moveTo(0, y);
-        ctx.bezierCurveTo(
-            size * 0.3, y + (Math.random() - 0.5) * size * 0.4,
-            size * 0.7, y + (Math.random() - 0.5) * size * 0.4,
-            size, y + (Math.random() - 0.5) * size * 0.2
-        );
-        ctx.lineWidth = size * 0.005;
-        ctx.strokeStyle = '#ffffff';
-        ctx.stroke();
-        ctx.beginPath();
-        const y2 = y + size * 0.06;
-        ctx.moveTo(0, y2);
-        ctx.bezierCurveTo(
-            size * 0.3, y2 + (Math.random() - 0.5) * size * 0.3,
-            size * 0.7, y2 + (Math.random() - 0.5) * size * 0.3,
-            size, y2 + (Math.random() - 0.5) * size * 0.15
-        );
-        ctx.lineWidth = size * 0.003;
-        ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-        ctx.stroke();
+        // Horizontal bar
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.fillRect(0, size * 0.45, size, size * 0.1);
     }
 
-    ctx.globalCompositeOperation = 'source-over';
     return canvas.toDataURL('image/jpeg', 0.85);
 }
 
