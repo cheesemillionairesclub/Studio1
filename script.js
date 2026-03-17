@@ -1168,13 +1168,13 @@ function removeUploadedTrack() {
     const inlineForm = document.getElementById('inlineCampaignForm');
     if (inlineForm) inlineForm.style.display = 'none';
 
-    // Disable pricing button (no track uploaded)
+    // Reset pricing button (no track uploaded)
     const pricingBtn = document.getElementById('inlinePricingBtn');
     if (pricingBtn) {
-        pricingBtn.disabled = true;
-        pricingBtn.style.opacity = '0.5';
-        pricingBtn.style.cursor = 'not-allowed';
-        pricingBtn.textContent = 'Upload a track first';
+        pricingBtn.disabled = false;
+        pricingBtn.style.opacity = '';
+        pricingBtn.style.cursor = '';
+        pricingBtn.textContent = 'Start 7-Day Trial';
     }
     const banner = document.getElementById('selectedTrackBanner');
     if (banner) banner.remove();
@@ -1311,13 +1311,10 @@ async function handleAudioUpload(file) {
         if (uploadDropzone) uploadDropzone.style.display = 'none';
         if (trackPreview) trackPreview.style.display = '';
 
-        // Enable pricing button now that a track is uploaded
+        // Mark that a track has been uploaded
         const pricingBtn = document.getElementById('inlinePricingBtn');
         if (pricingBtn) {
-            pricingBtn.disabled = false;
-            pricingBtn.style.opacity = '';
-            pricingBtn.style.cursor = '';
-            pricingBtn.textContent = 'Start Free Trial';
+            pricingBtn.dataset.trackUploaded = 'true';
         }
 
         const titleEl = document.getElementById('trackPreviewTitle');
@@ -1715,6 +1712,12 @@ document.addEventListener('click', async (e) => {
     const btn = e.target.closest('#inlinePricingBtn');
     if (!btn) return;
     e.preventDefault();
+
+    // If no track uploaded, show popup and scroll to upload section
+    if (btn.dataset.trackUploaded !== 'true') {
+        showToast('Please upload a track first before starting your trial.', true);
+        return;
+    }
 
     const user = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
 
