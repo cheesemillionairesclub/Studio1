@@ -3951,11 +3951,12 @@ body.has-promo .terms-page {
 }
 
 .auth-dropdown-item.auth-logout {
-    color: #ff5252;
+    color: #1a1a2e;
 }
 
 .auth-dropdown-item.auth-logout:hover {
-    background: rgba(255, 82, 82, 0.1);
+    background: #1a1a2e;
+    color: #fff;
 }
 
 /* ===== Auth Prompt Modal ===== */
