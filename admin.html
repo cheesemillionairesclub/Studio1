@@ -475,7 +475,7 @@
                         ${order.mastering_approved ? '<div class="badge-mastering"><strong>Approved For Mastering</strong></div>' : ''}
                         ${(() => {
                             let step = 1;
-                            if (order.order_status === 'completed') step = 3;
+                            if (order.order_status === 'completed') step = 2;
                             else if (order.mastering_approved) step = 2;
                             const sc = (n) => step > n ? 'done' : step === n ? 'active' : '';
                             const dc = (n) => step > n ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : n;
@@ -483,8 +483,6 @@
                                 <div class="admin-pipeline-step ${sc(1)}"><div class="admin-pipeline-dot">${dc(1)}</div>Feedbacks</div>
                                 <div class="admin-pipeline-sep${step >= 2 ? ' filled' : ''}"></div>
                                 <div class="admin-pipeline-step ${sc(2)}"><div class="admin-pipeline-dot">${dc(2)}</div>Mastering</div>
-                                <div class="admin-pipeline-sep${step >= 3 ? ' filled' : ''}"></div>
-                                <div class="admin-pipeline-step ${sc(3)}"><div class="admin-pipeline-dot">${dc(3)}</div>Labels</div>
                             </div>`;
                         })()}
                     </td>
