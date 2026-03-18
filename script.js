@@ -1765,7 +1765,7 @@ function showUploadCountdown() {
         const s = document.createElement('style');
         s.id = 'cd-styles';
         s.textContent = `
-            .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px 0;animation:cd-in .35s ease;width:100%}
+            .cd-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px 0;animation:cd-in .35s ease;width:100%;height:100%;min-height:inherit;box-sizing:border-box}
             .cd-icon{width:40px;height:40px;border-radius:50%;object-fit:cover;animation:cd-spin 3s linear infinite}
 
             .cd-nums{position:relative;height:1.8rem;width:3rem;text-align:center}
