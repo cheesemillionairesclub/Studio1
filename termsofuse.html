@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=2">
 </head>
-<body>
+<body class="has-promo">
 
     <!-- Promo Banner -->
     <div class="promo-banner" id="promoBanner">
@@ -23,7 +23,7 @@
                 <span class="promo-copied" style="display:none">Copied!</span>
             </button>
         </div>
-        <button class="promo-banner-close" onclick="document.getElementById('promoBanner').classList.add('promo-hidden')" aria-label="Close">&times;</button>
+        <button class="promo-banner-close" onclick="document.getElementById('promoBanner').classList.add('promo-hidden');document.body.classList.remove('has-promo')" aria-label="Close">&times;</button>
     </div>
 
     <!-- Navigation -->

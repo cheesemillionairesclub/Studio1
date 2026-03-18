@@ -156,9 +156,18 @@ body {
     color: #fff;
 }
 
-/* Push navbar down when promo banner is visible */
-.promo-banner:not(.promo-hidden) ~ .navbar {
+/* Push everything down when promo banner is visible */
+body.has-promo .navbar {
     top: 40px;
+}
+body.has-promo .hero {
+    padding-top: 160px;
+}
+body.has-promo .dashboard-page {
+    padding-top: 160px !important;
+}
+body.has-promo .terms-page {
+    padding-top: 160px;
 }
 
 @media (max-width: 768px) {
@@ -173,8 +182,14 @@ body {
     .promo-banner-close {
         right: 8px;
     }
-    .promo-banner:not(.promo-hidden) ~ .navbar {
+    body.has-promo .navbar {
         top: 36px;
+    }
+    body.has-promo .hero {
+        padding-top: 156px;
+    }
+    body.has-promo .dashboard-page {
+        padding-top: 156px !important;
     }
 }
 
