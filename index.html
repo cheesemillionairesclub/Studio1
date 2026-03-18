@@ -272,40 +272,77 @@
                 <h2 class="section-title" data-i18n-html="pricing_title_v2">Choose your <span class="text-gradient">Plan</span></h2>
                 <p class="section-desc" data-i18n="pricing_desc_v2">Start with a free trial. Cancel anytime.</p>
             </div>
-            <div id="inlinePricingCard" style="max-width: 520px; margin: 0 auto;">
-                <div class="product-card popular" data-pack="mastering" style="margin: 0 auto; max-width: 100%;">
-                    <div class="popular-badge" data-i18n="pricing_pro_badge">PRO PLAN</div>
+            <div id="inlinePricingCard" style="max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+                <!-- Studio Access -->
+                <div class="product-card" data-pack="mastering" data-plan="access">
                     <div style="padding: 20px 0 10px; text-align: center;">
-                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 8px;" data-i18n="pricing_pro_title">Pro Plan</h3>
-                        <p style="font-size: 0.85rem; color: var(--white-50); line-height: 1.6;" data-i18n="pricing_pro_desc">Everything you need to release your music professionally.</p>
+                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 8px;">Studio Access</h3>
+                        <p style="font-size: 0.85rem; color: var(--white-50); line-height: 1.6;">Get started with professional feedback and mastering.</p>
                     </div>
-                    <div class="product-card-price">1<span style="font-size: 0.5em; font-weight: 400; color: var(--white-50);">EUR/month</span></div>
-                    <p style="font-size: 0.75rem; color: var(--green-primary); text-align: center; margin: -8px 0 12px; font-weight: 500;" data-i18n="pricing_free_trial">3-day free trial</p>
+                    <div class="product-card-price">0.99<span style="font-size: 0.5em; font-weight: 400; color: var(--white-50);">$/month</span></div>
+                    <p style="font-size: 0.75rem; color: var(--green-primary); text-align: center; margin: -8px 0 12px; font-weight: 500;">3-day free trial</p>
                     <ul style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 0.85rem; color: var(--white-70); line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
-                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="pricing_feat_1">Up to 5 tracks per month</span></li>
-                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="pricing_feat_2">In-depth feedback from industry professionals</span></li>
-                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="pricing_feat_3">Premium mastering for a release-ready sound</span></li>
-                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="pricing_feat_4">Private WhatsApp access to our engineering team</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>1 track per month</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>In-depth feedback from industry professionals</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Premium mastering for a release-ready sound</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Up to 3 free re-uploads after feedback before mastering</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Private WhatsApp access to our engineering team</span></li>
                     </ul>
-                    <button class="product-card-btn pack-select-btn" id="inlinePricingBtn" data-pack="mastering" data-i18n="pricing_cta">Start 3-Day Trial</button>
-                    <div class="requirements-tooltip-wrapper" style="margin-top: 12px;">
-                        <button class="requirements-tooltip-btn requirements-tooltip-btn-sm" onclick="this.parentElement.classList.toggle('active')">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            <span data-i18n="pricing_requirements_btn">Submission requirements</span>
-                        </button>
-                        <div class="requirements-tooltip-content">
-                            <div class="requirements-tooltip-close" onclick="this.closest('.requirements-tooltip-wrapper').classList.remove('active')">&times;</div>
-                            <h4 data-i18n="req_title">REQUIREMENTS</h4>
-                            <p class="req-intro" data-i18n="req_intro">To ensure the highest quality results, please follow these guidelines before submitting your track.</p>
-                            <div class="req-group"><h5 data-i18n="req_format_title">Audio Format</h5><ul><li data-i18n="req_format_1">WAV or AIFF only</li><li data-i18n="req_format_2">24-bit preferred (16-bit minimum)</li><li data-i18n="req_format_3">Sample rate: 44.1 kHz or higher</li></ul></div>
-                            <div class="req-group"><h5 data-i18n="req_headroom_title">Headroom</h5><ul><li data-i18n="req_headroom_1">Leave -6 dB headroom on your master</li><li data-i18n="req_headroom_2">No clipping</li></ul></div>
-                            <div class="req-group"><h5 data-i18n="req_nolimit_title">No Limiting</h5><ul><li data-i18n="req_nolimit_1">Remove any limiter from the master channel</li><li data-i18n="req_nolimit_2">Avoid heavy compression on the master</li></ul></div>
-                            <div class="req-group"><h5 data-i18n="req_export_title">Export Quality</h5><ul><li data-i18n="req_export_1">Export your final mixdown</li><li data-i18n="req_export_2">No MP3 or compressed formats</li></ul></div>
-                            <div class="req-group"><h5 data-i18n="req_mix_title">Mix Balance</h5><ul><li data-i18n="req_mix_1">Proper balance between elements</li><li data-i18n="req_mix_2">No distorted or over-saturated signals</li><li data-i18n="req_mix_3">Clean low-end (kick / bass separation)</li></ul></div>
-                            <div class="req-group"><h5 data-i18n="req_version_title">Version</h5><ul><li data-i18n="req_version_1">Submit the final version only</li><li data-i18n="req_version_2">No drafts or unfinished ideas</li></ul></div>
-                            <div class="req-group"><h5 data-i18n="req_optional_title">Optional (Recommended)</h5><ul><li data-i18n="req_optional_1">Reference track (if you have one)</li><li data-i18n="req_optional_2">Notes or artistic direction</li></ul></div>
-                        </div>
+                    <button class="product-card-btn pricing-plan-btn" data-plan="access">Start 3-Day Trial</button>
+                </div>
+                <!-- Studio Pro (Popular) -->
+                <div class="product-card popular" data-pack="mastering" data-plan="pro">
+                    <div class="popular-badge">MOST POPULAR</div>
+                    <div style="padding: 20px 0 10px; text-align: center;">
+                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 8px;">Studio Pro</h3>
+                        <p style="font-size: 0.85rem; color: var(--white-50); line-height: 1.6;">Everything you need to release your music professionally.</p>
                     </div>
+                    <div class="product-card-price">3.99<span style="font-size: 0.5em; font-weight: 400; color: var(--white-50);">$/month</span></div>
+                    <p style="font-size: 0.75rem; color: var(--green-primary); text-align: center; margin: -8px 0 12px; font-weight: 500;">3-day free trial</p>
+                    <ul style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 0.85rem; color: var(--white-70); line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Up to 5 tracks per month</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>In-depth feedback from industry professionals</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Premium mastering for a release-ready sound</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Up to 3 free re-uploads after feedback before mastering</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Private WhatsApp access to our engineering team</span></li>
+                    </ul>
+                    <button class="product-card-btn pricing-plan-btn" data-plan="pro">Start 3-Day Trial</button>
+                </div>
+                <!-- Studio Elite -->
+                <div class="product-card" data-pack="mastering" data-plan="elite">
+                    <div style="padding: 20px 0 10px; text-align: center;">
+                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 8px;">Studio Elite</h3>
+                        <p style="font-size: 0.85rem; color: var(--white-50); line-height: 1.6;">Maximum capacity for serious artists and producers.</p>
+                    </div>
+                    <div class="product-card-price">7.99<span style="font-size: 0.5em; font-weight: 400; color: var(--white-50);">$/month</span></div>
+                    <p style="font-size: 0.75rem; color: var(--green-primary); text-align: center; margin: -8px 0 12px; font-weight: 500;">3-day free trial</p>
+                    <ul style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 0.85rem; color: var(--white-70); line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Up to 10 tracks per month</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>In-depth feedback from industry professionals</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Premium mastering for a release-ready sound</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Up to 3 free re-uploads after feedback before mastering</span></li>
+                        <li style="display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.5" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg> <span>Private WhatsApp access to our engineering team</span></li>
+                    </ul>
+                    <button class="product-card-btn pricing-plan-btn" data-plan="elite">Start 3-Day Trial</button>
+                </div>
+            </div>
+            <!-- Submission requirements (shared) -->
+            <div class="requirements-tooltip-wrapper" style="margin-top: 24px; max-width: 960px; margin-left: auto; margin-right: auto;">
+                <button class="requirements-tooltip-btn requirements-tooltip-btn-sm" onclick="this.parentElement.classList.toggle('active')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <span data-i18n="pricing_requirements_btn">Submission requirements</span>
+                </button>
+                <div class="requirements-tooltip-content">
+                    <div class="requirements-tooltip-close" onclick="this.closest('.requirements-tooltip-wrapper').classList.remove('active')">&times;</div>
+                    <h4 data-i18n="req_title">REQUIREMENTS</h4>
+                    <p class="req-intro" data-i18n="req_intro">To ensure the highest quality results, please follow these guidelines before submitting your track.</p>
+                    <div class="req-group"><h5 data-i18n="req_format_title">Audio Format</h5><ul><li data-i18n="req_format_1">WAV or AIFF only</li><li data-i18n="req_format_2">24-bit preferred (16-bit minimum)</li><li data-i18n="req_format_3">Sample rate: 44.1 kHz or higher</li></ul></div>
+                    <div class="req-group"><h5 data-i18n="req_headroom_title">Headroom</h5><ul><li data-i18n="req_headroom_1">Leave -6 dB headroom on your master</li><li data-i18n="req_headroom_2">No clipping</li></ul></div>
+                    <div class="req-group"><h5 data-i18n="req_nolimit_title">No Limiting</h5><ul><li data-i18n="req_nolimit_1">Remove any limiter from the master channel</li><li data-i18n="req_nolimit_2">Avoid heavy compression on the master</li></ul></div>
+                    <div class="req-group"><h5 data-i18n="req_export_title">Export Quality</h5><ul><li data-i18n="req_export_1">Export your final mixdown</li><li data-i18n="req_export_2">No MP3 or compressed formats</li></ul></div>
+                    <div class="req-group"><h5 data-i18n="req_mix_title">Mix Balance</h5><ul><li data-i18n="req_mix_1">Proper balance between elements</li><li data-i18n="req_mix_2">No distorted or over-saturated signals</li><li data-i18n="req_mix_3">Clean low-end (kick / bass separation)</li></ul></div>
+                    <div class="req-group"><h5 data-i18n="req_version_title">Version</h5><ul><li data-i18n="req_version_1">Submit the final version only</li><li data-i18n="req_version_2">No drafts or unfinished ideas</li></ul></div>
+                    <div class="req-group"><h5 data-i18n="req_optional_title">Optional (Recommended)</h5><ul><li data-i18n="req_optional_1">Reference track (if you have one)</li><li data-i18n="req_optional_2">Notes or artistic direction</li></ul></div>
                 </div>
             </div>
         </div>

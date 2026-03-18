@@ -52,6 +52,11 @@ async function findProfileByStripeCustomer(serviceKey, customerId) {
     return data[0] || null;
 }
 
+// Extract plan_type from subscription metadata
+function getPlanTypeFromSub(sub) {
+    return sub.metadata?.plan_type || null;
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -79,27 +84,28 @@ export default async function handler(req, res) {
         const userId = session.metadata?.user_id;
         const customerId = session.customer;
         const subscriptionId = session.subscription;
+        const planType = session.metadata?.plan_type || 'pro';
 
         if (userId && customerId) {
-            // Link Stripe customer + subscription to profile
-            // Use upsert to create profile if it doesn't exist yet (race condition with auth trigger)
             const profileData = {
                 id: userId,
                 stripe_customer_id: customerId,
                 stripe_subscription_id: subscriptionId || null,
+                plan_type: planType,
             };
 
-            // Add email from checkout session if available
             const customerEmail = session.customer_details?.email || session.customer_email;
             if (customerEmail) profileData.email = customerEmail;
 
-            // Fetch subscription to get status and trial info
             if (subscriptionId) {
                 try {
                     const sub = await stripe.subscriptions.retrieve(subscriptionId);
-                    profileData.subscription_status = sub.status; // 'trialing' or 'active'
+                    profileData.subscription_status = sub.status;
                     profileData.trial_end = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
                     profileData.current_period_end = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+                    // Also get plan_type from subscription metadata if available
+                    const subPlan = getPlanTypeFromSub(sub);
+                    if (subPlan) profileData.plan_type = subPlan;
                 } catch (e) {
                     console.error('[Webhook] Failed to retrieve subscription:', e.message);
                 }
@@ -108,10 +114,9 @@ export default async function handler(req, res) {
             const upsertRes = await upsertProfile(serviceKey, profileData);
             if (!upsertRes.ok) {
                 console.error('[Webhook] Profile upsert failed:', await upsertRes.text());
-                // Fallback to PATCH in case upsert fails due to permissions
                 await updateProfile(serviceKey, { id: userId }, profileData);
             }
-            console.log(`[Webhook] Profile ${userId} linked to customer ${customerId}`);
+            console.log(`[Webhook] Profile ${userId} linked to customer ${customerId}, plan: ${planType}`);
         }
     }
 
@@ -129,7 +134,11 @@ export default async function handler(req, res) {
                 current_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
             };
 
-            // Reset track counter when trial ends and subscription becomes active (trial → paid)
+            // Update plan_type from subscription metadata
+            const subPlan = getPlanTypeFromSub(sub);
+            if (subPlan) updates.plan_type = subPlan;
+
+            // Reset track counter when trial ends and subscription becomes active
             if (event.type === 'customer.subscription.updated' && sub.status === 'active') {
                 const prevAttrs = event.data.previous_attributes;
                 if (prevAttrs?.status === 'trialing') {
@@ -163,7 +172,6 @@ export default async function handler(req, res) {
         const invoice = event.data.object;
         const customerId = invoice.customer;
 
-        // Reset monthly track counter on renewal OR first payment after trial
         if (invoice.billing_reason === 'subscription_cycle' || invoice.billing_reason === 'subscription_update') {
             const profile = await findProfileByStripeCustomer(serviceKey, customerId);
             if (profile) {

@@ -755,6 +755,19 @@
             overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
         }
 
+        // ===== Plan Config =====
+        const PLAN_LIMITS = { access: 1, pro: 5, elite: 10 };
+        const PLAN_NAMES = { access: 'Studio Access', pro: 'Studio Pro', elite: 'Studio Elite' };
+
+        function getPlanName(profile) {
+            const plan = profile?.plan_type || 'pro';
+            return PLAN_NAMES[plan] || 'Studio Pro';
+        }
+        function getPlanLimit(profile) {
+            const plan = profile?.plan_type || 'pro';
+            return PLAN_LIMITS[plan] || 5;
+        }
+
         // ===== Subscription Banner =====
         async function renderSubscriptionBanner(overrideTracksUsed) {
             const banner = document.getElementById('subscriptionBanner');
@@ -764,6 +777,8 @@
             if (!profile) { banner.style.display = 'none'; return; }
 
             const status = profile.subscription_status || 'none';
+            const planName = getPlanName(profile);
+            const trackLimit = getPlanLimit(profile);
 
             // Use override if provided, otherwise use profile field as source of truth
             let tracksUsed;
@@ -778,11 +793,11 @@
                 banner.innerHTML = `
                     <div class="sub-banner sub-active">
                         <div class="sub-banner-left">
-                            <span class="sub-badge active">Pro Plan</span>
+                            <span class="sub-badge active">${planName}</span>
                             <span class="sub-status">Active</span>
                         </div>
                         <div class="sub-banner-right">
-                            <span class="sub-tracks">${tracksUsed}/5 tracks used</span>
+                            <span class="sub-tracks">${tracksUsed}/${trackLimit} tracks used</span>
                         </div>
                     </div>`;
             } else if (status === 'trialing') {
@@ -792,7 +807,7 @@
                 banner.innerHTML = `
                     <div class="sub-banner sub-trial">
                         <div class="sub-banner-left">
-                            <span class="sub-badge trial">Free Trial</span>
+                            <span class="sub-badge trial">${planName} — Free Trial</span>
                             <span class="sub-status">${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining</span>
                         </div>
                         <div class="sub-banner-right">

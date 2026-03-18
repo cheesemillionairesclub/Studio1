@@ -443,8 +443,10 @@
                 const subStatus = order.subscription_status || 'none';
                 const isTrial = subStatus === 'trialing';
                 const isPaid = subStatus === 'active';
-                const subBadge = isTrial ? '<span class="badge-sub badge-trial">Trial</span>'
-                    : isPaid ? '<span class="badge-sub badge-paid">Paid</span>'
+                const planNames = { access: 'Access', pro: 'Pro', elite: 'Elite' };
+                const planLabel = planNames[order.plan_type] || 'Pro';
+                const subBadge = isTrial ? `<span class="badge-sub badge-trial">${esc(planLabel)} Trial</span>`
+                    : isPaid ? `<span class="badge-sub badge-paid">${esc(planLabel)}</span>`
                     : `<span class="badge-sub badge-none">${esc(subStatus)}</span>`;
 
                 return `<tr data-order-id="${order.id}">

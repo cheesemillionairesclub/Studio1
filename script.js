@@ -1724,14 +1724,13 @@ function removeUploadedTrack() {
     const inlineForm = document.getElementById('inlineCampaignForm');
     if (inlineForm) inlineForm.style.display = 'none';
 
-    // Reset pricing button (no track uploaded)
-    const pricingBtn = document.getElementById('inlinePricingBtn');
-    if (pricingBtn) {
-        pricingBtn.disabled = false;
-        pricingBtn.style.opacity = '';
-        pricingBtn.style.cursor = '';
-        pricingBtn.textContent = 'Start 3-Day Trial';
-    }
+    // Reset pricing buttons
+    document.querySelectorAll('.pricing-plan-btn').forEach(btn => {
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.style.cursor = '';
+        btn.textContent = 'Start 3-Day Trial';
+    });
     const banner = document.getElementById('selectedTrackBanner');
     if (banner) banner.remove();
 }
@@ -1869,10 +1868,9 @@ async function handleAudioUpload(file) {
         if (trackPreview) trackPreview.style.display = '';
 
         // Mark that a track has been uploaded
-        const pricingBtn = document.getElementById('inlinePricingBtn');
-        if (pricingBtn) {
-            pricingBtn.dataset.trackUploaded = 'true';
-        }
+        document.querySelectorAll('.pricing-plan-btn').forEach(btn => {
+            btn.dataset.trackUploaded = 'true';
+        });
 
         const titleEl = document.getElementById('trackPreviewTitle');
         if (titleEl) titleEl.textContent = trackTitle;
@@ -2263,18 +2261,23 @@ function changeTrack() {
     }
 }
 
+// ===== Plan Config =====
+const PLAN_LIMITS = { access: 1, pro: 5, elite: 10 };
+const PLAN_NAMES = { access: 'Studio Access', pro: 'Studio Pro', elite: 'Studio Elite' };
+
+function getTrackLimit(profile) {
+    const plan = profile?.plan_type || 'pro';
+    return PLAN_LIMITS[plan] || 5;
+}
+
 // ===== Package Selection =====
-// Inline pricing "Start Free Trial" button — redirect to Stripe checkout with trial
+// Pricing plan buttons — redirect to Stripe checkout with trial
 document.addEventListener('click', async (e) => {
-    const btn = e.target.closest('#inlinePricingBtn');
+    const btn = e.target.closest('.pricing-plan-btn');
     if (!btn) return;
     e.preventDefault();
 
-    // If no track uploaded, show popup and scroll to upload section
-    if (btn.dataset.trackUploaded !== 'true') {
-        showToast('Please upload a track first before starting your trial.', true);
-        return;
-    }
+    const plan = btn.dataset.plan || 'pro';
 
     const user = typeof BeatpushAuth !== 'undefined' ? BeatpushAuth.getUser() : null;
 
@@ -2289,7 +2292,7 @@ document.addEventListener('click', async (e) => {
         const checkoutRes = await fetch('/api/create-checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: user?.id || '', user_email: user?.email || '' }),
+            body: JSON.stringify({ user_id: user?.id || '', user_email: user?.email || '', plan }),
         });
         const checkoutData = await checkoutRes.json();
         if (checkoutData.url) {
@@ -2298,14 +2301,14 @@ document.addEventListener('click', async (e) => {
             showToast('Failed to start subscription. Please try again.');
             btn.disabled = false;
             btn.style.opacity = '';
-            btn.textContent = 'Start Free Trial';
+            btn.textContent = 'Start 3-Day Trial';
         }
     } catch (err) {
         console.error('[AlphaStudios] Checkout error:', err);
         showToast('Failed to start subscription. Please try again.');
         btn.disabled = false;
         btn.style.opacity = '';
-        btn.textContent = 'Start Free Trial';
+        btn.textContent = 'Start 3-Day Trial';
     }
 });
 
@@ -2568,19 +2571,20 @@ document.getElementById('launchCampaignBtn').addEventListener('click', async fun
     const hasSubscription = subStatus === 'active' || subStatus === 'trialing';
 
     if (hasSubscription) {
-        // User is subscribed — check track limit
+        // User is subscribed — check track limit based on plan
         const tracksUsed = profile.tracks_used_this_month || 0;
-        const tracksLimit = subStatus === 'trialing' ? 1 : 5;
+        const tracksLimit = subStatus === 'trialing' ? 1 : getTrackLimit(profile);
 
         // Trial user at limit → redirect to paid checkout (no trial)
         if (subStatus === 'trialing' && tracksUsed >= tracksLimit) {
             localStorage.setItem('alphastudios_pending_campaign', JSON.stringify(campaignData));
             setBtnLoading('Redirecting...');
             try {
+                const plan = profile.plan_type || 'pro';
                 const checkoutRes = await fetch('/api/create-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id, user_email: user.email, skip_trial: true }),
+                    body: JSON.stringify({ user_id: user.id, user_email: user.email, skip_trial: true, plan }),
                 });
                 const checkoutData = await checkoutRes.json();
                 if (checkoutData.url) {

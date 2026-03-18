@@ -2354,6 +2354,13 @@ body.has-promo .terms-page {
     background: var(--bg-primary);
 }
 
+@media (max-width: 900px) {
+    #inlinePricingCard {
+        grid-template-columns: 1fr !important;
+        max-width: 480px !important;
+    }
+}
+
 /* ===== How It Works ===== */
 .how-section {
     padding: 100px 0;
@@ -2708,7 +2715,7 @@ body.has-promo .terms-page {
     border: 1px solid var(--white-10);
 }
 .mastering-compare-highend {
-    background: rgba(76, 175, 80, 0.08);
+    background: var(--green-10);
     border: 1px solid var(--green-primary);
 }
 .mastering-compare-label {

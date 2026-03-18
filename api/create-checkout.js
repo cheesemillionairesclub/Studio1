@@ -1,5 +1,11 @@
 import Stripe from 'stripe';
 
+const PLAN_CONFIG = {
+    access: { name: 'Studio Access', amount: 99, trackLimit: 1 },
+    pro:    { name: 'Studio Pro',    amount: 399, trackLimit: 5 },
+    elite:  { name: 'Studio Elite',  amount: 799, trackLimit: 10 },
+};
+
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -16,40 +22,50 @@ export default async function handler(req, res) {
     const user_id = body.user_id || '';
     const user_email = body.user_email || '';
     const skip_trial = body.skip_trial || false;
+    const plan = body.plan || 'pro'; // default to pro for backwards compat
+
+    const config = PLAN_CONFIG[plan];
+    if (!config) {
+        return res.status(400).json({ error: 'Invalid plan. Must be: access, pro, or elite' });
+    }
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const origin = req.headers.origin || 'https://alphastudios.app';
 
     try {
-        // Create or retrieve Stripe price for the Pro Plan ($1/month)
-        // Use a fixed price ID if set in env, otherwise create inline
-        let priceId = process.env.STRIPE_PRO_PRICE_ID;
-
-        if (!priceId) {
-            // Find or create the product and price
-            const products = await stripe.products.list({ limit: 1, active: true });
-            let product = products.data.find(p => p.name === 'AlphaStudios Pro Plan');
-            if (!product) {
-                product = await stripe.products.create({
-                    name: 'AlphaStudios Pro Plan',
-                    description: 'Up to 5 tracks/month: professional feedback, mastering, label recommendations, demo message generation, Trackstack submission.',
-                });
-            }
-            const prices = await stripe.prices.list({ product: product.id, active: true, limit: 1 });
-            if (prices.data.length) {
-                priceId = prices.data[0].id;
-            } else {
-                const price = await stripe.prices.create({
-                    product: product.id,
-                    unit_amount: 100, // $1.00
-                    currency: 'eur',
-                    recurring: { interval: 'month' },
-                });
-                priceId = price.id;
-            }
+        // Find or create the product and price for this plan
+        const productName = `AlphaStudios ${config.name}`;
+        const products = await stripe.products.list({ limit: 100, active: true });
+        let product = products.data.find(p => p.name === productName);
+        if (!product) {
+            product = await stripe.products.create({
+                name: productName,
+                description: `${config.name}: ${config.trackLimit} track${config.trackLimit > 1 ? 's' : ''}/month — professional feedback, mastering, WhatsApp access.`,
+                metadata: { plan_type: plan, track_limit: String(config.trackLimit) },
+            });
         }
 
-        const subscriptionData = { metadata: { user_id } };
+        // Find existing price or create one
+        const prices = await stripe.prices.list({ product: product.id, active: true, limit: 10 });
+        let priceId;
+        const matchingPrice = prices.data.find(p =>
+            p.unit_amount === config.amount &&
+            p.currency === 'usd' &&
+            p.recurring?.interval === 'month'
+        );
+        if (matchingPrice) {
+            priceId = matchingPrice.id;
+        } else {
+            const price = await stripe.prices.create({
+                product: product.id,
+                unit_amount: config.amount,
+                currency: 'usd',
+                recurring: { interval: 'month' },
+            });
+            priceId = price.id;
+        }
+
+        const subscriptionData = { metadata: { user_id, plan_type: plan } };
         if (!skip_trial) {
             subscriptionData.trial_period_days = 3;
         }
@@ -59,7 +75,7 @@ export default async function handler(req, res) {
             line_items: [{ price: priceId, quantity: 1 }],
             mode: 'subscription',
             subscription_data: subscriptionData,
-            metadata: { user_id, upgrade_from_trial: skip_trial ? 'true' : 'false' },
+            metadata: { user_id, plan_type: plan, upgrade_from_trial: skip_trial ? 'true' : 'false' },
             success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/`,
             allow_promotion_codes: true,

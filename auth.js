@@ -55,19 +55,23 @@
         } catch (e) { /* not admin */ }
     }
 
+    const AUTH_PLAN_NAMES = { access: 'Studio Access', pro: 'Studio Pro', elite: 'Studio Elite' };
+
     function updatePlanBadge(profile) {
         const planEl = document.getElementById('authDropdownPlan');
         if (!planEl) return;
 
         const status = profile?.subscription_status;
+        const planType = profile?.plan_type || 'pro';
+        const planName = AUTH_PLAN_NAMES[planType] || 'Studio Pro';
         let label = 'Free Plan';
         let cls = 'plan-free';
 
         if (status === 'active') {
-            label = 'Pro Plan';
+            label = planName;
             cls = 'plan-pro';
         } else if (status === 'trialing') {
-            label = 'Trial';
+            label = `${planName} — Trial`;
             cls = 'plan-trial';
         }
 

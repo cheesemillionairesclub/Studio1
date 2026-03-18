@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     trial_end TIMESTAMPTZ,
     current_period_end TIMESTAMPTZ,
     tracks_used_this_month INTEGER DEFAULT 0,
+    plan_type TEXT DEFAULT 'pro',
     country TEXT,
     device_type TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -216,7 +217,12 @@ INSERT INTO public.labels (name, genre, trackstack_url) VALUES
 ON CONFLICT DO NOTHING;
 
 -- =============================================
--- 7. SET YOUR ADMIN USER
+-- 7. MIGRATION: ADD plan_type COLUMN (run on existing databases)
+-- =============================================
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS plan_type TEXT DEFAULT 'pro';
+
+-- =============================================
+-- 8. SET YOUR ADMIN USER
 -- =============================================
 -- After you sign in for the first time with Google,
 -- run this query replacing YOUR_EMAIL with your email:

@@ -49,7 +49,7 @@ export default async function handler(req, res) {
         const userIds = [...new Set(orders.map(o => o.user_id).filter(Boolean))];
         let profilesMap = {};
         if (userIds.length) {
-            const pRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=in.(${userIds.join(',')})&select=id,subscription_status,trial_end`, {
+            const pRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=in.(${userIds.join(',')})&select=id,subscription_status,trial_end,plan_type`, {
                 headers: {
                     'apikey': SUPABASE_SERVICE_KEY,
                     'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
@@ -66,6 +66,7 @@ export default async function handler(req, res) {
             ...o,
             subscription_status: profilesMap[o.user_id]?.subscription_status || 'none',
             trial_end: profilesMap[o.user_id]?.trial_end || null,
+            plan_type: profilesMap[o.user_id]?.plan_type || 'pro',
         }));
 
         return res.status(200).json(enriched);
