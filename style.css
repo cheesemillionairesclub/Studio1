@@ -3946,8 +3946,8 @@ body.has-promo .terms-page {
 }
 
 .auth-dropdown-item:hover {
-    background: var(--white-10);
-    color: var(--white);
+    background: #1a1a2e;
+    color: #fff;
 }
 
 .auth-dropdown-item.auth-logout {
