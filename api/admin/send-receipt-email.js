@@ -122,7 +122,7 @@ function buildEmailHtml({ greeting, packLabel, order }) {
     <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:40px 20px;">
         <!-- Header -->
         <div style="text-align:center;padding-bottom:30px;border-bottom:1px solid rgba(0,0,0,0.08);">
-            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" style="height:50px;" />
+            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" style="height:80px;" />
         </div>
 
         <!-- Content -->
@@ -188,7 +188,7 @@ function buildFeedbackEmailHtml({ greeting, packLabel, order }) {
     <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:40px 20px;">
         <!-- Header -->
         <div style="text-align:center;padding-bottom:30px;border-bottom:1px solid rgba(0,0,0,0.08);">
-            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" style="height:50px;" />
+            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" style="height:80px;" />
         </div>
 
         <!-- Content -->
@@ -201,7 +201,7 @@ function buildFeedbackEmailHtml({ greeting, packLabel, order }) {
 
             <!-- Feedback -->
             <div style="background:rgba(26,26,46,0.03);border:1px solid rgba(26,26,46,0.08);border-radius:12px;padding:24px;margin-bottom:30px;text-align:left;">
-                <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:rgba(26,26,46,0.4);margin-bottom:12px;font-weight:600;">Engineer Feedback</div>
+                <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:rgba(26,26,46,0.4);margin-bottom:12px;font-weight:600;">Alpha Studio Feedback</div>
                 <p style="color:#1a1a2e;font-size:15px;line-height:1.7;margin:0;">${feedbackText}</p>
             </div>
 
