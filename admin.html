@@ -470,7 +470,7 @@
                     <td>${esc(order.customer_email || '-')}</td>
                     <td>
                         <span class="status-badge ${statusClass}">${statusText}</span>
-                        ${order.mastering_approved ? '<div class="badge-mastering"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Approved for mastering</div>' : ''}
+                        ${order.mastering_approved ? '<div class="badge-mastering"><strong>Approved For Mastering</strong></div>' : ''}
                         ${(() => {
                             let step = 1;
                             if (order.order_status === 'completed') step = 3;

@@ -2357,7 +2357,9 @@ body.has-promo .terms-page {
 /* ===== How It Works ===== */
 .how-section {
     padding: 100px 0;
-    background: var(--bg-primary);
+    background: radial-gradient(ellipse at 50% 0%, rgba(26, 26, 46, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(26, 26, 46, 0.04) 0%, transparent 40%),
+                var(--bg-primary);
 }
 
 .steps-timeline {
@@ -2610,7 +2612,7 @@ body.has-promo .terms-page {
     top: 0;
     bottom: 0;
     width: 4px;
-    background: linear-gradient(180deg, var(--green-primary), rgba(76, 175, 80, 0.3));
+    background: linear-gradient(180deg, var(--green-primary), var(--green-20));
     border-radius: 4px 0 0 4px;
 }
 .highlight-main {
