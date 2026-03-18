@@ -2509,7 +2509,7 @@ body.has-promo .terms-page {
 /* ===== What We Do Section ===== */
 .whatwedo-section {
     padding: 100px 0;
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
 }
 .whatwedo-grid {
     display: grid;
