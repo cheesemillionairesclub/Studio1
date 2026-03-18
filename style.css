@@ -4304,6 +4304,7 @@ body.has-promo .terms-page {
 .dash-order-footer {
     display: flex;
     justify-content: center;
+    margin-top: 12px;
 }
 
 .dash-download-btn {
