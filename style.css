@@ -76,7 +76,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 999;
+    z-index: 1100;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -158,6 +158,9 @@ body {
 
 /* Push everything down when promo banner is visible */
 body.has-promo .navbar {
+    top: 40px;
+}
+body.has-promo .nav-links {
     top: 40px;
 }
 body.has-promo .hero {
