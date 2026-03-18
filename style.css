@@ -861,10 +861,24 @@ body {
     padding: 48px 24px;
     border: 2px dashed var(--white-15);
     border-radius: var(--radius-lg);
-    background: var(--bg-card) url('https://res.cloudinary.com/dymdijw7n/image/upload/v1773794308/Dark_Blue_Minimalist_Letter_A_Logo_1_x8xt9c.png') center center / 40% no-repeat;
+    background: var(--bg-card);
     cursor: pointer;
     transition: all var(--transition);
     position: relative;
+    overflow: hidden;
+}
+.upload-dropzone::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('https://res.cloudinary.com/dymdijw7n/image/upload/v1773794308/Dark_Blue_Minimalist_Letter_A_Logo_1_x8xt9c.png') center center / cover no-repeat;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 0;
+}
+.upload-dropzone > * {
+    position: relative;
+    z-index: 1;
 }
 
 .upload-dropzone:hover {
