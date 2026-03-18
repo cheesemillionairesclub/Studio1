@@ -556,7 +556,7 @@ body {
 /* ===== Search Section ===== */
 .search-section {
     padding: 100px 0;
-    background: var(--bg-primary) url('https://res.cloudinary.com/dymdijw7n/image/upload/v1773794308/Dark_Blue_Minimalist_Letter_A_Logo_1_x8xt9c.png') center center / contain no-repeat;
+    background: var(--bg-primary);
     position: relative;
 }
 .search-section::before {
@@ -861,7 +861,7 @@ body {
     padding: 48px 24px;
     border: 2px dashed var(--white-15);
     border-radius: var(--radius-lg);
-    background: var(--bg-card);
+    background: var(--bg-card) url('https://res.cloudinary.com/dymdijw7n/image/upload/v1773794308/Dark_Blue_Minimalist_Letter_A_Logo_1_x8xt9c.png') center center / 40% no-repeat;
     cursor: pointer;
     transition: all var(--transition);
     position: relative;
