@@ -3626,6 +3626,14 @@ body.has-promo .terms-page {
         display: flex;
     }
 
+    .logo-img {
+        height: 100px;
+    }
+
+    .nav-actions {
+        gap: 8px;
+    }
+
     .lang-btn {
         padding: 5px 10px;
         font-size: 0.75rem;
@@ -4409,6 +4417,18 @@ body.has-promo .terms-page {
 @media (max-width: 480px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
+    }
+
+    .logo-img {
+        height: 80px;
+    }
+
+    .nav-actions {
+        gap: 6px;
+    }
+
+    .navbar {
+        padding: 0 12px;
     }
 
     .auth-login-btn {
