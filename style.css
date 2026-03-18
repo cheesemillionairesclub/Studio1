@@ -4040,8 +4040,9 @@ body {
 
 .dash-pipeline-step.active .dash-pipeline-dot {
     border-color: #1a1a2e;
-    background: rgba(26,26,46,0.08);
+    background: rgba(26,26,46,0.12);
     color: #1a1a2e;
+    box-shadow: 0 0 0 4px var(--bg-card), 0 0 12px rgba(26,26,46,0.4), 0 0 24px rgba(26,26,46,0.2);
 }
 
 .dash-pipeline-step.done .dash-pipeline-dot {
@@ -4060,6 +4061,7 @@ body {
 
 .dash-pipeline-step.active .dash-pipeline-label {
     color: #1a1a2e;
+    font-size: 0.7rem;
 }
 
 .dash-pipeline-step.done .dash-pipeline-label {
@@ -4069,17 +4071,18 @@ body {
 .dash-pipeline-line {
     position: absolute;
     top: 16px;
-    left: calc(100% / 6 + 20px);
-    right: calc(100% / 6 + 20px);
+    left: calc(25% + 22px);
+    right: calc(25% + 22px);
     height: 2px;
     background: var(--white-10);
     z-index: 0;
+    border-radius: 1px;
 }
 
 .dash-pipeline-line-fill {
     height: 100%;
     background: #1a1a2e;
-    box-shadow: 0 0 6px rgba(0,0,0,0.3), 0 0 12px rgba(0,0,0,0.15);
+    box-shadow: 0 0 6px rgba(26,26,46,0.5), 0 0 14px rgba(26,26,46,0.3), 0 0 24px rgba(26,26,46,0.15);
     transition: width 0.4s ease;
     border-radius: 1px;
 }
