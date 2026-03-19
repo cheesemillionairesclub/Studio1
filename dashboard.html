@@ -3,20 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MY CAMPAIGNS - BeatPush</title>
-    <link rel="icon" type="image/png" href="https://i.ibb.co/FLyL2c8K/icon.png">
+    <title>Dashboard - AlphaStudios</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=3">
+    <style>
+        /* Subscription Banner */
+        .sub-banner {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; border-radius: 12px; margin-bottom: 24px;
+            border: 1px solid var(--white-10); flex-wrap: wrap; gap: 10px;
+        }
+        .sub-banner-left, .sub-banner-right { display: flex; align-items: center; gap: 10px; }
+        .sub-badge {
+            padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+        }
+        .sub-badge.active { background: rgba(76,175,80,0.15); color: #4CAF50; }
+        .sub-badge.trial { background: rgba(150,150,150,0.15); color: #666; }
+        .sub-badge.inactive { background: rgba(255,82,82,0.15); color: #ff5252; }
+        .sub-status { font-size: 0.85rem; color: var(--white-50); }
+        .sub-tracks { font-size: 0.85rem; font-weight: 600; color: var(--white-70); }
+        .sub-trial-note { font-size: 0.7rem; color: var(--white-30); }
+        .sub-reactivate {
+            padding: 6px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+            background: #1a1a2e; color: #fff; text-decoration: none;
+        }
+        /* Success Popup */
+        .dash-success-overlay {
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .dash-success-overlay.visible { opacity: 1; }
+        .dash-success-box {
+            background: #ffffff; border: 1px solid rgba(26,26,46,0.08);
+            border-radius: 16px; padding: 36px 32px; max-width: 380px; width: 90%;
+            text-align: center; transform: scale(0.95); transition: transform 0.3s ease;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+        .dash-success-overlay.visible .dash-success-box { transform: scale(1); }
+        .dash-success-logo { width: 48px; height: 48px; border-radius: 10px; margin-bottom: 16px; object-fit: contain; }
+        .dash-success-title { font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin: 0 0 8px; }
+        .dash-success-text { font-size: 0.85rem; color: rgba(26,26,46,0.55); line-height: 1.6; margin: 0 0 20px; }
+        .dash-success-text strong { color: #1a1a2e; }
+        .dash-success-art { display: none; }
+        .dash-success-btn {
+            background: #1a1a2e; color: #fff; border: none; border-radius: 8px;
+            padding: 10px 32px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .dash-success-btn:hover { background: #0f0f1a; }
+
+        .sub-active { background: rgba(200,200,200,0.08); border-color: rgba(200,200,200,0.2); }
+        .sub-trial { background: rgba(200,200,200,0.08); border-color: rgba(200,200,200,0.2); }
+        .sub-inactive, .sub-none { background: rgba(200,200,200,0.08); border-color: rgba(200,200,200,0.2); }
+
+        .dash-feedback-actions {
+            display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;
+        }
+        .dash-action-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 8px; font-size: 0.8rem;
+            font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.2s;
+        }
+        .dash-reupload-btn {
+            background: transparent; color: var(--white-70);
+            border-color: var(--white-15);
+        }
+        .dash-reupload-btn:hover { border-color: var(--white-50); color: var(--white); }
+        .reupload-count {
+            font-size: 0.7rem; opacity: 0.5; margin-left: 2px;
+        }
+        .dash-reupload-maxed {
+            font-size: 0.75rem; color: var(--white-30); font-style: italic;
+        }
+        .dash-master-btn {
+            background: #4CAF50; color: #fff; border-color: #4CAF50;
+        }
+        .dash-master-btn:hover { background: #4CAF50; opacity: 0.9; }
+        .dash-mastering-approved {
+            display: flex; align-items: center; gap: 6px;
+            margin-top: 12px; font-size: 0.8rem; font-weight: 700; color: #4CAF50;
+        }
+
+        /* Reupload Modal */
+        .reupload-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .reupload-overlay.visible { opacity: 1; }
+        .reupload-modal {
+            background: var(--bg-primary, #0e0e1a); border: 1px solid var(--white-10);
+            border-radius: 16px; padding: 28px; max-width: 420px; width: 90%;
+            position: relative;
+        }
+        .reupload-modal h3 {
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;
+        }
+        .reupload-close {
+            position: absolute; top: 12px; right: 16px; background: none;
+            border: none; color: var(--white-50); font-size: 1.5rem; cursor: pointer;
+        }
+        .reupload-warning {
+            font-size: 0.8rem; color: var(--white-50); line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .reupload-warning strong { color: var(--white-70); }
+        .reupload-dropzone {
+            border: 2px dashed var(--white-15); border-radius: 12px;
+            padding: 28px; text-align: center; cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .reupload-dropzone:hover, .reupload-dropzone.drag-over {
+            border-color: #333;
+        }
+        .reupload-dropzone p { font-size: 0.85rem; color: var(--white-50); margin: 8px 0 4px; }
+        .reupload-dropzone span { font-size: 0.75rem; color: var(--white-30); }
+        .reupload-browse { color: #1a1a2e; cursor: pointer; text-decoration: underline; font-weight: 600; }
+        .reupload-file-info {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: var(--white-05); border-radius: 8px;
+            font-size: 0.85rem; color: var(--white-70);
+        }
+        .reupload-file-remove {
+            background: none; border: none; color: var(--white-30);
+            font-size: 1.2rem; cursor: pointer;
+        }
+        .reupload-submit {
+            width: 100%; margin-top: 16px; padding: 12px;
+            background: #1a1a2e; color: #fff; border: none; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+        }
+        .reupload-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+        .reupload-submit:not(:disabled):hover { background: #0f0f1a; }
+        .reupload-progress { margin-top: 16px; }
+        .reupload-progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--white-50); margin-bottom: 6px; }
+        .reupload-progress-track { width: 100%; height: 6px; background: var(--white-10); border-radius: 3px; overflow: hidden; }
+        .reupload-progress-bar { height: 100%; width: 0%; background: #1a1a2e; border-radius: 3px; transition: width 0.3s ease; }
+    </style>
 </head>
-<body>
+<body class="has-promo">
+
+    <!-- Promo Banner -->
+    <div class="promo-banner" id="promoBanner">
+        <div class="promo-banner-content">
+            <span class="promo-banner-text">10% OFF Discount. Use Code</span>
+            <button class="promo-banner-code" id="promoCopyBtn" onclick="navigator.clipboard.writeText('ALPHA1').then(()=>{this.classList.add('copied');this.querySelector('.promo-copied').style.display='inline';setTimeout(()=>{this.classList.remove('copied');this.querySelector('.promo-copied').style.display='none'},1500)})">
+                ALPHA1
+                <svg class="promo-copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span class="promo-copied" style="display:none">Copied!</span>
+            </button>
+        </div>
+        <button class="promo-banner-close" onclick="document.getElementById('promoBanner').classList.add('promo-hidden');document.body.classList.remove('has-promo')" aria-label="Close">&times;</button>
+    </div>
 
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-inner">
             <a href="/" class="logo">
-                <img src="https://i.ibb.co/nMjbdTkQ/White-and-Black-Modern-Initial-B-Logo-5000-x-5000-px-1.png" alt="BeatPush" class="logo-img">
+                <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" class="logo-img">
             </a>
             <div class="nav-actions">
                 <div class="lang-selector" id="langSelector">
@@ -46,12 +196,13 @@
                                 <div>
                                     <div class="auth-dropdown-name" id="authDropdownName"></div>
                                     <div class="auth-dropdown-email" id="authDropdownEmail"></div>
+                                    <div class="auth-dropdown-plan" id="authDropdownPlan"></div>
                                 </div>
                             </div>
                             <div class="auth-dropdown-divider"></div>
                             <button class="auth-dropdown-item" id="authDashboardBtn">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                                <span data-i18n="nav_dashboard">MY CAMPAIGNS</span>
+                                <span data-i18n="nav_dashboard">Dashboard</span>
                             </button>
                             <button class="auth-dropdown-item" id="authAdminBtn" style="display:none;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
@@ -74,21 +225,23 @@
         </div>
     </nav>
     <ul class="nav-links" id="navLinks">
-        <li><a href="/#search" class="nav-cta" data-i18n="nav_cta">BOOST MY TRACK</a></li>
+        <li><a href="/#search" class="nav-cta" data-i18n="nav_cta">GET STARTED</a></li>
         <li><a href="/#how-it-works" data-i18n="nav_how">HOW IT WORKS</a></li>
         <li><a href="/#pricing" data-i18n="nav_pricing">Pricing</a></li>
         <li><a href="/#faq">FAQ</a></li>
-        <li class="nav-dashboard-item"><a href="/dashboard" class="nav-dashboard-link active" data-i18n="nav_dashboard">MY CAMPAIGNS</a></li>
+        <li class="nav-dashboard-item"><a href="/dashboard" class="nav-dashboard-link active" data-i18n="nav_dashboard">Dashboard</a></li>
     </ul>
 
     <!-- Dashboard Content -->
     <section class="dashboard-section dashboard-page">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge" data-i18n="dashboard_badge">MY CAMPAIGNS</span>
+                <span class="section-badge" data-i18n="dashboard_badge">DASHBOARD</span>
                 <h2 class="section-title" data-i18n="dashboard_title">Your Campaign Dashboard</h2>
                 <p class="section-desc" data-i18n="dashboard_desc">Track the status of all your promotions.</p>
             </div>
+            <!-- Subscription Banner -->
+            <div id="subscriptionBanner" style="display:none;"></div>
             <div class="dashboard-grid" id="dashboardGrid">
                 <div class="dashboard-loading">
                     <div class="search-spinner" style="display:block;width:32px;height:32px;margin:40px auto;"></div>
@@ -150,8 +303,17 @@
             const isCompleted = order.order_status === 'completed';
             const statusClass = isCompleted ? 'status-completed' : 'status-progress';
             const statusText = isCompleted ? (t.dashboard_status_completed || 'Completed') : (t.dashboard_status_progress || 'In Progress');
-            const packLabel = order.pack === 'daily-push' ? 'Daily Push' : `${order.pack} Copies`;
+            const packLabel = order.pack === 'mastering' ? 'Mastering + Feedback' : order.pack;
             const receiptDisabled = !order.receipt_url;
+
+            // Pipeline step logic: 1=Feedbacks, 2=Mastering
+            let pipelineStep = 1;
+            if (isCompleted) pipelineStep = 2;
+            else if (order.mastering_approved) pipelineStep = 2;
+
+            const stepClass = (n) => pipelineStep > n ? 'done' : pipelineStep === n ? 'active' : '';
+            const dotContent = (n) => pipelineStep > n ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : n;
+            const lineFill = pipelineStep >= 2 ? '100%' : '0%';
 
             card.innerHTML = `
                 <div class="dash-order-header">
@@ -159,20 +321,23 @@
                         ${order.track_artwork ? `<img src="${escapeHtmlAttr(order.track_artwork)}" alt="" class="dash-track-art" onerror="this.style.display='none'">` : '<div class="dash-track-art-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white-30)" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>'}
                         <div>
                             <div class="dash-track-title">${escapeHtmlAttr(order.track_title || 'Unknown Track')}</div>
-                            <div class="dash-track-artist">${escapeHtmlAttr(order.track_artist || 'Unknown Artist')}</div>
+                            ${order.track_artist ? `<div class="dash-track-artist">${escapeHtmlAttr(order.track_artist)}</div>` : ''}
                         </div>
                     </div>
                     <div class="dash-order-status ${statusClass}">${statusText}</div>
                 </div>
-                <div class="dash-order-details">
-                    <div class="dash-detail-row">
-                        <span class="dash-detail-label">${t.dashboard_label_campaign || 'Campaign'}</span>
-                        <span class="dash-detail-value">${escapeHtmlAttr(packLabel)}</span>
+                <div class="dash-pipeline">
+                    <div class="dash-pipeline-line"><div class="dash-pipeline-line-fill" style="width:${lineFill}"></div></div>
+                    <div class="dash-pipeline-step ${stepClass(1)}">
+                        <div class="dash-pipeline-dot">${dotContent(1)}</div>
+                        <span class="dash-pipeline-label">Feedbacks</span>
                     </div>
-                    ${order.genre ? `<div class="dash-detail-row">
-                        <span class="dash-detail-label">${t.dashboard_label_genre || 'Genre'}</span>
-                        <span class="dash-detail-value">${escapeHtmlAttr(order.genre)}</span>
-                    </div>` : ''}
+                    <div class="dash-pipeline-step ${stepClass(2)}">
+                        <div class="dash-pipeline-dot">${dotContent(2)}</div>
+                        <span class="dash-pipeline-label">Mastering</span>
+                    </div>
+                </div>
+                <div class="dash-order-details">
                     <div class="dash-detail-row">
                         <span class="dash-detail-label">${t.dashboard_label_date || 'Date'}</span>
                         <span class="dash-detail-value">${new Date(order.created_at).toLocaleDateString()}</span>
@@ -183,14 +348,51 @@
                     <span class="dash-detail-label">${t.dashboard_label_similar || 'Similar Artists'}</span>
                     <div class="dash-artist-chips">${artistsHtml}</div>
                 </div>` : ''}
-                <div class="dash-order-footer">
-                    <div class="dash-receipt-wrapper">
-                        <button class="dash-receipt-btn ${receiptDisabled ? 'disabled' : ''}" ${receiptDisabled ? 'disabled' : ''} onclick="${receiptDisabled ? '' : `window.open('${escapeHtmlAttr(order.receipt_url)}', '_blank')`}">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                            ${t.dashboard_label_receipt || 'Receipt'}
-                        </button>
-                        ${receiptDisabled ? '<div class="dash-receipt-tooltip">You will be able to download your PDF receipt here once your campaign is completed!</div>' : ''}
+                ${order.feedback ? `
+                <div class="dash-feedback-section">
+                    <div class="dash-feedback-label">
+                        <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="" style="width:18px;height:18px;border-radius:4px;">
+                        Alpha Studios Feedback
                     </div>
+                    <div class="dash-feedback-text">${escapeHtmlAttr(order.feedback)}</div>
+                    ${!order.mastering_approved ? `
+                    <div class="dash-feedback-actions">
+                        ${(order.reupload_count || 0) < 3 ? `
+                        <button class="dash-action-btn dash-reupload-btn" onclick="openReuploadModal('${order.id}', ${order.reupload_count || 0}, '${escapeHtmlAttr(order.track_title || '')}', '${escapeHtmlAttr(order.track_artist || '')}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                            Re-upload Track <span class="reupload-count">${order.reupload_count || 0}/3</span>
+                        </button>` : `<span class="dash-reupload-maxed">Re-uploads used (3/3)</span>`}
+                        <button class="dash-action-btn dash-master-btn" onclick="approveMastering('${order.id}', '${escapeHtmlAttr(order.track_title || '')}', '${escapeHtmlAttr(order.track_artist || '')}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Approve Mastering
+                        </button>
+                    </div>` : `
+                    <div class="dash-mastering-approved">
+                        Approved For Mastering
+                    </div>`}
+                </div>` : ''}
+                ${order.track_url ? `
+                <div class="dash-audio-player" data-src="${escapeHtmlAttr(order.track_url)}">
+                    <button class="dash-play-btn" aria-label="Play">
+                        <svg class="dash-play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <svg class="dash-pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    </button>
+                    <div class="dash-waveform-wrap">
+                        <canvas class="dash-waveform" height="40"></canvas>
+                        <div class="dash-waveform-progress"></div>
+                    </div>
+                    <span class="dash-audio-time">0:00</span>
+                </div>` : ''}
+                <div class="dash-order-footer">
+                    ${order.receipt_url ? `
+                    <a href="${escapeHtmlAttr(order.receipt_url)}" target="_blank" class="dash-download-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download Mastered Track
+                    </a>` : `
+                    <div class="dash-pending-msg">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        ${pipelineStep === 1 ? (t.dashboard_pending_feedback || 'Your feedback will be available here once ready.') : (t.dashboard_pending_mastered || 'Your mastered track will be available here once ready.')}
+                    </div>`}
                 </div>
             `;
             return card;
@@ -218,10 +420,177 @@
                 }
 
                 orders.forEach(order => grid.appendChild(createOrderCard(order)));
+                // Initialize waveform players after cards are in the DOM
+                initAudioPlayers();
             } catch (e) {
                 const t2 = getT();
                 grid.innerHTML = '<p style="text-align:center;color:var(--white-50);padding:40px;">' + (t2.dashboard_error || 'Failed to load campaigns.') + '</p>';
             }
+        }
+
+        // ===== Audio Waveform Player =====
+        let currentAudioPlayer = null; // Track active player for single-play
+
+        function initAudioPlayers() {
+            document.querySelectorAll('.dash-audio-player').forEach(player => {
+                if (player._initialized) return;
+                player._initialized = true;
+
+                const src = player.dataset.src;
+                const canvas = player.querySelector('.dash-waveform');
+                const playBtn = player.querySelector('.dash-play-btn');
+                const playIcon = player.querySelector('.dash-play-icon');
+                const pauseIcon = player.querySelector('.dash-pause-icon');
+                const progressEl = player.querySelector('.dash-waveform-progress');
+                const timeEl = player.querySelector('.dash-audio-time');
+                const wrapEl = player.querySelector('.dash-waveform-wrap');
+
+                let audio = null;
+                let waveformData = null;
+                let loaded = false;
+
+                // Draw placeholder bars
+                drawWaveform(canvas, null, 0);
+
+                function formatTime(s) {
+                    if (!s || isNaN(s)) return '0:00';
+                    const m = Math.floor(s / 60);
+                    const sec = Math.floor(s % 60);
+                    return m + ':' + (sec < 10 ? '0' : '') + sec;
+                }
+
+                function drawWaveform(cvs, data, progress) {
+                    const ctx = cvs.getContext('2d');
+                    const dpr = window.devicePixelRatio || 1;
+                    const w = cvs.clientWidth;
+                    const h = cvs.clientHeight;
+                    cvs.width = w * dpr;
+                    cvs.height = h * dpr;
+                    ctx.scale(dpr, dpr);
+                    ctx.clearRect(0, 0, w, h);
+
+                    const bars = Math.floor(w / 3.5);
+                    const barW = 2;
+                    const gap = (w - bars * barW) / (bars - 1);
+                    const mid = h / 2;
+
+                    const style = getComputedStyle(document.documentElement);
+                    const baseColor = style.getPropertyValue('--white-15').trim() || 'rgba(0,0,0,0.1)';
+                    const activeColor = style.getPropertyValue('--green-primary').trim() || '#1a1a2e';
+
+                    for (let i = 0; i < bars; i++) {
+                        const x = i * (barW + gap);
+                        const val = data ? data[Math.floor(i * data.length / bars)] : (0.2 + Math.random() * 0.3);
+                        const barH = Math.max(2, val * (h - 4));
+                        const progressFrac = progress || 0;
+                        const isFilled = (i / bars) <= progressFrac;
+
+                        ctx.fillStyle = isFilled ? activeColor : baseColor;
+                        ctx.beginPath();
+                        ctx.roundRect(x, mid - barH / 2, barW, barH, 1);
+                        ctx.fill();
+                    }
+                }
+
+                async function loadAudio() {
+                    if (loaded) return;
+                    loaded = true;
+                    audio = new Audio();
+                    audio.crossOrigin = 'anonymous';
+                    audio.preload = 'auto';
+                    audio.src = src;
+
+                    // Decode waveform
+                    try {
+                        const resp = await fetch(src);
+                        const buf = await resp.arrayBuffer();
+                        const actx = new (window.AudioContext || window.webkitAudioContext)();
+                        const decoded = await actx.decodeAudioData(buf);
+                        const raw = decoded.getChannelData(0);
+                        const samples = 200;
+                        const blockSize = Math.floor(raw.length / samples);
+                        waveformData = [];
+                        for (let i = 0; i < samples; i++) {
+                            let sum = 0;
+                            for (let j = 0; j < blockSize; j++) {
+                                sum += Math.abs(raw[i * blockSize + j]);
+                            }
+                            waveformData.push(sum / blockSize);
+                        }
+                        // Normalize
+                        const max = Math.max(...waveformData) || 1;
+                        waveformData = waveformData.map(v => v / max);
+                        drawWaveform(canvas, waveformData, 0);
+                        actx.close();
+                    } catch (e) {
+                        console.warn('[Dashboard] Waveform decode failed:', e);
+                    }
+
+                    audio.addEventListener('timeupdate', () => {
+                        const prog = audio.duration ? audio.currentTime / audio.duration : 0;
+                        progressEl.style.width = (prog * 100) + '%';
+                        timeEl.textContent = formatTime(audio.currentTime);
+                        drawWaveform(canvas, waveformData, prog);
+                    });
+
+                    audio.addEventListener('ended', () => {
+                        playIcon.style.display = '';
+                        pauseIcon.style.display = 'none';
+                        progressEl.style.width = '0%';
+                        drawWaveform(canvas, waveformData, 0);
+                        timeEl.textContent = formatTime(audio.duration);
+                        currentAudioPlayer = null;
+                    });
+
+                    audio.addEventListener('loadedmetadata', () => {
+                        timeEl.textContent = formatTime(audio.duration);
+                    });
+                }
+
+                playBtn.addEventListener('click', async () => {
+                    await loadAudio();
+                    if (!audio) return;
+
+                    // Stop other player
+                    if (currentAudioPlayer && currentAudioPlayer !== audio) {
+                        currentAudioPlayer.pause();
+                        const otherPlayer = currentAudioPlayer._playerEl;
+                        if (otherPlayer) {
+                            otherPlayer.querySelector('.dash-play-icon').style.display = '';
+                            otherPlayer.querySelector('.dash-pause-icon').style.display = 'none';
+                        }
+                    }
+
+                    if (audio.paused) {
+                        audio.play();
+                        audio._playerEl = player;
+                        currentAudioPlayer = audio;
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = '';
+                    } else {
+                        audio.pause();
+                        currentAudioPlayer = null;
+                        playIcon.style.display = '';
+                        pauseIcon.style.display = 'none';
+                    }
+                });
+
+                // Click on waveform to seek
+                wrapEl.addEventListener('click', async (e) => {
+                    await loadAudio();
+                    if (!audio || !audio.duration) return;
+                    const rect = wrapEl.getBoundingClientRect();
+                    const frac = (e.clientX - rect.left) / rect.width;
+                    audio.currentTime = frac * audio.duration;
+                    if (audio.paused) {
+                        audio.play();
+                        audio._playerEl = player;
+                        currentAudioPlayer = audio;
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = '';
+                    }
+                });
+            });
         }
 
         async function init() {
@@ -239,11 +608,507 @@
                 return;
             }
 
+            await renderSubscriptionBanner();
             loadDashboard();
 
+            // Handle ?session_id for post-checkout return
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+            if (sessionId) {
+                window.history.replaceState({}, '', '/dashboard');
+                console.log('[Dashboard] Post-checkout return, session:', sessionId);
+
+                let isUpgradeFromTrial = false;
+
+                // Verify subscription was activated and update profile immediately
+                // (don't wait for webhook — it may arrive later)
+                try {
+                    const checkoutRes = await fetch(`/api/checkout-success?session_id=${encodeURIComponent(sessionId)}`);
+                    if (checkoutRes.ok) {
+                        const checkoutData = await checkoutRes.json();
+                        console.log('[Dashboard] Checkout data:', JSON.stringify(checkoutData));
+
+                        // Update local profile with subscription status from Stripe
+                        // Use upsert (POST with merge-duplicates) to create profile if it doesn't exist
+                        if (checkoutData.subscription_status) {
+                            const token = BeatpushAuth.getToken();
+                            // Check if upgrading from trial to active — use metadata flag (avoids webhook race condition)
+                            isUpgradeFromTrial = checkoutData.upgrade_from_trial === true;
+
+                            const profileData = {
+                                id: user.id,
+                                email: user.email,
+                                subscription_status: checkoutData.subscription_status,
+                            };
+                            if (checkoutData.trial_end) profileData.trial_end = checkoutData.trial_end;
+                            if (isUpgradeFromTrial) profileData.tracks_used_this_month = 0;
+
+                            await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`,
+                                    'apikey': BeatpushAuth.supabaseKey,
+                                    'Prefer': 'resolution=merge-duplicates',
+                                },
+                                body: JSON.stringify(profileData),
+                            });
+                            console.log('[Dashboard] Profile subscription_status set to:', checkoutData.subscription_status, isUpgradeFromTrial ? '(upgrade from trial, count reset)' : '');
+                        }
+                    }
+                } catch (e) {
+                    console.error('[Dashboard] Failed to verify checkout session:', e);
+                }
+
+                // Save pending campaign order if exists
+                const campaignRaw = localStorage.getItem('alphastudios_pending_campaign');
+                localStorage.removeItem('alphastudios_pending_campaign');
+                console.log('[Dashboard] Pending campaign:', campaignRaw ? 'found' : 'none');
+
+                let postCheckoutTracksUsed = null;
+
+                if (campaignRaw) {
+                    try {
+                        const campaign = JSON.parse(campaignRaw);
+                        console.log('[Dashboard] Saving order for track:', campaign.track_title);
+
+                        const result = await saveOrderToSupabase(campaign, {
+                            session_id: sessionId,
+                            customer_email: user.email,
+                            amount_total: 0,
+                            currency: 'eur',
+                        });
+
+                        if (result) {
+                            // Increment track count — if upgrading from trial, base is 0 (just reset above)
+                            const token = BeatpushAuth.getToken();
+                            const baseCount = isUpgradeFromTrial ? 0 : ((await BeatpushAuth.getProfile())?.tracks_used_this_month || 0);
+                            const newCount = baseCount + 1;
+                            postCheckoutTracksUsed = newCount;
+                            const patchRes = await fetch(`${BeatpushAuth.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`,
+                                    'apikey': BeatpushAuth.supabaseKey,
+                                },
+                                body: JSON.stringify({ tracks_used_this_month: newCount }),
+                            });
+                            console.log('[Dashboard] Track count updated:', patchRes.ok, 'new count:', newCount);
+
+                            // Show success popup
+                            showSubscriptionSuccess(campaign);
+                        }
+                    } catch (e) {
+                        console.error('[Dashboard] Post-checkout save error:', e);
+                    }
+                } else {
+                    // No pending campaign — just show welcome popup for new subscriber
+                    showSubscriptionSuccess(null);
+                }
+
+                // Refresh UI with known track count to avoid stale data
+                await renderSubscriptionBanner(postCheckoutTracksUsed);
+                loadDashboard();
+            }
+
+            // Handle ?submitted for direct track submission success popup
+            const submittedTrack = new URLSearchParams(window.location.search).get('submitted');
+            if (submittedTrack) {
+                window.history.replaceState({}, '', '/dashboard');
+                showSubscriptionSuccess({ track_title: decodeURIComponent(submittedTrack) });
+                // Refresh banner to show updated track count
+                await renderSubscriptionBanner();
+            }
+
             // Re-render cards when language changes
-            window.addEventListener('beatpush-langchange', () => loadDashboard());
+            window.addEventListener('alphastudios-langchange', () => loadDashboard());
         }
+
+        // ===== Success Popup =====
+        function showSubscriptionSuccess(campaign) {
+            const existing = document.querySelector('.dash-success-overlay');
+            if (existing) existing.remove();
+
+            const hasTrack = campaign && campaign.track_title;
+            const overlay = document.createElement('div');
+            overlay.className = 'dash-success-overlay';
+            overlay.innerHTML = `
+                <div class="dash-success-box">
+                    <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="" class="dash-success-logo">
+                    <h3 class="dash-success-title">${hasTrack ? 'Track Submitted!' : 'Welcome to Pro!'}</h3>
+                    <p class="dash-success-text">${hasTrack
+                        ? `<strong>${campaign.track_title}</strong> has been submitted. Our team will begin processing your track shortly. Average delivery: 24–48h. You can follow the progress of your order from your dashboard.`
+                        : 'Your free trial is now active. Upload a track to get started!'
+                    }</p>
+                    <button class="dash-success-btn">Dashboard</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+
+            const close = () => {
+                overlay.classList.remove('visible');
+                setTimeout(() => overlay.remove(), 300);
+            };
+            overlay.querySelector('.dash-success-btn').addEventListener('click', close);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        }
+
+        // ===== Plan Config =====
+        const PLAN_LIMITS = { access: 1, pro: 5, elite: 10 };
+        const PLAN_NAMES = { access: 'Studio Access', pro: 'Studio Pro', elite: 'Studio Elite' };
+
+        function getPlanName(profile) {
+            const plan = profile?.plan_type || 'pro';
+            return PLAN_NAMES[plan] || 'Studio Pro';
+        }
+        function getPlanLimit(profile) {
+            const plan = profile?.plan_type || 'pro';
+            return PLAN_LIMITS[plan] || 5;
+        }
+
+        // ===== Subscription Banner =====
+        async function renderSubscriptionBanner(overrideTracksUsed) {
+            const banner = document.getElementById('subscriptionBanner');
+            if (!banner) return;
+
+            const profile = await BeatpushAuth.getProfile();
+            if (!profile) { banner.style.display = 'none'; return; }
+
+            const status = profile.subscription_status || 'none';
+            const planName = getPlanName(profile);
+            const trackLimit = getPlanLimit(profile);
+
+            // Use override if provided, otherwise use profile field as source of truth
+            let tracksUsed;
+            if (typeof overrideTracksUsed === 'number') {
+                tracksUsed = overrideTracksUsed;
+            } else {
+                tracksUsed = profile.tracks_used_this_month || 0;
+            }
+
+            if (status === 'active') {
+                banner.style.display = '';
+                banner.innerHTML = `
+                    <div class="sub-banner sub-active">
+                        <div class="sub-banner-left">
+                            <span class="sub-badge active">${planName}</span>
+                            <span class="sub-status">Active</span>
+                        </div>
+                        <div class="sub-banner-right">
+                            <span class="sub-tracks">${tracksUsed}/${trackLimit} tracks used</span>
+                        </div>
+                    </div>`;
+            } else if (status === 'trialing') {
+                const trialEnd = profile.trial_end ? new Date(profile.trial_end) : null;
+                const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd - Date.now()) / 86400000)) : 0;
+                banner.style.display = '';
+                banner.innerHTML = `
+                    <div class="sub-banner sub-trial">
+                        <div class="sub-banner-left">
+                            <span class="sub-badge trial">${planName} — Free Trial</span>
+                            <span class="sub-status">${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining</span>
+                        </div>
+                        <div class="sub-banner-right">
+                            <span class="sub-tracks">${tracksUsed}/1 track used</span>
+                            <span class="sub-trial-note">Feedback only &middot; Mastering locked</span>
+                        </div>
+                    </div>`;
+            } else if (status === 'canceled' || status === 'unpaid') {
+                banner.style.display = '';
+                banner.innerHTML = `
+                    <div class="sub-banner sub-inactive">
+                        <div class="sub-banner-left">
+                            <span class="sub-badge inactive">${status === 'unpaid' ? 'Payment Failed' : 'Canceled'}</span>
+                        </div>
+                        <div class="sub-banner-right">
+                            <a href="/" class="sub-reactivate">Reactivate Subscription</a>
+                        </div>
+                    </div>`;
+            } else {
+                banner.style.display = '';
+                banner.innerHTML = `
+                    <div class="sub-banner sub-none">
+                        <div class="sub-banner-left">
+                            <span class="sub-badge inactive">No Subscription</span>
+                        </div>
+                        <div class="sub-banner-right">
+                            <a href="/" class="sub-reactivate">Start Free Trial</a>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // ===== Re-upload Modal =====
+        let _reuploadTrackTitle = '';
+        let _reuploadTrackArtist = '';
+
+        function openReuploadModal(orderId, currentCount, trackTitle, trackArtist) {
+            _reuploadTrackTitle = trackTitle || '';
+            _reuploadTrackArtist = trackArtist || '';
+            // Remove existing modal
+            const existing = document.getElementById('reuploadModal');
+            if (existing) existing.remove();
+
+            const remaining = 3 - currentCount;
+            const overlay = document.createElement('div');
+            overlay.id = 'reuploadModal';
+            overlay.className = 'reupload-overlay';
+            overlay.innerHTML = `
+                <div class="reupload-modal">
+                    <button class="reupload-close" onclick="closeReuploadModal()">&times;</button>
+                    <h3>Re-upload Track</h3>
+                    <p class="reupload-warning">This will replace your current track and reset all feedback. You have <strong>${remaining} re-upload${remaining > 1 ? 's' : ''}</strong> remaining.</p>
+                    <div class="reupload-dropzone" id="reuploadDropzone">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p>Drag & drop your track here</p>
+                        <span>or <label class="reupload-browse" for="reuploadFileInput">browse</label></span>
+                        <input type="file" id="reuploadFileInput" accept="audio/*,.wav,.mp3,.flac,.aiff,.aif" style="display:none;">
+                    </div>
+                    <div class="reupload-file-info" id="reuploadFileInfo" style="display:none;">
+                        <span id="reuploadFileName"></span>
+                        <button class="reupload-file-remove" onclick="clearReuploadFile()">&times;</button>
+                    </div>
+                    <div class="reupload-progress" id="reuploadProgress" style="display:none;">
+                        <div class="reupload-progress-info">
+                            <span id="reuploadProgressLabel">Uploading...</span>
+                            <span id="reuploadProgressPercent">0%</span>
+                        </div>
+                        <div class="reupload-progress-track">
+                            <div class="reupload-progress-bar" id="reuploadProgressBar"></div>
+                        </div>
+                    </div>
+                    <button class="reupload-submit" id="reuploadSubmitBtn" disabled onclick="submitReupload('${orderId}')">
+                        Upload & Reset
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+
+            // File input + drag & drop
+            const dropzone = document.getElementById('reuploadDropzone');
+            const fileInput = document.getElementById('reuploadFileInput');
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) setReuploadFile(e.target.files[0]);
+            });
+            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+                if (e.dataTransfer.files[0]) setReuploadFile(e.dataTransfer.files[0]);
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeReuploadModal();
+            });
+        }
+
+        let _reuploadFile = null;
+
+        function setReuploadFile(file) {
+            _reuploadFile = file;
+            document.getElementById('reuploadDropzone').style.display = 'none';
+            document.getElementById('reuploadFileInfo').style.display = '';
+            document.getElementById('reuploadFileName').textContent = file.name;
+            document.getElementById('reuploadSubmitBtn').disabled = false;
+        }
+
+        function clearReuploadFile() {
+            _reuploadFile = null;
+            document.getElementById('reuploadDropzone').style.display = '';
+            document.getElementById('reuploadFileInfo').style.display = 'none';
+            document.getElementById('reuploadSubmitBtn').disabled = true;
+        }
+
+        function closeReuploadModal() {
+            const modal = document.getElementById('reuploadModal');
+            if (modal) {
+                modal.classList.remove('visible');
+                setTimeout(() => modal.remove(), 200);
+            }
+            _reuploadFile = null;
+        }
+
+        function uploadWithProgress(url, file, contentType) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('PUT', url);
+                xhr.setRequestHeader('Content-Type', contentType);
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        const bar = document.getElementById('reuploadProgressBar');
+                        const percent = document.getElementById('reuploadProgressPercent');
+                        if (bar) bar.style.width = pct + '%';
+                        if (percent) percent.textContent = pct + '%';
+                    }
+                });
+                xhr.onload = () => resolve(xhr);
+                xhr.onerror = () => reject(new Error('Upload failed'));
+                xhr.send(file);
+            });
+        }
+
+        async function submitReupload(orderId) {
+            if (!_reuploadFile) return;
+            const btn = document.getElementById('reuploadSubmitBtn');
+            btn.disabled = true;
+            btn.style.display = 'none';
+
+            // Show progress bar, hide dropzone/file info
+            const progressEl = document.getElementById('reuploadProgress');
+            if (progressEl) progressEl.style.display = '';
+
+            const token = BeatpushAuth.getToken();
+            let trackUrl = '';
+            let artworkUrl = '';
+
+            try {
+                // 1. Upload audio via signed URL
+                const signRes = await fetch('/api/upload-audio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: _reuploadFile.name }),
+                });
+                const signData = await signRes.json();
+                if (signRes.ok && signData.uploadUrl) {
+                    const xhr = await uploadWithProgress(signData.uploadUrl, _reuploadFile, _reuploadFile.type || 'audio/wav');
+                    if (xhr.status >= 200 && xhr.status < 300) trackUrl = signData.publicUrl;
+                }
+
+                // 2. Generate & upload artwork
+                const artworkDataUrl = generateTrackArtwork(400);
+                const artSignRes = await fetch('/api/upload-audio?type=artwork', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: `artwork_${Date.now()}.jpg` }),
+                });
+                const artSignData = await artSignRes.json();
+                if (artSignRes.ok && artSignData.uploadUrl) {
+                    const artBlob = await (await fetch(artworkDataUrl)).blob();
+                    const artUpRes = await fetch(artSignData.uploadUrl, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'image/jpeg' },
+                        body: artBlob,
+                    });
+                    if (artUpRes.ok) artworkUrl = artSignData.publicUrl;
+                }
+
+                // 3. Call reupload API
+                const res = await fetch('/api/reupload-track', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ order_id: orderId, track_url: trackUrl, track_artwork: artworkUrl }),
+                });
+
+                if (res.ok) {
+                    // Notify admin via email
+                    try {
+                        const notifRes = await fetch('/api/notify-admin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ action: 'reupload', order_id: orderId, track_title: _reuploadTrackTitle, track_artist: _reuploadTrackArtist }),
+                        });
+                        if (!notifRes.ok) console.warn('Admin notify failed:', await notifRes.text());
+                    } catch (e) { console.warn('Admin notify error:', e); }
+                    closeReuploadModal();
+                    loadDashboard();
+                } else {
+                    const err = await res.json();
+                    alert(err.error || 'Re-upload failed');
+                    btn.disabled = false;
+                    btn.style.display = '';
+                    if (progressEl) progressEl.style.display = 'none';
+                }
+            } catch (e) {
+                alert('Re-upload failed: ' + e.message);
+                btn.disabled = false;
+                btn.style.display = '';
+                if (progressEl) progressEl.style.display = 'none';
+            }
+        }
+
+        // ===== Approve Mastering =====
+        async function approveMastering(orderId, trackTitle, trackArtist) {
+            const token = BeatpushAuth.getToken();
+            try {
+                const res = await fetch('/api/reupload-track?action=approve', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ order_id: orderId }),
+                });
+                if (res.ok) {
+                    // Notify admin via email
+                    try {
+                        const notifRes = await fetch('/api/notify-admin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ action: 'approve_mastering', order_id: orderId, track_title: trackTitle || '', track_artist: trackArtist || '' }),
+                        });
+                        if (!notifRes.ok) console.warn('Admin notify failed:', await notifRes.text());
+                    } catch (e) { console.warn('Admin notify error:', e); }
+                    loadDashboard();
+                } else {
+                    const err = await res.json();
+                    alert(err.error || 'Failed to approve');
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        // ===== Artwork Generator (same as main site) =====
+        function generateTrackArtwork(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const h1 = Math.random() * 360;
+            const h2 = (h1 + 60 + Math.random() * 120) % 360;
+            const h3 = (h2 + 60 + Math.random() * 120) % 360;
+            const c1 = `hsl(${h1}, 80%, 55%)`, c2 = `hsl(${h2}, 75%, 45%)`, c3 = `hsl(${h3}, 85%, 50%)`;
+            const g1 = ctx.createLinearGradient(0, 0, size, size);
+            g1.addColorStop(0, c1); g1.addColorStop(0.5, c2); g1.addColorStop(1, c3);
+            ctx.fillStyle = g1; ctx.fillRect(0, 0, size, size);
+            const g2 = ctx.createRadialGradient(size*0.75, size*0.2, 0, size*0.75, size*0.2, size*0.7);
+            g2.addColorStop(0, `hsla(${h1}, 80%, 65%, 0.6)`); g2.addColorStop(1, 'transparent');
+            ctx.fillStyle = g2; ctx.fillRect(0, 0, size, size);
+            const g3 = ctx.createRadialGradient(size*0.2, size*0.8, 0, size*0.2, size*0.8, size*0.65);
+            g3.addColorStop(0, `hsla(${h3}, 85%, 60%, 0.5)`); g3.addColorStop(1, 'transparent');
+            ctx.fillStyle = g3; ctx.fillRect(0, 0, size, size);
+            ctx.globalCompositeOperation = 'soft-light';
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                const y = size*(0.15+i*0.2)+(Math.random()-0.5)*size*0.1;
+                ctx.moveTo(-10, y);
+                ctx.bezierCurveTo(size*0.3+Math.random()*size*0.1, y-size*0.15+Math.random()*size*0.3, size*0.7+Math.random()*size*0.1, y+size*0.15-Math.random()*size*0.3, size+10, y+(Math.random()-0.5)*size*0.2);
+                ctx.lineWidth = size*(0.03+Math.random()*0.04);
+                ctx.strokeStyle = [c1,c2,c3][i%3]; ctx.stroke();
+            }
+            ctx.globalCompositeOperation = 'overlay';
+            const g4 = ctx.createLinearGradient(0,0,0,size);
+            g4.addColorStop(0,'rgba(255,255,255,0.08)'); g4.addColorStop(0.5,'transparent'); g4.addColorStop(1,'rgba(0,0,0,0.12)');
+            ctx.fillStyle = g4; ctx.fillRect(0,0,size,size);
+            ctx.globalCompositeOperation = 'source-over';
+            return canvas.toDataURL('image/jpeg', 0.85);
+        }
+
+        // Expose functions to onclick handlers
+        window.openReuploadModal = openReuploadModal;
+        window.closeReuploadModal = closeReuploadModal;
+        window.clearReuploadFile = clearReuploadFile;
+        window.submitReupload = submitReupload;
+        window.approveMastering = approveMastering;
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);

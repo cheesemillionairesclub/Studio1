@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const SUPABASE_URL = 'https://wrdbhyypbpppzrtyacvw.supabase.co';
+    const SUPABASE_URL = 'https://mbruoxxqpnxcybwureku.supabase.co';
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     // Verify admin: check the user's token and profile
@@ -36,6 +36,7 @@ export default async function handler(req, res) {
 
     // GET: list all orders
     if (req.method === 'GET') {
+        // Fetch orders with user subscription status from profiles
         const ordersRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?order=created_at.desc&select=*`, {
             headers: {
                 'apikey': SUPABASE_SERVICE_KEY,
@@ -43,7 +44,32 @@ export default async function handler(req, res) {
             },
         });
         const orders = await ordersRes.json();
-        return res.status(200).json(orders);
+
+        // Fetch all profiles to get subscription_status per user
+        const userIds = [...new Set(orders.map(o => o.user_id).filter(Boolean))];
+        let profilesMap = {};
+        if (userIds.length) {
+            const pRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=in.(${userIds.join(',')})&select=id,subscription_status,trial_end,plan_type`, {
+                headers: {
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                },
+            });
+            if (pRes.ok) {
+                const pData = await pRes.json();
+                pData.forEach(p => { profilesMap[p.id] = p; });
+            }
+        }
+
+        // Attach subscription info to each order
+        const enriched = orders.map(o => ({
+            ...o,
+            subscription_status: profilesMap[o.user_id]?.subscription_status || 'none',
+            trial_end: profilesMap[o.user_id]?.trial_end || null,
+            plan_type: profilesMap[o.user_id]?.plan_type || 'pro',
+        }));
+
+        return res.status(200).json(enriched);
     }
 
     // PATCH: update order status or receipt
@@ -53,12 +79,13 @@ export default async function handler(req, res) {
             try { body = JSON.parse(body); } catch (e) { body = {}; }
         }
 
-        const { order_id, order_status, receipt_url } = body;
+        const { order_id, order_status, receipt_url, feedback } = body;
         if (!order_id) return res.status(400).json({ error: 'Missing order_id' });
 
         const updates = { updated_at: new Date().toISOString() };
         if (order_status) updates.order_status = order_status;
         if (receipt_url !== undefined) updates.receipt_url = receipt_url;
+        if (feedback !== undefined) updates.feedback = feedback;
 
         const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${order_id}`, {
             method: 'PATCH',

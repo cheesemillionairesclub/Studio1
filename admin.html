@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeatPush Admin</title>
-    <link rel="icon" type="image/png" href="https://i.ibb.co/FLyL2c8K/icon.png">
+    <title>AlphaStudios Admin</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --green-primary: #00e676;
-            --green-dark: #00c853;
-            --green-glow: rgba(0, 230, 118, 0.3);
-            --bg-primary: #000;
-            --bg-card: #111;
-            --white: #fff;
-            --white-70: rgba(255,255,255,0.7);
-            --white-50: rgba(255,255,255,0.5);
-            --white-30: rgba(255,255,255,0.3);
-            --white-15: rgba(255,255,255,0.15);
-            --white-10: rgba(255,255,255,0.1);
-            --white-05: rgba(255,255,255,0.05);
+            --green-primary: #1a1a2e;
+            --green-dark: #0f0f1a;
+            --green-glow: rgba(26, 26, 46, 0.2);
+            --bg-primary: #ffffff;
+            --bg-card: #ffffff;
+            --white: #1a1a2e;
+            --white-70: rgba(26,26,46,0.65);
+            --white-50: rgba(26,26,46,0.5);
+            --white-30: rgba(26,26,46,0.3);
+            --white-15: rgba(26,26,46,0.12);
+            --white-10: rgba(26,26,46,0.08);
+            --white-05: rgba(26,26,46,0.04);
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -69,7 +69,7 @@
             gap: 10px;
             padding: 12px 28px;
             background: var(--green-primary);
-            color: #000;
+            color: #ffffff;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
@@ -116,7 +116,7 @@
             border-top: 1px solid var(--white-05);
             vertical-align: middle;
         }
-        tr:hover td { background: rgba(255,255,255,0.02); }
+        tr:hover td { background: rgba(26,26,46,0.03); }
         .order-track {
             display: flex;
             align-items: center;
@@ -138,7 +138,7 @@
             font-weight: 600;
         }
         .status-in_progress {
-            background: rgba(255,255,255,0.1);
+            background: rgba(26,26,46,0.08);
             color: var(--white-50);
         }
         .status-completed {
@@ -168,7 +168,7 @@
         }
         .admin-btn.btn-green {
             background: var(--green-primary);
-            color: #000;
+            color: #ffffff;
             border-color: var(--green-primary);
             font-weight: 600;
         }
@@ -180,6 +180,100 @@
             cursor: not-allowed;
         }
         input[type="file"] { display: none; }
+        .admin-feedback-cell { min-width: 200px; }
+        .admin-feedback-input {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px 10px;
+            background: var(--white-05);
+            border: 1px solid var(--white-15);
+            border-radius: 6px;
+            color: var(--white);
+            font-family: inherit;
+            font-size: 0.8rem;
+            resize: vertical;
+        }
+        .admin-feedback-input::placeholder { color: var(--white-30); }
+        .admin-feedback-input:focus { outline: none; border-color: var(--green-primary); }
+        /* Admin pipeline stepper (inline) */
+        .admin-pipeline {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .admin-pipeline-step {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--white-20);
+            letter-spacing: 0.2px;
+        }
+        .admin-pipeline-step.done { color: var(--green-primary); }
+        .admin-pipeline-step.active { color: var(--green-primary); }
+        .admin-pipeline-dot {
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.55rem; font-weight: 700;
+            border: 1.5px solid var(--white-15);
+            background: transparent;
+            color: var(--white-20);
+        }
+        .admin-pipeline-step.active .admin-pipeline-dot {
+            border-color: var(--green-primary);
+            background: var(--green-10);
+            color: var(--green-primary);
+        }
+        .admin-pipeline-step.done .admin-pipeline-dot {
+            border-color: var(--green-primary);
+            background: var(--green-primary);
+            color: #fff;
+        }
+        .admin-pipeline-sep {
+            width: 12px; height: 1.5px;
+            background: var(--white-10);
+            flex-shrink: 0;
+        }
+        .admin-pipeline-step.done + .admin-pipeline-sep,
+        .admin-pipeline-sep.filled { background: var(--green-primary); }
+        .admin-versions {
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .admin-version-link {
+            display: inline-block; padding: 3px 10px; border-radius: 6px;
+            font-size: 0.7rem; font-weight: 500; text-decoration: none;
+            background: var(--white-05); color: var(--white-50);
+            border: 1px solid var(--white-10); transition: all 0.2s;
+        }
+        .admin-version-link:hover {
+            background: var(--white-10); color: var(--white);
+        }
+        .admin-version-link.latest {
+            background: rgba(0,168,84,0.08); color: var(--green-primary);
+            border-color: rgba(0,168,84,0.2); font-weight: 600;
+        }
+        .badge-mastering {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px; font-size: 0.7rem;
+            font-weight: 600; background: rgba(76,175,80,0.12); color: #4CAF50;
+            margin-top: 4px;
+        }
+        .badge-sub {
+            display: inline-block; padding: 2px 8px; border-radius: 12px;
+            font-size: 0.65rem; font-weight: 700; margin-top: 3px;
+        }
+        .badge-trial { background: rgba(33,150,243,0.15); color: #2196F3; }
+        .badge-paid { background: rgba(76,175,80,0.15); color: #4CAF50; }
+        .badge-none { background: rgba(255,82,82,0.12); color: #ff5252; }
+        .badge-reupload {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px; font-size: 0.7rem;
+            font-weight: 600; background: rgba(255,152,0,0.12); color: #ff9800;
+            margin-top: 4px;
+        }
         .admin-loading {
             text-align: center;
             padding: 60px;
@@ -204,7 +298,7 @@
 <body>
     <div id="adminApp">
         <div class="admin-login" id="adminLogin">
-            <h2>BeatPush Admin Panel</h2>
+            <h2>AlphaStudios Admin Panel</h2>
             <p id="adminLoginMsg">Checking session...</p>
             <a href="/" class="admin-login-btn" id="adminGoLogin" style="display:none;text-decoration:none;">Go to main site to sign in</a>
         </div>
@@ -212,8 +306,8 @@
         <div id="adminPanel" style="display:none;">
             <div class="admin-header">
                 <h1>
-                    <img src="https://i.ibb.co/FLyL2c8K/icon.png" alt="">
-                    BeatPush Admin
+                    <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773648385/Black_and_Red_Modern_Initials_A_E-Sport_Gaming_Pictorial_Mark_Logo_hx5o3z.png" alt="">
+                    AlphaStudios Admin
                 </h1>
                 <div class="admin-user">
                     <span id="adminUserName"></span>
@@ -229,11 +323,11 @@
                         <tr>
                             <th>Date</th>
                             <th>Track</th>
+                            <th>Original File</th>
                             <th>Customer</th>
-                            <th>Pack</th>
-                            <th>Genre</th>
                             <th>Status</th>
-                            <th>Receipt</th>
+                            <th>Mastered File</th>
+                            <th>Feedback</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -253,7 +347,7 @@
         // Init - detect existing session
         (async function() {
             const msg = document.getElementById('adminLoginMsg');
-            const token = localStorage.getItem('beatpush_access_token');
+            const token = localStorage.getItem('alphastudios_access_token');
 
             if (!token) {
                 msg.textContent = 'No session found. Sign in on the main site first.';
@@ -336,15 +430,24 @@
         function renderOrders(orders) {
             const tbody = document.getElementById('adminOrdersBody');
             if (!orders.length) {
-                tbody.innerHTML = '<tr><td colspan="8" class="admin-loading">No orders yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="admin-loading">No orders yet.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = orders.map(order => {
-                const packLabel = order.pack === 'daily-push' ? 'Daily Push' : `${order.pack} Copies`;
+                const packLabel = order.pack === 'mastering' ? 'Mastering + Feedback + Labels' : order.pack;
                 const statusClass = `status-${order.order_status}`;
                 const statusText = order.order_status === 'completed' ? 'Completed' : 'In Progress';
                 const hasReceipt = !!order.receipt_url;
+
+                const subStatus = order.subscription_status || 'none';
+                const isTrial = subStatus === 'trialing';
+                const isPaid = subStatus === 'active';
+                const planNames = { access: 'Access', pro: 'Pro', elite: 'Elite' };
+                const planLabel = planNames[order.plan_type] || 'Pro';
+                const subBadge = isTrial ? `<span class="badge-sub badge-trial">${esc(planLabel)} Trial</span>`
+                    : isPaid ? `<span class="badge-sub badge-paid">${esc(planLabel)}</span>`
+                    : `<span class="badge-sub badge-none">${esc(subStatus)}</span>`;
 
                 return `<tr data-order-id="${order.id}">
                     <td>${new Date(order.created_at).toLocaleDateString()}</td>
@@ -354,25 +457,104 @@
                             <div>
                                 <div class="order-track-title">${esc(order.track_title || '-')}</div>
                                 <div class="order-track-artist">${esc(order.track_artist || '-')}</div>
+                                ${subBadge}
+                                ${order.reupload_count ? `<div class="badge-reupload">Re-upload ${order.reupload_count}/3</div>` : ''}
                             </div>
                         </div>
                     </td>
+                    <td>${(() => {
+                        const versions = Array.isArray(order.track_versions) && order.track_versions.length ? order.track_versions : (order.track_url ? [{ url: order.track_url, label: 'Original' }] : []);
+                        if (!versions.length) return '<span style="color:var(--white-30)">No file</span>';
+                        return '<div class="admin-versions">' + versions.map((v, i) =>
+                            `<a href="${esc(v.url)}" target="_blank" class="admin-version-link${i === versions.length - 1 ? ' latest' : ''}" title="${v.date ? new Date(v.date).toLocaleString() : ''}">${esc(v.label || ('Upload ' + (i+1)))}</a>`
+                        ).join('') + '</div>';
+                    })()}</td>
                     <td>${esc(order.customer_email || '-')}</td>
-                    <td>${esc(packLabel)}</td>
-                    <td>${esc(order.genre || '-')}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${hasReceipt ? `<a href="${esc(order.receipt_url)}" target="_blank" class="admin-btn" style="text-decoration:none;">View PDF</a>` : '<span style="color:var(--white-30)">-</span>'}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        ${order.mastering_approved ? '<div class="badge-mastering"><strong>Approved For Mastering</strong></div>' : ''}
+                        ${(() => {
+                            let step = 1;
+                            if (order.order_status === 'completed') step = 2;
+                            else if (order.mastering_approved) step = 2;
+                            const sc = (n) => step > n ? 'done' : step === n ? 'active' : '';
+                            const dc = (n) => step > n ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : n;
+                            return `<div class="admin-pipeline">
+                                <div class="admin-pipeline-step ${sc(1)}"><div class="admin-pipeline-dot">${dc(1)}</div>Feedbacks</div>
+                                <div class="admin-pipeline-sep${step >= 2 ? ' filled' : ''}"></div>
+                                <div class="admin-pipeline-step ${sc(2)}"><div class="admin-pipeline-dot">${dc(2)}</div>Mastering</div>
+                            </div>`;
+                        })()}
+                    </td>
+                    <td>${hasReceipt ? `<a href="${esc(order.receipt_url)}" target="_blank" class="admin-btn" style="text-decoration:none;">Download</a>` : '<span style="color:var(--white-30)">-</span>'}</td>
+                    <td>
+                        <div class="admin-feedback-cell">
+                            <textarea class="admin-feedback-input" id="feedback-${order.id}" placeholder="Write feedback...">${esc(order.feedback || '')}</textarea>
+                            <button class="admin-btn" onclick="saveFeedback('${order.id}')" style="margin-top:4px;width:100%;">Send Feedback</button>
+                        </div>
+                    </td>
                     <td>
                         <div class="admin-actions">
                             ${order.order_status === 'in_progress' ? `<button class="admin-btn btn-green" onclick="toggleStatus('${order.id}', 'completed')">Mark Complete</button>` : `<button class="admin-btn" onclick="toggleStatus('${order.id}', 'in_progress')">Mark In Progress</button>`}
-                            <label class="admin-btn">
-                                Upload PDF
-                                <input type="file" accept=".pdf" onchange="uploadReceipt('${order.id}', this)">
-                            </label>
+                            ${isPaid ? `<label class="admin-btn">
+                                Upload Audio
+                                <input type="file" accept="audio/*,.wav,.mp3,.flac,.aiff,.aif" onchange="uploadMasteredFile('${order.id}', this)">
+                            </label>` : `<span class="admin-btn" style="opacity:0.4;cursor:not-allowed;" title="Mastering only for paid subscribers">Upload Audio</span>`}
                         </div>
                     </td>
                 </tr>`;
             }).join('');
+        }
+
+        async function saveFeedback(orderId) {
+            const textarea = document.getElementById(`feedback-${orderId}`);
+            const feedbackText = textarea ? textarea.value.trim() : '';
+            if (!feedbackText) {
+                showNotification('Please write some feedback first.', 'warning');
+                return;
+            }
+
+            const token = BeatpushAuth.getToken();
+            try {
+                // Save feedback to order
+                const res = await fetch('/api/admin/orders', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ order_id: orderId, feedback: feedbackText }),
+                });
+                if (!res.ok) throw new Error('Failed to save feedback');
+
+                // Send email notification
+                try {
+                    const emailRes = await fetch('/api/admin/send-receipt-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ order_id: orderId, type: 'feedback' }),
+                    });
+                    const emailData = await emailRes.json();
+                    if (emailRes.ok) {
+                        showNotification(`Feedback saved & email sent to ${emailData.sent_to}`, 'success');
+                    } else {
+                        showNotification(`Feedback saved but email failed: ${emailData.error}`, 'warning');
+                    }
+                } catch (emailErr) {
+                    showNotification('Feedback saved but email notification failed', 'warning');
+                }
+
+                // Reload
+                const listRes = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } });
+                const orders = await listRes.json();
+                renderStats(orders);
+                renderOrders(orders);
+            } catch (e) {
+                alert('Failed to save feedback: ' + e.message);
+            }
         }
 
         async function toggleStatus(orderId, newStatus) {
@@ -398,52 +580,83 @@
             }
         }
 
-        async function uploadReceipt(orderId, input) {
+        async function uploadMasteredFile(orderId, input) {
             const file = input.files[0];
             if (!file) return;
 
             const token = BeatpushAuth.getToken();
             try {
-                const res = await fetch('/api/admin/upload-receipt', {
+                // Step 1: Get signed upload URL from our API
+                const urlRes = await fetch('/api/admin/upload-receipt', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
-                        'X-Order-Id': orderId,
-                        'X-File-Name': file.name,
-                        'Content-Type': 'application/pdf',
                     },
+                    body: JSON.stringify({ action: 'get-upload-url', order_id: orderId, file_name: file.name }),
+                });
+                if (!urlRes.ok) {
+                    const err = await urlRes.json();
+                    alert('Upload failed: ' + (err.details || err.error));
+                    input.value = '';
+                    return;
+                }
+                const { uploadUrl, publicUrl } = await urlRes.json();
+
+                // Step 2: Upload file directly to Supabase Storage via signed URL
+                const putRes = await fetch(uploadUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': file.type || 'audio/wav' },
                     body: file,
                 });
-                if (res.ok) {
-                    // Auto-send receipt notification email
-                    try {
-                        const emailRes = await fetch('/api/admin/send-receipt-email', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`,
-                            },
-                            body: JSON.stringify({ order_id: orderId }),
-                        });
-                        const emailData = await emailRes.json();
-                        if (emailRes.ok) {
-                            showNotification(`Receipt uploaded & email sent to ${emailData.sent_to}`, 'success');
-                        } else {
-                            showNotification(`Receipt uploaded but email failed: ${emailData.error}`, 'warning');
-                        }
-                    } catch (emailErr) {
-                        showNotification('Receipt uploaded but email notification failed', 'warning');
-                    }
-
-                    // Reload orders
-                    const listRes = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } });
-                    const orders = await listRes.json();
-                    renderStats(orders);
-                    renderOrders(orders);
-                } else {
-                    const err = await res.json();
-                    alert('Upload failed: ' + (err.details || err.error));
+                if (!putRes.ok) {
+                    const errText = await putRes.text();
+                    alert('Upload to storage failed: ' + errText);
+                    input.value = '';
+                    return;
                 }
+
+                // Step 3: Confirm upload - update order with receipt URL
+                const confirmRes = await fetch('/api/admin/upload-receipt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ action: 'confirm-upload', order_id: orderId, receipt_url: publicUrl }),
+                });
+                if (!confirmRes.ok) {
+                    const err = await confirmRes.json();
+                    alert('Failed to update order: ' + (err.details || err.error));
+                    input.value = '';
+                    return;
+                }
+
+                // Step 4: Auto-send email notification to customer
+                try {
+                    const emailRes = await fetch('/api/admin/send-receipt-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ order_id: orderId }),
+                    });
+                    const emailData = await emailRes.json();
+                    if (emailRes.ok) {
+                        showNotification(`Audio uploaded & email sent to ${emailData.sent_to}`, 'success');
+                    } else {
+                        showNotification(`Audio uploaded but email failed: ${emailData.error}`, 'warning');
+                    }
+                } catch (emailErr) {
+                    showNotification('Audio uploaded but email notification failed', 'warning');
+                }
+
+                // Reload orders
+                const listRes = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } });
+                const orders = await listRes.json();
+                renderStats(orders);
+                renderOrders(orders);
             } catch (e) {
                 alert('Upload failed: ' + e.message);
             }

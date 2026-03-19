@@ -1,4 +1,4 @@
-// Admin API: Send receipt notification email to customer
+// Admin API: Send mastered file notification email to customer
 import { Resend } from 'resend';
 
 export default async function handler(req, res) {
@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const SUPABASE_URL = 'https://wrdbhyypbpppzrtyacvw.supabase.co';
+    const SUPABASE_URL = 'https://mbruoxxqpnxcybwureku.supabase.co';
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -33,8 +33,10 @@ export default async function handler(req, res) {
     const profiles = await profileRes.json();
     if (!profiles[0]?.is_admin) return res.status(403).json({ error: 'Not admin' });
 
-    const { order_id } = req.body;
+    const { order_id, type } = req.body;
     if (!order_id) return res.status(400).json({ error: 'Missing order_id' });
+
+    const isFeedback = type === 'feedback';
 
     try {
         // Fetch order details
@@ -46,8 +48,11 @@ export default async function handler(req, res) {
         if (!orders.length) return res.status(404).json({ error: 'Order not found' });
         const order = orders[0];
 
-        if (!order.receipt_url) {
-            return res.status(400).json({ error: 'No receipt uploaded for this order yet' });
+        if (!isFeedback && !order.receipt_url) {
+            return res.status(400).json({ error: 'No mastered file uploaded for this order yet' });
+        }
+        if (isFeedback && !order.feedback) {
+            return res.status(400).json({ error: 'No feedback written for this order yet' });
         }
 
         // Determine recipient email: try user profile first, fallback to order customer_email
@@ -70,15 +75,24 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'No email found for this customer' });
         }
 
-        const packLabel = order.pack === 'daily-push' ? 'Daily Push' : `${order.pack} Copies`;
+        const packLabel = order.pack || 'Mastering + Feedback + Labels';
         const greeting = recipientName ? recipientName.split(' ')[0] : 'there';
 
         const resend = new Resend(RESEND_API_KEY);
+
+        const subject = isFeedback
+            ? `New feedback on your track 🎧`
+            : `Your mastered track is ready! 🎵`;
+
+        const html = isFeedback
+            ? buildFeedbackEmailHtml({ greeting, packLabel, order })
+            : buildEmailHtml({ greeting, packLabel, order });
+
         const { error: emailError } = await resend.emails.send({
-            from: process.env.RESEND_FROM_EMAIL || 'BeatPush <noreply@beatpush.com>',
+            from: process.env.RESEND_FROM_EMAIL || 'AlphaStudios <noreply@alphastudios.app>',
             to: [recipientEmail],
-            subject: `Your BeatPush Campaign is Complete! 🎵`,
-            html: buildEmailHtml({ greeting, packLabel, order }),
+            subject,
+            html,
         });
 
         if (emailError) {
@@ -96,7 +110,7 @@ export default async function handler(req, res) {
 function buildEmailHtml({ greeting, packLabel, order }) {
     const trackTitle = order.track_title || 'your track';
     const trackArtist = order.track_artist || '';
-    const dashboardUrl = process.env.APP_URL ? `${process.env.APP_URL}/dashboard` : 'https://beatpush.com/dashboard';
+    const dashboardUrl = process.env.APP_URL ? `${process.env.APP_URL}/dashboard` : 'https://alphastudios.app/dashboard';
 
     return `<!DOCTYPE html>
 <html>
@@ -104,53 +118,104 @@ function buildEmailHtml({ greeting, packLabel, order }) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin:0;padding:0;background:#000;font-family:'Helvetica Neue',Arial,sans-serif;">
-    <div style="max-width:600px;margin:0 auto;background:#000;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#f5f7fa;font-family:'Helvetica Neue',Arial,sans-serif;">
+    <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:40px 20px;">
         <!-- Header -->
-        <div style="text-align:center;padding-bottom:30px;border-bottom:1px solid rgba(255,255,255,0.1);">
-            <img src="https://i.ibb.co/nMjbdTkQ/White-and-Black-Modern-Initial-B-Logo-5000-x-5000-px-1.png" alt="BeatPush" style="height:50px;" />
+        <div style="text-align:center;padding-bottom:30px;border-bottom:1px solid rgba(0,0,0,0.08);">
+            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" style="height:80px;" />
         </div>
 
         <!-- Content -->
         <div style="padding:40px 0;text-align:center;">
-            <h1 style="color:#fff;font-size:24px;font-weight:700;margin:0 0 10px;">Campaign Completed!</h1>
-            <p style="color:rgba(255,255,255,0.6);font-size:16px;margin:0 0 30px;line-height:1.5;">
+            <h1 style="color:#1a1a2e;font-size:24px;font-weight:700;margin:0 0 10px;">Your mastered track is ready!</h1>
+            <p style="color:rgba(26,26,46,0.6);font-size:16px;margin:0 0 30px;line-height:1.5;">
                 Hey ${escapeHtml(greeting)}, great news!<br>
-                Your campaign receipt is ready to download.
+                Your mastered file is ready to download.
             </p>
 
             <!-- Track Info -->
-            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:30px;text-align:left;">
+            <div style="background:rgba(26,26,46,0.03);border:1px solid rgba(26,26,46,0.08);border-radius:12px;padding:20px;margin-bottom:30px;text-align:left;">
                 <table style="width:100%;border-collapse:collapse;">
                     <tr>
-                        <td style="padding:8px 0;color:rgba(255,255,255,0.5);font-size:14px;width:120px;">Track</td>
-                        <td style="padding:8px 0;color:#fff;font-size:14px;font-weight:600;">${escapeHtml(trackTitle)}${trackArtist ? ` - ${escapeHtml(trackArtist)}` : ''}</td>
+                        <td style="padding:8px 0;color:rgba(26,26,46,0.5);font-size:14px;width:120px;">Track</td>
+                        <td style="padding:8px 0;color:#1a1a2e;font-size:14px;font-weight:600;">${escapeHtml(trackTitle)}${trackArtist ? ` - ${escapeHtml(trackArtist)}` : ''}</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px 0;color:rgba(255,255,255,0.5);font-size:14px;">Campaign</td>
-                        <td style="padding:8px 0;color:#fff;font-size:14px;font-weight:600;">${escapeHtml(packLabel)}</td>
+                        <td style="padding:8px 0;color:rgba(26,26,46,0.5);font-size:14px;">Package</td>
+                        <td style="padding:8px 0;color:#1a1a2e;font-size:14px;font-weight:600;">${escapeHtml(packLabel)}</td>
                     </tr>
                     ${order.genre ? `<tr>
-                        <td style="padding:8px 0;color:rgba(255,255,255,0.5);font-size:14px;">Genre</td>
-                        <td style="padding:8px 0;color:#fff;font-size:14px;font-weight:600;">${escapeHtml(order.genre)}</td>
+                        <td style="padding:8px 0;color:rgba(26,26,46,0.5);font-size:14px;">Genre</td>
+                        <td style="padding:8px 0;color:#1a1a2e;font-size:14px;font-weight:600;">${escapeHtml(order.genre)}</td>
                     </tr>` : ''}
                 </table>
             </div>
 
-            <!-- CTA Button -->
-            <a href="${escapeHtml(dashboardUrl)}" style="display:inline-block;padding:14px 40px;background:#00e676;color:#000;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
-                VIEW MY DASHBOARD
+            <!-- Download Button -->
+            <a href="${escapeHtml(order.receipt_url)}" style="display:inline-block;padding:14px 40px;background:#1a1a2e;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
+                DOWNLOAD MY MASTERED TRACK
             </a>
-            <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:16px;">
-                Log in to your dashboard to download your campaign receipt PDF.
+            <p style="color:rgba(26,26,46,0.4);font-size:13px;margin-top:16px;">
+                You can also access your file from your <a href="${escapeHtml(dashboardUrl)}" style="color:#1a1a2e;">dashboard</a>.
             </p>
         </div>
 
         <!-- Footer -->
-        <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;text-align:center;">
-            <p style="color:rgba(255,255,255,0.3);font-size:12px;margin:0;line-height:1.5;">
-                BeatPush - Beatport Music Promotion<br>
-                You received this email because you purchased a campaign on BeatPush.
+        <div style="border-top:1px solid rgba(0,0,0,0.08);padding-top:20px;text-align:center;">
+            <p style="color:rgba(26,26,46,0.3);font-size:12px;margin:0;line-height:1.5;">
+                AlphaStudios - Professional Music Services<br>
+                You received this email because you placed an order on AlphaStudios.
+            </p>
+        </div>
+    </div>
+</body>
+</html>`;
+}
+
+function buildFeedbackEmailHtml({ greeting, packLabel, order }) {
+    const trackTitle = order.track_title || 'your track';
+    const trackArtist = order.track_artist || '';
+    const dashboardUrl = process.env.APP_URL ? `${process.env.APP_URL}/dashboard` : 'https://alphastudios.app/dashboard';
+    const feedbackText = (order.feedback || '').replace(/\n/g, '<br>');
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#f5f7fa;font-family:'Helvetica Neue',Arial,sans-serif;">
+    <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:40px 20px;">
+        <!-- Header -->
+        <div style="text-align:center;padding-bottom:30px;border-bottom:1px solid rgba(0,0,0,0.08);">
+            <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" style="height:80px;" />
+        </div>
+
+        <!-- Content -->
+        <div style="padding:40px 0;text-align:center;">
+            <h1 style="color:#1a1a2e;font-size:24px;font-weight:700;margin:0 0 10px;">New Feedback on Your Track</h1>
+            <p style="color:rgba(26,26,46,0.6);font-size:16px;margin:0 0 30px;line-height:1.5;">
+                Hey ${escapeHtml(greeting)}, you have new feedback on<br>
+                <strong>${escapeHtml(trackTitle)}${trackArtist ? ` - ${escapeHtml(trackArtist)}` : ''}</strong>
+            </p>
+
+            <!-- Feedback -->
+            <div style="background:rgba(26,26,46,0.03);border:1px solid rgba(26,26,46,0.08);border-radius:12px;padding:24px;margin-bottom:30px;text-align:left;">
+                <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:rgba(26,26,46,0.4);margin-bottom:12px;font-weight:600;">Alpha Studio Feedback</div>
+                <p style="color:#1a1a2e;font-size:15px;line-height:1.7;margin:0;">${feedbackText}</p>
+            </div>
+
+            <!-- CTA Button -->
+            <a href="${escapeHtml(dashboardUrl)}" style="display:inline-block;padding:14px 40px;background:#1a1a2e;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.5px;">
+                VIEW MY DASHBOARD
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div style="border-top:1px solid rgba(0,0,0,0.08);padding-top:20px;text-align:center;">
+            <p style="color:rgba(26,26,46,0.3);font-size:12px;margin:0;line-height:1.5;">
+                AlphaStudios - Professional Music Services<br>
+                You received this email because you placed an order on AlphaStudios.
             </p>
         </div>
     </div>

@@ -1,6 +1,6 @@
-// ===== Supabase Client (Browser) =====
-const SUPABASE_URL = 'https://wrdbhyypbpppzrtyacvw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyZGJoeXlwYnBwcHpydHlhY3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NjE4NzMsImV4cCI6MjA4OTEzNzg3M30.jO-JGKecLjYM71Z--5FVNz-m_iNgMMYP4AdrmD7Xg9o';
+// ===== AlphaStudios Supabase Client (Browser) =====
+const SUPABASE_URL = 'https://mbruoxxqpnxcybwureku.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1icnVveHhxcG54Y3lid3VyZWt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDQzMTEsImV4cCI6MjA4OTE4MDMxMX0.f8hibuuC4OevHbQCcF6GtDqu-7oS_y7fBZKbkVj3xX8';
 
 // Lightweight Supabase auth client (no SDK needed for browser)
 const BeatpushAuth = {
@@ -33,13 +33,13 @@ const BeatpushAuth = {
             const accessToken = params.get('access_token');
             const refreshToken = params.get('refresh_token');
             if (accessToken) {
-                localStorage.setItem('beatpush_access_token', accessToken);
-                if (refreshToken) localStorage.setItem('beatpush_refresh_token', refreshToken);
+                localStorage.setItem('alphastudios_access_token', accessToken);
+                if (refreshToken) localStorage.setItem('alphastudios_refresh_token', refreshToken);
                 // Clean URL
                 window.history.replaceState({}, '', window.location.pathname + window.location.search);
                 // Redirect to admin if coming from admin login
-                if (localStorage.getItem('beatpush_admin_redirect')) {
-                    localStorage.removeItem('beatpush_admin_redirect');
+                if (localStorage.getItem('alphastudios_admin_redirect')) {
+                    localStorage.removeItem('alphastudios_admin_redirect');
                     window.location.href = '/admin';
                     this._readyResolve(null);
                     return null;
@@ -47,7 +47,7 @@ const BeatpushAuth = {
             }
         }
 
-        const token = localStorage.getItem('beatpush_access_token');
+        const token = localStorage.getItem('alphastudios_access_token');
         if (token) {
             try {
                 const user = await this._getUser(token);
@@ -78,14 +78,14 @@ const BeatpushAuth = {
 
     // Get access token
     getToken() {
-        return localStorage.getItem('beatpush_access_token');
+        return localStorage.getItem('alphastudios_access_token');
     },
 
     // Sign in with Google OAuth
     async signInWithGoogle(redirectTo) {
         // Save current page state before redirect
         if (redirectTo) {
-            localStorage.setItem('beatpush_auth_redirect', redirectTo);
+            localStorage.setItem('alphastudios_auth_redirect', redirectTo);
         }
         const url = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(window.location.origin + '/')}`;
         window.location.href = url;
@@ -131,7 +131,7 @@ const BeatpushAuth = {
 
     // Refresh session
     async _refreshSession() {
-        const refreshToken = localStorage.getItem('beatpush_refresh_token');
+        const refreshToken = localStorage.getItem('alphastudios_refresh_token');
         if (!refreshToken) return false;
         try {
             const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
@@ -144,8 +144,8 @@ const BeatpushAuth = {
             });
             if (!res.ok) return false;
             const data = await res.json();
-            localStorage.setItem('beatpush_access_token', data.access_token);
-            if (data.refresh_token) localStorage.setItem('beatpush_refresh_token', data.refresh_token);
+            localStorage.setItem('alphastudios_access_token', data.access_token);
+            if (data.refresh_token) localStorage.setItem('alphastudios_refresh_token', data.refresh_token);
             this._session = { access_token: data.access_token };
             this._user = data.user;
             this._notify();
@@ -158,8 +158,8 @@ const BeatpushAuth = {
     _clearSession() {
         this._session = null;
         this._user = null;
-        localStorage.removeItem('beatpush_access_token');
-        localStorage.removeItem('beatpush_refresh_token');
+        localStorage.removeItem('alphastudios_access_token');
+        localStorage.removeItem('alphastudios_refresh_token');
     },
 
     _notify() {

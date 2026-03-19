@@ -1,27 +1,12 @@
-// Admin API: Upload receipt PDF to Supabase Storage
-export const config = {
-    api: { bodyParser: false },
-};
-
-async function getRawBody(req, limit = 10 * 1024 * 1024) {
-    const chunks = [];
-    let size = 0;
-    for await (const chunk of req) {
-        size += chunk.length;
-        if (size > limit) throw new Error('File too large');
-        chunks.push(chunk);
-    }
-    return Buffer.concat(chunks);
-}
-
+// Admin API: Generate signed upload URL for mastered audio, then update order
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Order-Id, X-File-Name');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const SUPABASE_URL = 'https://wrdbhyypbpppzrtyacvw.supabase.co';
+    const SUPABASE_URL = 'https://mbruoxxqpnxcybwureku.supabase.co';
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     // Verify admin
@@ -41,52 +26,81 @@ export default async function handler(req, res) {
     const profiles = await profileRes.json();
     if (!profiles[0]?.is_admin) return res.status(403).json({ error: 'Not admin' });
 
-    const orderId = req.headers['x-order-id'];
-    const fileName = req.headers['x-file-name'] || 'receipt.pdf';
-    if (!orderId) return res.status(400).json({ error: 'Missing order ID' });
-
-    try {
-        const rawBody = await getRawBody(req);
-        const storagePath = `${orderId}/${fileName}`;
-
-        // Upload to Supabase Storage
-        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/receipts/${storagePath}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                'apikey': SUPABASE_SERVICE_KEY,
-                'Content-Type': 'application/pdf',
-                'x-upsert': 'true',
-            },
-            body: rawBody,
-        });
-
-        if (!uploadRes.ok) {
-            const errText = await uploadRes.text();
-            return res.status(500).json({ error: 'Upload failed', details: errText });
-        }
-
-        // Get public URL
-        const receiptUrl = `${SUPABASE_URL}/storage/v1/object/public/receipts/${storagePath}`;
-
-        // Update order with receipt URL and mark as completed
-        await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_SERVICE_KEY,
-                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-            },
-            body: JSON.stringify({
-                receipt_url: receiptUrl,
-                order_status: 'completed',
-                updated_at: new Date().toISOString(),
-            }),
-        });
-
-        return res.status(200).json({ success: true, receipt_url: receiptUrl });
-    } catch (error) {
-        console.error('Upload error:', error.message);
-        return res.status(500).json({ error: 'Upload failed', details: error.message });
+    let body = req.body;
+    if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch (e) { body = {}; }
     }
+
+    const { action, order_id, file_name, receipt_url } = body || {};
+
+    if (!order_id) return res.status(400).json({ error: 'Missing order_id' });
+
+    // Step 1: Generate signed upload URL
+    if (action === 'get-upload-url') {
+        const safeName = (file_name || 'mastered.wav').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storagePath = `${order_id}/${Date.now()}_${safeName}`;
+
+        try {
+            const signRes = await fetch(
+                `${SUPABASE_URL}/storage/v1/object/upload/sign/mastered/${storagePath}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'apikey': SUPABASE_SERVICE_KEY,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ expiresIn: 600 }),
+                }
+            );
+
+            if (!signRes.ok) {
+                const err = await signRes.text();
+                console.error('Supabase sign error:', err);
+                return res.status(500).json({ error: 'Failed to create upload URL', details: err });
+            }
+
+            const signData = await signRes.json();
+            const uploadUrl = `${SUPABASE_URL}/storage/v1${signData.url}`;
+            const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/mastered/${storagePath}`;
+
+            return res.status(200).json({ uploadUrl, publicUrl, path: storagePath });
+        } catch (error) {
+            console.error('Upload URL error:', error.message);
+            return res.status(500).json({ error: 'Failed to create upload URL', details: error.message });
+        }
+    }
+
+    // Step 2: Confirm upload - update order with receipt URL
+    if (action === 'confirm-upload') {
+        if (!receipt_url) return res.status(400).json({ error: 'Missing receipt_url' });
+
+        try {
+            const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${order_id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                },
+                body: JSON.stringify({
+                    receipt_url: receipt_url,
+                    order_status: 'completed',
+                    updated_at: new Date().toISOString(),
+                }),
+            });
+
+            if (!updateRes.ok) {
+                const errText = await updateRes.text();
+                return res.status(500).json({ error: 'Failed to update order', details: errText });
+            }
+
+            return res.status(200).json({ success: true, receipt_url });
+        } catch (error) {
+            console.error('Confirm upload error:', error.message);
+            return res.status(500).json({ error: 'Failed to update order', details: error.message });
+        }
+    }
+
+    return res.status(400).json({ error: 'Invalid action. Use "get-upload-url" or "confirm-upload".' });
 }

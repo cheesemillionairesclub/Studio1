@@ -1,119 +1,100 @@
 import Stripe from 'stripe';
 
-const PRODUCT_DESCRIPTION = 'All purchases comply with Beatport\'s platform mechanics and are made through legitimate customer accounts. 24/48H delivery. You will receive a detailed receipt once your order is complete.';
+const PLAN_CONFIG = {
+    access: { name: 'Studio Access', amount: 99, trackLimit: 1 },
+    pro:    { name: 'Studio Pro',    amount: 399, trackLimit: 5 },
+    elite:  { name: 'Studio Elite',  amount: 799, trackLimit: 10 },
+};
 
 export default async function handler(req, res) {
-    // Allow CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
-    // Parse body - handle both parsed and raw
     let body = req.body;
     if (typeof body === 'string') {
         try { body = JSON.parse(body); } catch (e) { body = {}; }
     }
     if (!body) body = {};
 
-    const pack = String(body.pack || '');
-    const track_title = body.track_title || '';
-    const track_artist = body.track_artist || '';
-    const track_url = body.track_url || '';
-    const genre = body.genre || '';
-    const similar_artists = body.similar_artists || '';
-    const release_status = body.release_status || '';
+    const user_id = body.user_id || '';
+    const user_email = body.user_email || '';
+    const skip_trial = body.skip_trial || false;
+    const plan = body.plan || 'pro'; // default to pro for backwards compat
 
-    console.log('=== CREATE CHECKOUT ===');
-    console.log('Received pack:', pack);
-    console.log('Raw body:', JSON.stringify(body));
-
-    // Define all packs inline - no external config to avoid any reference issues
-    let amount, currency, name, mode, interval;
-
-    if (pack === '50') {
-        amount = 24000; currency = 'usd'; name = 'Beatport Campaign - 50 Copies'; mode = 'payment';
-    } else if (pack === '100') {
-        amount = 48000; currency = 'usd'; name = 'Beatport Campaign - 100 Copies'; mode = 'payment';
-    } else if (pack === '200') {
-        amount = 96000; currency = 'usd'; name = 'Beatport Campaign - 200 Copies'; mode = 'payment';
-    } else if (pack === '500') {
-        amount = 190000; currency = 'usd'; name = 'Beatport Campaign - 500 Copies'; mode = 'payment';
-    } else if (pack === '1000') {
-        amount = 385000; currency = 'usd'; name = 'Beatport Campaign - 1,000 Copies'; mode = 'payment';
-    } else if (pack === 'daily-push') {
-        amount = 5500; currency = 'usd'; name = 'Beatport Daily Push - 10 Copies/Day'; mode = 'subscription'; interval = 'day';
-    } else {
-        console.log('INVALID PACK:', pack);
-        return res.status(400).json({ error: `Invalid pack: "${pack}"` });
+    const config = PLAN_CONFIG[plan];
+    if (!config) {
+        return res.status(400).json({ error: 'Invalid plan. Must be: access, pro, or elite' });
     }
 
-    console.log(`Creating session: pack=${pack}, amount=${amount}, mode=${mode}`);
-
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const origin = req.headers.origin || 'https://beatpush.app';
-
-    const metadata = {
-        pack,
-        track_title:     track_title.substring(0, 500),
-        track_artist:    track_artist.substring(0, 500),
-        track_url:       track_url.substring(0, 500),
-        genre:           genre.substring(0, 500),
-        similar_artists: similar_artists.substring(0, 500),
-        release_status:  release_status.substring(0, 500),
-    };
+    const origin = req.headers.origin || 'https://alphastudios.app';
 
     try {
-        let sessionParams;
-
-        if (mode === 'subscription') {
-            sessionParams = {
-                payment_method_types: ['card'],
-                line_items: [{
-                    price_data: {
-                        currency,
-                        product_data: { name, description: PRODUCT_DESCRIPTION },
-                        unit_amount: amount,
-                        recurring: { interval },
-                    },
-                    quantity: 1,
-                }],
-                mode: 'subscription',
-                subscription_data: { metadata },
-                metadata,
-                success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${origin}/`,
-            };
-        } else {
-            sessionParams = {
-                payment_method_types: ['card'],
-                line_items: [{
-                    price_data: {
-                        currency,
-                        product_data: { name, description: PRODUCT_DESCRIPTION },
-                        unit_amount: amount,
-                    },
-                    quantity: 1,
-                }],
-                mode: 'payment',
-                payment_intent_data: { metadata },
-                invoice_creation: { enabled: true },
-                metadata,
-                success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${origin}/`,
-            };
+        // Find or create the product and price for this plan
+        const productName = `AlphaStudios ${config.name}`;
+        const products = await stripe.products.list({ limit: 100, active: true });
+        let product = products.data.find(p => p.name === productName);
+        if (!product) {
+            product = await stripe.products.create({
+                name: productName,
+                description: `${config.name}: ${config.trackLimit} track${config.trackLimit > 1 ? 's' : ''}/month — professional feedback, mastering, WhatsApp access.`,
+                metadata: { plan_type: plan, track_limit: String(config.trackLimit) },
+            });
         }
 
-        console.log('Session params mode:', sessionParams.mode);
+        // Find existing price or create one
+        const prices = await stripe.prices.list({ product: product.id, active: true, limit: 10 });
+        let priceId;
+        const matchingPrice = prices.data.find(p =>
+            p.unit_amount === config.amount &&
+            p.currency === 'usd' &&
+            p.recurring?.interval === 'month'
+        );
+        if (matchingPrice) {
+            priceId = matchingPrice.id;
+        } else {
+            const price = await stripe.prices.create({
+                product: product.id,
+                unit_amount: config.amount,
+                currency: 'usd',
+                recurring: { interval: 'month' },
+            });
+            priceId = price.id;
+        }
+
+        const subscriptionData = { metadata: { user_id, plan_type: plan } };
+        if (!skip_trial) {
+            subscriptionData.trial_period_days = 3;
+        }
+
+        const sessionParams = {
+            payment_method_types: ['card'],
+            line_items: [{ price: priceId, quantity: 1 }],
+            mode: 'subscription',
+            subscription_data: subscriptionData,
+            metadata: { user_id, plan_type: plan, upgrade_from_trial: skip_trial ? 'true' : 'false' },
+            success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${origin}/`,
+            allow_promotion_codes: true,
+        };
+
+        // Pre-fill email if available
+        if (user_email) {
+            sessionParams.customer_email = user_email;
+        }
+
         const session = await stripe.checkout.sessions.create(sessionParams);
-        console.log('Session created:', session.id, 'URL:', session.url);
-        return res.status(200).json({ url: session.url, pack, amount, mode });
+        return res.status(200).json({ url: session.url });
     } catch (error) {
-        console.error('Stripe checkout error:', error.message);
-        return res.status(500).json({ error: 'Failed to create checkout session', details: error.message });
+        console.error('Stripe checkout error:', error.message, error.type, error.code);
+        return res.status(500).json({
+            error: 'Failed to create checkout session',
+            details: error.message,
+            type: error.type || '',
+            code: error.code || '',
+        });
     }
 }

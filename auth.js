@@ -1,4 +1,4 @@
-// ===== BeatPush Auth UI & Dashboard =====
+// ===== AlphaStudios Auth UI & Dashboard =====
 
 (function () {
     'use strict';
@@ -50,7 +50,32 @@
             if (profile && profile.is_admin) {
                 adminBtn.style.display = '';
             }
+            // Update plan badge in dropdown
+            updatePlanBadge(profile);
         } catch (e) { /* not admin */ }
+    }
+
+    const AUTH_PLAN_NAMES = { access: 'Studio Access', pro: 'Studio Pro', elite: 'Studio Elite' };
+
+    function updatePlanBadge(profile) {
+        const planEl = document.getElementById('authDropdownPlan');
+        if (!planEl) return;
+
+        const status = profile?.subscription_status;
+        const planType = profile?.plan_type || 'pro';
+        const planName = AUTH_PLAN_NAMES[planType] || 'Studio Pro';
+        let label = 'Free Plan';
+        let cls = 'plan-free';
+
+        if (status === 'active') {
+            label = planName;
+            cls = 'plan-pro';
+        } else if (status === 'trialing') {
+            label = `${planName} — Trial`;
+            cls = 'plan-trial';
+        }
+
+        planEl.innerHTML = `<span class="auth-plan-badge ${cls}">${label}</span>`;
     }
 
     // ===== Avatar dropdown toggle =====
@@ -116,19 +141,19 @@
 
         // Save the action to perform after login
         if (returnAction) {
-            localStorage.setItem('beatpush_auth_redirect', returnAction);
+            localStorage.setItem('alphastudios_auth_redirect', returnAction);
         }
         // Save campaign state so it can be restored after OAuth redirect
-        localStorage.setItem('beatpush_auth_pending_action', 'payment');
+        localStorage.setItem('alphastudios_auth_pending_action', 'payment');
         try {
             if (typeof selectedTrack !== 'undefined' && selectedTrack) {
-                localStorage.setItem('beatpush_pending_track', JSON.stringify(selectedTrack));
+                localStorage.setItem('alphastudios_pending_track', JSON.stringify(selectedTrack));
             }
             if (typeof selectedPack !== 'undefined' && selectedPack) {
-                localStorage.setItem('beatpush_pending_pack', selectedPack);
+                localStorage.setItem('alphastudios_pending_pack', selectedPack);
             }
             if (typeof selectedArtists !== 'undefined' && selectedArtists.length) {
-                localStorage.setItem('beatpush_pending_artists', JSON.stringify(selectedArtists));
+                localStorage.setItem('alphastudios_pending_artists', JSON.stringify(selectedArtists));
             }
         } catch (e) {}
 
@@ -149,7 +174,7 @@
         overlay.innerHTML = `
             <div class="toast-box auth-prompt-box">
                 <div class="toast-icon">
-                    <img src="https://i.ibb.co/nMjbdTkQ/White-and-Black-Modern-Initial-B-Logo-5000-x-5000-px-1.png" alt="BeatPush" class="toast-logo">
+                    <img src="https://res.cloudinary.com/dymdijw7n/image/upload/v1773690586/Dark_Blue_Minimalist_Letter_A_Logo_rufnct.png" alt="AlphaStudios" class="toast-logo">
                 </div>
                 <h3 class="auth-prompt-title">${t.auth_prompt_title || 'Sign in to continue'}</h3>
                 <p class="auth-prompt-text">${t.auth_prompt_text || 'Please sign in with your Google account to proceed with your campaign.'}</p>
@@ -171,7 +196,7 @@
         const close = () => {
             overlay.classList.remove('visible');
             setTimeout(() => overlay.remove(), 300);
-            localStorage.removeItem('beatpush_auth_pending_action');
+            localStorage.removeItem('alphastudios_auth_pending_action');
         };
 
         overlay.querySelector('.auth-prompt-cancel').addEventListener('click', close);
@@ -181,19 +206,22 @@
     // ===== Save order after payment =====
     window.saveOrderToSupabase = async function (campaign, paymentData) {
         const user = BeatpushAuth.getUser();
-        if (!user) return;
+        if (!user) {
+            console.error('[AlphaStudios] Cannot save order: no user logged in');
+            return null;
+        }
 
         try {
-            await fetch('/api/save-order', {
+            const res = await fetch('/api/save-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user_id: user.id,
                     stripe_session_id: paymentData?.session_id || '',
                     customer_email: paymentData?.customer_email || user.email,
-                    pack: campaign.pack || '',
+                    pack: campaign.pack || 'pro',
                     amount: paymentData?.amount_total || 0,
-                    currency: paymentData?.currency || 'usd',
+                    currency: paymentData?.currency || 'eur',
                     track_title: campaign.track_title || '',
                     track_artist: campaign.track_artist || '',
                     track_artwork: campaign.track_artwork || '',
@@ -203,8 +231,17 @@
                     release_status: campaign.release_status || '',
                 }),
             });
+            if (!res.ok) {
+                const errText = await res.text();
+                console.error('[AlphaStudios] Save order API error:', res.status, errText);
+                return null;
+            }
+            const data = await res.json();
+            console.log('[AlphaStudios] Order saved:', data.order?.id);
+            return data;
         } catch (e) {
-            console.error('[BeatPush] Failed to save order:', e);
+            console.error('[AlphaStudios] Failed to save order:', e);
+            return null;
         }
     };
 
@@ -228,7 +265,7 @@
                 body: JSON.stringify({ device_type }),
             });
         } catch (e) {
-            console.error('[BeatPush] Failed to update user meta:', e);
+            console.error('[AlphaStudios] Failed to update user meta:', e);
         }
     }
 
@@ -246,60 +283,94 @@
         if (user) {
             sendUserMeta();
 
-            const pendingAction = localStorage.getItem('beatpush_auth_pending_action');
+            const pendingAction = localStorage.getItem('alphastudios_auth_pending_action');
             if (pendingAction === 'payment') {
-                localStorage.removeItem('beatpush_auth_pending_action');
+                localStorage.removeItem('alphastudios_auth_pending_action');
 
-                // Restore campaign state saved before OAuth redirect
-                try {
-                    const savedTrack = localStorage.getItem('beatpush_pending_track');
-                    const savedPack = localStorage.getItem('beatpush_pending_pack');
-                    const savedArtists = localStorage.getItem('beatpush_pending_artists');
+                // Check if user already has a subscription
+                let profile = null;
+                try { profile = await BeatpushAuth.getProfile(); } catch (e) {}
+                const subStatus = profile?.subscription_status;
+                const hasSubscription = subStatus === 'active' || subStatus === 'trialing';
 
-                    if (savedTrack) {
-                        const track = JSON.parse(savedTrack);
-                        localStorage.removeItem('beatpush_pending_track');
-                        // Re-select the track (rebuilds pricing section + banner)
-                        if (typeof selectTrack === 'function') {
-                            selectTrack(track.title, track.artist, track.artwork, track.id, track.genre);
-                        }
-                    }
+                if (hasSubscription) {
+                    // User already subscribed — restore campaign state and let them submit
+                    try {
+                        const savedTrack = localStorage.getItem('alphastudios_pending_track');
+                        const savedPack = localStorage.getItem('alphastudios_pending_pack');
+                        const savedArtists = localStorage.getItem('alphastudios_pending_artists');
 
-                    if (savedPack) {
-                        localStorage.removeItem('beatpush_pending_pack');
-                        if (typeof selectedPack !== 'undefined') {
-                            selectedPack = savedPack;
-                        }
-                        // Re-show campaign setup with the saved pack
-                        if (typeof showCampaignSetup === 'function') {
-                            showCampaignSetup(savedPack);
-                        }
-                    }
-
-                    if (savedArtists) {
-                        const artists = JSON.parse(savedArtists);
-                        localStorage.removeItem('beatpush_pending_artists');
-                        if (typeof selectedArtists !== 'undefined' && Array.isArray(artists)) {
-                            selectedArtists.length = 0;
-                            artists.forEach(a => selectedArtists.push(a));
-                            if (typeof renderArtistTags === 'function') renderArtistTags();
-                        }
-                    }
-
-                    // Scroll to the launch button so user sees "Run my campaign"
-                    setTimeout(() => {
-                        const launchBtn = document.getElementById('launchCampaignBtn');
-                        if (launchBtn) {
-                            launchBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        } else {
-                            const campaignSetup = document.getElementById('campaignSetup');
-                            if (campaignSetup && campaignSetup.style.display !== 'none') {
-                                campaignSetup.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                        if (savedTrack) {
+                            const track = JSON.parse(savedTrack);
+                            localStorage.removeItem('alphastudios_pending_track');
+                            if (typeof selectTrack === 'function') {
+                                selectTrack(track.title, track.artist, track.artwork, track.id, track.genre);
                             }
                         }
-                    }, 600);
-                } catch (e) {
-                    console.error('[BeatPush] Failed to restore campaign state:', e);
+                        if (savedPack) {
+                            localStorage.removeItem('alphastudios_pending_pack');
+                            if (typeof selectedPack !== 'undefined') selectedPack = savedPack;
+                            if (typeof showCampaignSetup === 'function') showCampaignSetup(savedPack);
+                        }
+                        if (savedArtists) {
+                            const artists = JSON.parse(savedArtists);
+                            localStorage.removeItem('alphastudios_pending_artists');
+                            if (typeof selectedArtists !== 'undefined' && Array.isArray(artists)) {
+                                selectedArtists.length = 0;
+                                artists.forEach(a => selectedArtists.push(a));
+                                if (typeof renderArtistTags === 'function') renderArtistTags();
+                            }
+                        }
+                        setTimeout(() => {
+                            const launchBtn = document.getElementById('launchCampaignBtn');
+                            if (launchBtn) launchBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 600);
+                    } catch (e) {
+                        console.error('[AlphaStudios] Failed to restore campaign state:', e);
+                    }
+                } else {
+                    // No subscription — redirect to Stripe Checkout with trial
+                    // Pricing card was already shown before login, go straight to checkout
+                    console.log('[AlphaStudios] Post-login: redirecting to Stripe Checkout');
+                    const existingCampaign = localStorage.getItem('alphastudios_pending_campaign');
+                    if (!existingCampaign) {
+                        try {
+                            const savedTrack = localStorage.getItem('alphastudios_pending_track');
+                            const savedPack = localStorage.getItem('alphastudios_pending_pack');
+                            const savedArtists = localStorage.getItem('alphastudios_pending_artists');
+                            const track = savedTrack ? JSON.parse(savedTrack) : {};
+                            const artists = savedArtists ? JSON.parse(savedArtists) : [];
+                            localStorage.setItem('alphastudios_pending_campaign', JSON.stringify({
+                                pack: savedPack || 'pro',
+                                track_title: track.title || '',
+                                track_artist: track.artist || '',
+                                track_artwork: track.artwork || '',
+                                track_url: track.id || '',
+                                genre: track.genre || '',
+                                similar_artists: artists,
+                                release_status: '',
+                            }));
+                        } catch (e) {}
+                    }
+                    localStorage.removeItem('alphastudios_pending_track');
+                    localStorage.removeItem('alphastudios_pending_pack');
+                    localStorage.removeItem('alphastudios_pending_artists');
+                    localStorage.removeItem('alphastudios_pending_audio_url');
+                    localStorage.removeItem('alphastudios_pending_artwork_url');
+                    try {
+                        const res = await fetch('/api/create-checkout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user_id: user.id, user_email: user.email }),
+                        });
+                        const data = await res.json();
+                        if (data.url) {
+                            window.location.href = data.url;
+                            return;
+                        }
+                    } catch (e) {
+                        console.error('[AlphaStudios] Failed to create checkout after login:', e);
+                    }
                 }
             }
         }
